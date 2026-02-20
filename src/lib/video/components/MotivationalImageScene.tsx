@@ -34,6 +34,7 @@ const FONT_SIZES: Record<string, number> = {
   medium: 52,
   large: 72,
   xlarge: 96,
+  xxlarge: 120,
 };
 
 // Image position mapping for object-position
@@ -71,6 +72,15 @@ function renderTextOverlays(
       positionGroups[pos] = [];
     }
     positionGroups[pos].push(overlay);
+  });
+  
+  // Sort each group by stackOrder (if provided), then by array order
+  Object.keys(positionGroups).forEach((pos) => {
+    positionGroups[pos].sort((a, b) => {
+      const orderA = a.stackOrder ?? 999; // Default to end if no stackOrder
+      const orderB = b.stackOrder ?? 999;
+      return orderA - orderB;
+    });
   });
   
   const elements: React.ReactElement[] = [];

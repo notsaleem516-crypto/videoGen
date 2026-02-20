@@ -196,7 +196,7 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
         x: z.number().min(0).max(100).optional(),
         y: z.number().min(0).max(100).optional(),
       }).optional(),
-      fontSize: z.enum(['small', 'medium', 'large', 'xlarge']).default('large'),
+      fontSize: z.enum(['small', 'medium', 'large', 'xlarge', 'xxlarge']).default('large'),
       fontWeight: z.enum(['normal', 'bold', 'black']).default('bold'),
       color: z.string().default('#FFFFFF'),
       shadow: z.boolean().default(true),
@@ -207,6 +207,7 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
         'zoom', 'typewriter', 'reveal'
       ]).default('fade'),
       animationDelay: z.number().min(0).max(5).default(0),
+      stackOrder: z.number().int().min(0).max(10).optional(),
     })).min(1).max(5),
     colorOverlay: z.object({
       enabled: z.boolean().default(false),

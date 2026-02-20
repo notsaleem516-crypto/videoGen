@@ -282,7 +282,7 @@ export const TextOverlaySchema = z.object({
     x: z.number().min(0).max(100).optional(), // Percentage from left
     y: z.number().min(0).max(100).optional(), // Percentage from top
   }).optional(),
-  fontSize: z.enum(['small', 'medium', 'large', 'xlarge']).default('large'),
+  fontSize: z.enum(['small', 'medium', 'large', 'xlarge', 'xxlarge']).default('large'),
   fontWeight: z.enum(['normal', 'bold', 'black']).default('bold'),
   color: z.string().default('#FFFFFF'), // Text color
   shadow: z.boolean().default(true), // Text shadow for readability
@@ -300,6 +300,7 @@ export const TextOverlaySchema = z.object({
     'reveal'
   ]).default('fade'),
   animationDelay: z.number().min(0).max(5).default(0), // Delay before text animation starts
+  stackOrder: z.number().int().min(0).max(10).optional(), // Order in stack (0 = top, higher = bottom)
 });
 
 export type TextOverlay = z.infer<typeof TextOverlaySchema>;
