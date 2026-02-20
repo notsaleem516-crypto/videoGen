@@ -2370,25 +2370,47 @@ const ColorOverlaySchema = lib.z.object({
   // 0 = transparent, 1 = solid
   animation: lib.z.enum(["none", "fade", "pulse"]).default("fade")
 });
+const TextStyleSchema = lib.z.enum([
+  "default",
+  // Simple fade in with shadow
+  "quote",
+  // Italic with left border
+  "typing",
+  // Typewriter effect
+  "words",
+  // Word by word appearance
+  "glow",
+  // Glowing text effect
+  "outline",
+  // Outlined text (transparent fill)
+  "bold-glow",
+  // Bold with glow
+  "shadow"
+  // Drop shadow effect
+]);
 const MotivationalImageBlockSchema = lib.z.object({
   type: lib.z.literal("motivational-image"),
   // Image source
   imageSrc: lib.z.string().min(1),
-  // URL or base64
   imageAlt: lib.z.string().max(200).optional(),
   // Image animation effect
   imageEffect: ImageEffectSchema.default("fade"),
   imageEffectDuration: lib.z.number().min(0.5).max(5).default(1.5),
-  // Duration of image animation
-  // Text overlays (can have multiple text elements)
-  textOverlays: lib.z.array(TextOverlaySchema).min(1).max(5),
-  // Optional color overlay (darkens/lightens image for better text visibility)
+  // Text (single text field)
+  text: lib.z.string().min(1).max(500),
+  textStyle: TextStyleSchema.default("default"),
+  fontSize: lib.z.enum(["small", "medium", "large", "xlarge", "xxlarge"]).default("xlarge"),
+  fontWeight: lib.z.enum(["normal", "bold", "black"]).default("bold"),
+  textColor: lib.z.string().default("#FFFFFF"),
+  textAlign: lib.z.enum(["left", "center", "right"]).default("center"),
+  textPosition: lib.z.enum(["top", "center", "bottom"]).default("center"),
+  textAnimationDelay: lib.z.number().min(0).max(5).default(0.3),
+  // Optional color overlay
   colorOverlay: ColorOverlaySchema.optional(),
-  // Optional background color (shown before image loads)
+  // Optional background color
   backgroundColor: lib.z.string().default("#000000"),
   // Image fit options
   imageFit: lib.z.enum(["cover", "contain", "fill"]).default("cover"),
-  // Optional image position for 'cover' fit
   imagePosition: lib.z.enum(["center", "top", "bottom", "left", "right"]).default("center")
 });
 const ContentBlockSchema = lib.z.discriminatedUnion("type", [
@@ -3989,11 +4011,11 @@ function TestimonialScene({
 
 
 const FONT_SIZES = {
-  small: 36,
-  medium: 52,
-  large: 72,
-  xlarge: 96,
-  xxlarge: 120
+  small: 32,
+  medium: 48,
+  large: 64,
+  xlarge: 80,
+  xxlarge: 100
 };
 const IMAGE_POSITIONS = {
   center: "center",
@@ -4002,51 +4024,6 @@ const IMAGE_POSITIONS = {
   left: "center left",
   right: "center right"
 };
-function renderTextOverlays(textOverlays, frame, fps, width, height, exitProgress) {
-  const positionGroups = {
-    top: [],
-    center: [],
-    bottom: [],
-    custom: []
-  };
-  textOverlays.forEach((overlay) => {
-    const pos = overlay.position || "center";
-    if (!positionGroups[pos]) {
-      positionGroups[pos] = [];
-    }
-    positionGroups[pos].push(overlay);
-  });
-  Object.keys(positionGroups).forEach((pos) => {
-    positionGroups[pos].sort((a, b) => {
-      const orderA = a.stackOrder ?? 999;
-      const orderB = b.stackOrder ?? 999;
-      return orderA - orderB;
-    });
-  });
-  const elements = [];
-  let globalIndex = 0;
-  Object.entries(positionGroups).forEach(([position, overlays]) => {
-    overlays.forEach((overlay, indexInGroup) => {
-      elements.push(
-        /* @__PURE__ */ (0,jsx_runtime.jsx)(
-          TextOverlayComponent,
-          {
-            textOverlay: overlay,
-            frame,
-            fps,
-            width,
-            height,
-            exitProgress,
-            indexInGroup,
-            totalInGroup: overlays.length
-          },
-          `text-${globalIndex++}`
-        )
-      );
-    });
-  });
-  return elements;
-}
 function MotivationalImageScene({
   data,
   theme = "dark_modern",
@@ -4054,23 +4031,22 @@ function MotivationalImageScene({
   animation
 }) {
   const frame = (0,esm.useCurrentFrame)();
-  const { fps, width, height } = (0,esm.useVideoConfig)();
+  const { fps } = (0,esm.useVideoConfig)();
   const enterDuration = (animation == null ? void 0 : animation.enter) ?? 1.5;
   const holdDuration = (animation == null ? void 0 : animation.hold) ?? 3;
   const exitDuration = (animation == null ? void 0 : animation.exit) ?? 0.5;
-  const enterEndFrame = fps * enterDuration;
-  const holdEndFrame = fps * (enterDuration + holdDuration);
-  const exitStartFrame = holdEndFrame;
-  const totalFrames = fps * (enterDuration + holdDuration + exitDuration);
+  const exitStartFrame = fps * (enterDuration + holdDuration);
   const exitProgress = frame > exitStartFrame ? Math.min(1, (frame - exitStartFrame) / (fps * exitDuration)) : 0;
   const imageAnimation = useImageAnimation({
-    effect: data.imageEffect,
+    effect: data.imageEffect || "fade",
     frame,
     fps,
-    duration: data.imageEffectDuration
+    duration: data.imageEffectDuration || 1.5
   });
   const colorOverlay = data.colorOverlay;
-  const overlayOpacity = (colorOverlay == null ? void 0 : colorOverlay.enabled) ? getOverlayOpacity(colorOverlay, frame, fps, enterDuration) : 0;
+  const overlayOpacity = (colorOverlay == null ? void 0 : colorOverlay.enabled) ? getOverlayOpacity(colorOverlay, frame, fps) : 0;
+  const textData = data.text || "";
+  const textStyle = data.textStyle || "default";
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     esm.AbsoluteFill,
     {
@@ -4109,10 +4085,191 @@ function MotivationalImageScene({
             }
           }
         ),
-        renderTextOverlays(data.textOverlays, frame, fps, width, height, exitProgress)
+        textData && /* @__PURE__ */ (0,jsx_runtime.jsx)(
+          TextLayer,
+          {
+            text: textData,
+            textStyle,
+            frame,
+            fps,
+            fontSize: data.fontSize || "xlarge",
+            fontWeight: data.fontWeight || "bold",
+            textColor: data.textColor || "#FFFFFF",
+            textAlign: data.textAlign || "center",
+            textPosition: data.textPosition || "center",
+            animationDelay: data.textAnimationDelay || 0.3,
+            exitProgress
+          }
+        )
       ]
     }
   );
+}
+function TextLayer({
+  text,
+  textStyle,
+  frame,
+  fps,
+  fontSize,
+  fontWeight,
+  textColor,
+  textAlign,
+  textPosition,
+  animationDelay,
+  exitProgress
+}) {
+  const delayedFrame = Math.max(0, frame - animationDelay * fps);
+  const animationDuration = 1 * fps;
+  const progress = Math.min(1, delayedFrame / animationDuration);
+  const positionStyles = getPositionStyles(textPosition);
+  const animationStyles = getTextAnimation(textStyle, progress, delayedFrame, fps);
+  const fontSizePx = FONT_SIZES[fontSize] || FONT_SIZES.large;
+  const baseStyles = {
+    fontSize: fontSizePx,
+    fontWeight,
+    color: textColor,
+    textAlign,
+    fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    letterSpacing: "-0.02em",
+    lineHeight: 1.2,
+    padding: "40px",
+    maxWidth: "95%",
+    opacity: animationStyles.opacity * (1 - exitProgress),
+    transform: animationStyles.transform
+  };
+  const styleSpecifics = getTextStyleSpecifics(textStyle, textColor);
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+    esm.AbsoluteFill,
+    {
+      style: {
+        display: "flex",
+        justifyContent: textAlign === "left" ? "flex-start" : textAlign === "right" ? "flex-end" : "center",
+        alignItems: positionStyles.alignItems,
+        padding: "40px",
+        pointerEvents: "none"
+      },
+      children: /* @__PURE__ */ (0,jsx_runtime.jsx)("div", { style: { ...baseStyles, ...styleSpecifics }, children: textStyle === "typing" ? /* @__PURE__ */ (0,jsx_runtime.jsx)(TypewriterText, { text, frame: delayedFrame, fps }) : textStyle === "words" ? /* @__PURE__ */ (0,jsx_runtime.jsx)(WordByWordText, { text, frame: delayedFrame, fps }) : text })
+    }
+  );
+}
+function getTextStyleSpecifics(textStyle, textColor) {
+  switch (textStyle) {
+    case "quote":
+      return {
+        fontStyle: "italic",
+        textShadow: `0 4px 20px rgba(0,0,0,0.8), 0 0 60px rgba(0,0,0,0.5)`,
+        borderLeft: `4px solid ${textColor}`,
+        paddingLeft: "30px"
+      };
+    case "glow":
+      return {
+        textShadow: `0 0 10px ${textColor}, 0 0 20px ${textColor}, 0 0 40px ${textColor}, 0 0 80px ${textColor}`
+      };
+    case "outline":
+      return {
+        color: "transparent",
+        WebkitTextStroke: `2px ${textColor}`,
+        textShadow: "none"
+      };
+    case "bold-glow":
+      return {
+        fontWeight: 900,
+        textShadow: `0 0 10px ${textColor}, 0 4px 20px rgba(0,0,0,0.9)`
+      };
+    case "shadow":
+      return {
+        textShadow: `3px 3px 0 rgba(0,0,0,0.8), 6px 6px 0 rgba(0,0,0,0.5)`
+      };
+    case "default":
+    default:
+      return {
+        textShadow: `0 4px 20px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.5)`
+      };
+  }
+}
+function getTextAnimation(textStyle, progress, frame, fps) {
+  switch (textStyle) {
+    case "typing":
+    case "words":
+      return {
+        opacity: 1,
+        transform: "none"
+      };
+    case "quote":
+      return {
+        opacity: (0,esm.interpolate)(progress, [0, 0.5, 1], [0, 0.8, 1]),
+        transform: `translateX(${(0,esm.interpolate)(progress, [0, 1], [-30, 0])}px)`
+      };
+    case "glow":
+      const pulse = 0.8 + 0.2 * Math.sin(frame / fps * Math.PI * 2);
+      return {
+        opacity: (0,esm.interpolate)(progress, [0, 1], [0, 1]) * pulse,
+        transform: "none"
+      };
+    case "outline":
+      return {
+        opacity: (0,esm.interpolate)(progress, [0, 1], [0, 1]),
+        transform: `scale(${(0,esm.interpolate)(progress, [0, 1], [0.9, 1])})`
+      };
+    case "bold-glow":
+      const springProgress = (0,esm.spring)({ frame, fps, config: { damping: 12, stiffness: 100 } });
+      return {
+        opacity: (0,esm.interpolate)(progress, [0, 1], [0, 1]),
+        transform: `scale(${springProgress})`
+      };
+    case "shadow":
+      return {
+        opacity: (0,esm.interpolate)(progress, [0, 1], [0, 1]),
+        transform: `translateY(${(0,esm.interpolate)(progress, [0, 1], [30, 0])}px)`
+      };
+    default:
+      return {
+        opacity: (0,esm.interpolate)(progress, [0, 1], [0, 1]),
+        transform: "none"
+      };
+  }
+}
+function TypewriterText({ text, frame, fps }) {
+  const charsPerSecond = 20;
+  const totalChars = text.length;
+  const duration = totalChars / charsPerSecond;
+  const progress = Math.min(1, frame / fps / duration);
+  const visibleChars = Math.floor(progress * totalChars);
+  const visibleText = text.slice(0, visibleChars);
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(jsx_runtime.Fragment, { children: [
+    visibleText,
+    progress < 1 && /* @__PURE__ */ (0,jsx_runtime.jsx)("span", { style: { opacity: 0.8 }, children: "|" })
+  ] });
+}
+function WordByWordText({ text, frame, fps }) {
+  const words = text.split(" ");
+  const wordsPerSecond = 2;
+  const duration = words.length / wordsPerSecond;
+  const progress = Math.min(1, frame / fps / duration);
+  const visibleWords = Math.floor(progress * words.length);
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(jsx_runtime.Fragment, { children: words.map((word, i) => /* @__PURE__ */ (0,jsx_runtime.jsx)(
+    "span",
+    {
+      style: {
+        opacity: i < visibleWords ? 1 : 0,
+        transition: "opacity 0.2s",
+        marginRight: "0.3em"
+      },
+      children: word
+    },
+    i
+  )) });
+}
+function getPositionStyles(position) {
+  switch (position) {
+    case "top":
+      return { alignItems: "flex-start" };
+    case "bottom":
+      return { alignItems: "flex-end" };
+    case "center":
+    default:
+      return { alignItems: "center" };
+  }
 }
 function useImageAnimation({
   effect,
@@ -4141,18 +4298,6 @@ function useImageAnimation({
       return {
         opacity: (0,esm.interpolate)(progress, [0, 0.3, 1], [0, 0.5, 1]),
         transform: `translateY(${(0,esm.interpolate)(progress, [0, 1], [-100, 0])}px)`,
-        filter: "none"
-      };
-    case "slide-left":
-      return {
-        opacity: (0,esm.interpolate)(progress, [0, 0.3, 1], [0, 0.5, 1]),
-        transform: `translateX(${(0,esm.interpolate)(progress, [0, 1], [200, 0])}px)`,
-        filter: "none"
-      };
-    case "slide-right":
-      return {
-        opacity: (0,esm.interpolate)(progress, [0, 0.3, 1], [0, 0.5, 1]),
-        transform: `translateX(${(0,esm.interpolate)(progress, [0, 1], [-200, 0])}px)`,
         filter: "none"
       };
     case "zoom-in":
@@ -4206,7 +4351,7 @@ function useImageAnimation({
       return { opacity: 1, transform: "none", filter: "none" };
   }
 }
-function getOverlayOpacity(overlay, frame, fps, enterDuration) {
+function getOverlayOpacity(overlay, frame, fps) {
   const baseOpacity = overlay.opacity ?? 0.4;
   const fadeInFrames = fps * 0.5;
   const progress = Math.min(1, frame / fadeInFrames);
@@ -4221,193 +4366,6 @@ function getOverlayOpacity(overlay, frame, fps, enterDuration) {
     default:
       return baseOpacity * progress;
   }
-}
-function TextOverlayComponent({
-  textOverlay,
-  frame,
-  fps,
-  width,
-  height,
-  exitProgress,
-  indexInGroup,
-  totalInGroup
-}) {
-  const delay = (textOverlay.animationDelay || 0) * fps;
-  const adjustedFrame = Math.max(0, frame - delay);
-  const animationDuration = 0.8 * fps;
-  const fontSize = FONT_SIZES[textOverlay.fontSize || "large"];
-  const textAnimation = getTextAnimation({
-    animation: textOverlay.animation || "fade",
-    frame: adjustedFrame,
-    fps,
-    duration: animationDuration
-  });
-  const textShadow = textOverlay.shadow ? `0 4px 12px ${textOverlay.shadowColor || "rgba(0,0,0,0.9)"}, 0 2px 4px ${textOverlay.shadowColor || "rgba(0,0,0,0.8)"}, 0 0 40px rgba(0,0,0,0.5)` : "none";
-  const lineHeight = fontSize * 1.3;
-  const groupSpacing = 20;
-  const totalGroupHeight = (totalInGroup - 1) * (lineHeight + groupSpacing);
-  const baseOffset = -totalGroupHeight / 2;
-  const stackOffset = indexInGroup * (lineHeight + groupSpacing);
-  const verticalOffset = baseOffset + stackOffset;
-  const position = textOverlay.position || "center";
-  let alignItems;
-  let paddingTop = 0;
-  let paddingBottom = 0;
-  switch (position) {
-    case "top":
-      alignItems = "flex-start";
-      paddingTop = 80 + indexInGroup * (lineHeight + groupSpacing);
-      break;
-    case "bottom":
-      alignItems = "flex-end";
-      paddingBottom = 80 + (totalInGroup - 1 - indexInGroup) * (lineHeight + groupSpacing);
-      break;
-    case "center":
-    default:
-      alignItems = "center";
-      break;
-  }
-  return /* @__PURE__ */ (0,jsx_runtime.jsx)(
-    esm.AbsoluteFill,
-    {
-      style: {
-        display: "flex",
-        justifyContent: "center",
-        alignItems,
-        padding: "60px",
-        paddingTop: paddingTop || void 0,
-        paddingBottom: paddingBottom || void 0,
-        pointerEvents: "none"
-      },
-      children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
-        "div",
-        {
-          style: {
-            opacity: textAnimation.opacity * (1 - exitProgress),
-            transform: position === "center" ? `${textAnimation.transform} translateY(${verticalOffset}px)` : textAnimation.transform,
-            transformOrigin: "center center",
-            textAlign: textOverlay.alignment || "center"
-          },
-          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
-            TextWithAnimation,
-            {
-              text: textOverlay.text,
-              animation: textOverlay.animation || "fade",
-              frame: adjustedFrame,
-              fps,
-              style: {
-                fontSize,
-                fontWeight: textOverlay.fontWeight || "bold",
-                color: textOverlay.color || "#FFFFFF",
-                textAlign: textOverlay.alignment || "center",
-                textShadow,
-                textWrap: "balance",
-                maxWidth: "900px",
-                fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                letterSpacing: "-0.02em",
-                lineHeight: 1.3
-              }
-            }
-          )
-        }
-      )
-    }
-  );
-}
-function getTextPosition(textOverlay, width, height) {
-  if (textOverlay.position === "custom" && textOverlay.customPosition) {
-    return {
-      x: textOverlay.customPosition.x,
-      y: textOverlay.customPosition.y,
-      alignItems: "flex-start",
-      transform: "translate(-50%, -50%)"
-    };
-  }
-  switch (textOverlay.position) {
-    case "top":
-      return { alignItems: "flex-start", transform: "none" };
-    case "bottom":
-      return { alignItems: "flex-end", transform: "none" };
-    case "center":
-    default:
-      return { alignItems: "center", transform: "none" };
-  }
-}
-function getTextAnimation({
-  animation,
-  frame,
-  fps,
-  duration
-}) {
-  const progress = Math.min(1, frame / duration);
-  switch (animation) {
-    case "none":
-      return { opacity: 1, transform: "none" };
-    case "fade":
-      return {
-        opacity: (0,esm.interpolate)(progress, [0, 1], [0, 1], { extrapolateRight: "clamp" }),
-        transform: "none"
-      };
-    case "slide-up":
-      return {
-        opacity: (0,esm.interpolate)(progress, [0, 0.5, 1], [0, 0.7, 1], { extrapolateRight: "clamp" }),
-        transform: `translateY(${(0,esm.interpolate)(progress, [0, 1], [50, 0])}px)`
-      };
-    case "slide-down":
-      return {
-        opacity: (0,esm.interpolate)(progress, [0, 0.5, 1], [0, 0.7, 1], { extrapolateRight: "clamp" }),
-        transform: `translateY(${(0,esm.interpolate)(progress, [0, 1], [-50, 0])}px)`
-      };
-    case "slide-left":
-      return {
-        opacity: (0,esm.interpolate)(progress, [0, 0.5, 1], [0, 0.7, 1], { extrapolateRight: "clamp" }),
-        transform: `translateX(${(0,esm.interpolate)(progress, [0, 1], [100, 0])}px)`
-      };
-    case "slide-right":
-      return {
-        opacity: (0,esm.interpolate)(progress, [0, 0.5, 1], [0, 0.7, 1], { extrapolateRight: "clamp" }),
-        transform: `translateX(${(0,esm.interpolate)(progress, [0, 1], [-100, 0])}px)`
-      };
-    case "zoom": {
-      const scaleProgress = (0,esm.spring)({
-        frame,
-        fps,
-        config: { damping: 12, stiffness: 100 }
-      });
-      return {
-        opacity: (0,esm.interpolate)(progress, [0, 0.5, 1], [0, 0.7, 1], { extrapolateRight: "clamp" }),
-        transform: `scale(${(0,esm.interpolate)(scaleProgress, [0, 1], [0.5, 1])})`
-      };
-    }
-    case "reveal":
-      return {
-        opacity: (0,esm.interpolate)(progress, [0, 0.5, 1], [0, 0.8, 1], { extrapolateRight: "clamp" }),
-        transform: `scaleY(${(0,esm.interpolate)(progress, [0, 1], [0, 1])})`
-      };
-    default:
-      return { opacity: 1, transform: "none" };
-  }
-}
-function TextWithAnimation({
-  text,
-  animation,
-  frame,
-  fps,
-  style
-}) {
-  if (animation === "typewriter") {
-    const charactersPerSecond = 15;
-    const totalCharacters = text.length;
-    const animationDuration = totalCharacters / charactersPerSecond;
-    const progress = Math.min(1, frame / fps / animationDuration);
-    const visibleCharacters = Math.floor(progress * totalCharacters);
-    const visibleText = text.slice(0, visibleCharacters);
-    return /* @__PURE__ */ (0,jsx_runtime.jsxs)("div", { style, children: [
-      visibleText,
-      progress < 1 && /* @__PURE__ */ (0,jsx_runtime.jsx)("span", { style: { opacity: 0.7 }, children: "|" })
-    ] });
-  }
-  return /* @__PURE__ */ (0,jsx_runtime.jsx)("div", { style, children: text });
 }
 /* harmony default export */ const components_MotivationalImageScene = ((/* unused pure expression or super */ null && (MotivationalImageScene)));
 

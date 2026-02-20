@@ -212,11 +212,11 @@ function getDefaultDecision(block: ContentBlock, index: number): AIDecision {
   } else if (block.type === 'testimonial') {
     duration = 4;
   } else if (block.type === 'motivational-image') {
-    // Motivational image duration: time for image animation + text reading
-    // Default 5 seconds for reading text with animations
-    const textOverlayCount = block.textOverlays?.length || 1;
-    duration = 4 + (textOverlayCount * 0.5); // Base 4s + 0.5s per text overlay
-    duration = Math.min(10, duration); // Cap at 10 seconds
+    // Motivational image duration: based on text length and style
+    const textLength = block.text?.length || 0;
+    const baseDuration = 4;
+    const readingTime = Math.ceil(textLength / 30); // ~30 chars per second reading
+    duration = Math.min(10, baseDuration + readingTime);
   }
 
   return {

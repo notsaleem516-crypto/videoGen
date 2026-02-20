@@ -179,7 +179,7 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     showTypingIndicator: z.boolean().optional().default(true),
     lastSeen: z.string().max(50).optional(),
   }),
-  // Motivational Image block (Image with Text Overlay)
+  // Motivational Image block (Simplified: Single text with style options)
   z.object({
     type: z.literal('motivational-image'),
     imageSrc: z.string().min(1),
@@ -189,26 +189,17 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
       'zoom-in', 'zoom-out', 'ken-burns', 'blur', 'rotate', 'bounce'
     ]).default('fade'),
     imageEffectDuration: z.number().min(0.5).max(5).default(1.5),
-    textOverlays: z.array(z.object({
-      text: z.string().min(1).max(500),
-      position: z.enum(['top', 'center', 'bottom', 'custom']).default('center'),
-      customPosition: z.object({
-        x: z.number().min(0).max(100).optional(),
-        y: z.number().min(0).max(100).optional(),
-      }).optional(),
-      fontSize: z.enum(['small', 'medium', 'large', 'xlarge', 'xxlarge']).default('large'),
-      fontWeight: z.enum(['normal', 'bold', 'black']).default('bold'),
-      color: z.string().default('#FFFFFF'),
-      shadow: z.boolean().default(true),
-      shadowColor: z.string().default('rgba(0,0,0,0.8)'),
-      alignment: z.enum(['left', 'center', 'right']).default('center'),
-      animation: z.enum([
-        'none', 'fade', 'slide-up', 'slide-down', 'slide-left', 'slide-right',
-        'zoom', 'typewriter', 'reveal'
-      ]).default('fade'),
-      animationDelay: z.number().min(0).max(5).default(0),
-      stackOrder: z.number().int().min(0).max(10).optional(),
-    })).min(1).max(5),
+    // Single text field with style options
+    text: z.string().min(1).max(500),
+    textStyle: z.enum([
+      'default', 'quote', 'typing', 'words', 'glow', 'outline', 'bold-glow', 'shadow'
+    ]).default('default'),
+    fontSize: z.enum(['small', 'medium', 'large', 'xlarge', 'xxlarge']).default('xlarge'),
+    fontWeight: z.enum(['normal', 'bold', 'black']).default('bold'),
+    textColor: z.string().default('#FFFFFF'),
+    textAlign: z.enum(['left', 'center', 'right']).default('center'),
+    textPosition: z.enum(['top', 'center', 'bottom']).default('center'),
+    textAnimationDelay: z.number().min(0).max(5).default(0.3),
     colorOverlay: z.object({
       enabled: z.boolean().default(false),
       color: z.string().default('#000000'),
@@ -264,10 +255,11 @@ function calculateCompositionConfig(input: z.infer<typeof VideoInputSchema>) {
       const chatDuration = 0.5 + typingDuration + messageCount * messageDelay + 1.5;
       contentDuration += Math.min(60, chatDuration); // Cap at 60 seconds
     } else if (blockType === 'motivational-image') {
-      // Motivational image duration
-      const textOverlays = (block as { textOverlays?: unknown[] }).textOverlays || [];
-      const textOverlayCount = textOverlays.length;
-      contentDuration += Math.min(10, 4 + (textOverlayCount * 0.5));
+      // Motivational image duration based on text length
+      const text = (block as { text?: string }).text || '';
+      const textLength = text.length;
+      const readingTime = Math.ceil(textLength / 30);
+      contentDuration += Math.min(10, 4 + readingTime);
     } else if (blockType === 'code') {
       const code = (block as { code?: string }).code || '';
       contentDuration += Math.min(8, Math.ceil(code.length / 100));
@@ -340,10 +332,11 @@ async function generateVideoPlan(videoMeta: z.infer<typeof VideoMetaSchema>, con
       const chatDuration = 0.5 + typingDuration + messageCount * messageDelay + 1.5;
       duration = Math.min(60, chatDuration); // Cap at 60 seconds
     } else if (blockType === 'motivational-image') {
-      // Motivational image duration
-      const textOverlays = (block as { textOverlays?: unknown[] }).textOverlays || [];
-      const textOverlayCount = textOverlays.length;
-      duration = Math.min(10, 4 + (textOverlayCount * 0.5));
+      // Motivational image duration based on text length
+      const text = (block as { text?: string }).text || '';
+      const textLength = text.length;
+      const readingTime = Math.ceil(textLength / 30);
+      duration = Math.min(10, 4 + readingTime);
     } else if (blockType === 'code') {
       const code = (block as { code?: string }).code || '';
       duration = Math.min(8, Math.ceil(code.length / 100));

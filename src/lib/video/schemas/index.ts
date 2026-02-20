@@ -338,33 +338,54 @@ export const ColorOverlaySchema = z.object({
 export type ColorOverlay = z.infer<typeof ColorOverlaySchema>;
 
 /**
+ * Text style types for motivational images
+ */
+export const TextStyleSchema = z.enum([
+  'default',    // Simple fade in with shadow
+  'quote',      // Italic with left border
+  'typing',     // Typewriter effect
+  'words',      // Word by word appearance
+  'glow',       // Glowing text effect
+  'outline',    // Outlined text (transparent fill)
+  'bold-glow',  // Bold with glow
+  'shadow',     // Drop shadow effect
+]);
+
+export type TextStyle = z.infer<typeof TextStyleSchema>;
+
+/**
  * Motivational image content block schema
- * Full-featured image with text overlay for motivational videos
+ * Simplified: Single text with different style options
  */
 export const MotivationalImageBlockSchema = z.object({
   type: z.literal('motivational-image'),
   
   // Image source
-  imageSrc: z.string().min(1), // URL or base64
+  imageSrc: z.string().min(1),
   imageAlt: z.string().max(200).optional(),
   
   // Image animation effect
   imageEffect: ImageEffectSchema.default('fade'),
-  imageEffectDuration: z.number().min(0.5).max(5).default(1.5), // Duration of image animation
+  imageEffectDuration: z.number().min(0.5).max(5).default(1.5),
   
-  // Text overlays (can have multiple text elements)
-  textOverlays: z.array(TextOverlaySchema).min(1).max(5),
+  // Text (single text field)
+  text: z.string().min(1).max(500),
+  textStyle: TextStyleSchema.default('default'),
+  fontSize: z.enum(['small', 'medium', 'large', 'xlarge', 'xxlarge']).default('xlarge'),
+  fontWeight: z.enum(['normal', 'bold', 'black']).default('bold'),
+  textColor: z.string().default('#FFFFFF'),
+  textAlign: z.enum(['left', 'center', 'right']).default('center'),
+  textPosition: z.enum(['top', 'center', 'bottom']).default('center'),
+  textAnimationDelay: z.number().min(0).max(5).default(0.3),
   
-  // Optional color overlay (darkens/lightens image for better text visibility)
+  // Optional color overlay
   colorOverlay: ColorOverlaySchema.optional(),
   
-  // Optional background color (shown before image loads)
+  // Optional background color
   backgroundColor: z.string().default('#000000'),
   
   // Image fit options
   imageFit: z.enum(['cover', 'contain', 'fill']).default('cover'),
-  
-  // Optional image position for 'cover' fit
   imagePosition: z.enum(['center', 'top', 'bottom', 'left', 'right']).default('center'),
 });
 
