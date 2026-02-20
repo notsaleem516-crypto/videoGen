@@ -45,6 +45,59 @@ const IMAGE_POSITIONS: Record<string, string> = {
   right: 'center right',
 };
 
+// ============================================================================
+// RENDER TEXT OVERLAYS - Stacks multiple overlays at same position
+// ============================================================================
+
+function renderTextOverlays(
+  textOverlays: TextOverlay[],
+  frame: number,
+  fps: number,
+  width: number,
+  height: number,
+  exitProgress: number
+): React.ReactElement[] {
+  // Group overlays by position
+  const positionGroups: Record<string, TextOverlay[]> = {
+    top: [],
+    center: [],
+    bottom: [],
+    custom: [],
+  };
+  
+  textOverlays.forEach((overlay) => {
+    const pos = overlay.position || 'center';
+    if (!positionGroups[pos]) {
+      positionGroups[pos] = [];
+    }
+    positionGroups[pos].push(overlay);
+  });
+  
+  const elements: React.ReactElement[] = [];
+  let globalIndex = 0;
+  
+  // Render each position group
+  Object.entries(positionGroups).forEach(([position, overlays]) => {
+    overlays.forEach((overlay, indexInGroup) => {
+      elements.push(
+        <TextOverlayComponent
+          key={`text-${globalIndex++}`}
+          textOverlay={overlay}
+          frame={frame}
+          fps={fps}
+          width={width}
+          height={height}
+          exitProgress={exitProgress}
+          indexInGroup={indexInGroup}
+          totalInGroup={overlays.length}
+        />
+      );
+    });
+  });
+  
+  return elements;
+}
+
 export function MotivationalImageScene({
   data,
   theme = 'dark_modern',
@@ -118,19 +171,8 @@ export function MotivationalImageScene({
         />
       )}
       
-      {/* Text Overlay Layers */}
-      {data.textOverlays.map((textOverlay, index) => (
-        <TextOverlayComponent
-          key={index}
-          textOverlay={textOverlay}
-          frame={frame}
-          fps={fps}
-          enterDuration={enterDuration}
-          width={width}
-          height={height}
-          exitProgress={exitProgress}
-        />
-      ))}
+      {/* Text Overlay Layers - Grouped by position for proper stacking */}
+      {renderTextOverlays(data.textOverlays, frame, fps, width, height, exitProgress)}
     </AbsoluteFill>
   );
 }
@@ -292,27 +334,28 @@ interface TextOverlayComponentProps {
   textOverlay: TextOverlay;
   frame: number;
   fps: number;
-  enterDuration: number;
   width: number;
   height: number;
   exitProgress: number;
+  indexInGroup: number;
+  totalInGroup: number;
 }
 
 function TextOverlayComponent({
   textOverlay,
   frame,
   fps,
-  enterDuration,
   width,
   height,
   exitProgress,
+  indexInGroup,
+  totalInGroup,
 }: TextOverlayComponentProps): React.ReactElement {
   const delay = (textOverlay.animationDelay || 0) * fps;
   const adjustedFrame = Math.max(0, frame - delay);
   const animationDuration = 0.8 * fps; // 0.8 seconds for text animation
   
-  // Calculate position
-  const position = getTextPosition(textOverlay, width, height);
+  const fontSize = FONT_SIZES[textOverlay.fontSize || 'large'];
   
   // Get text animation values
   const textAnimation = getTextAnimation({
@@ -322,27 +365,61 @@ function TextOverlayComponent({
     duration: animationDuration,
   });
   
-  const fontSize = FONT_SIZES[textOverlay.fontSize || 'large'];
-  
   // Text shadow style - stronger for better readability
   const textShadow = textOverlay.shadow
     ? `0 4px 12px ${textOverlay.shadowColor || 'rgba(0,0,0,0.9)'}, 0 2px 4px ${textOverlay.shadowColor || 'rgba(0,0,0,0.8)'}, 0 0 40px rgba(0,0,0,0.5)`
     : 'none';
+  
+  // Calculate vertical offset for stacking multiple texts at same position
+  // Each text gets spaced out vertically within its position group
+  const lineHeight = fontSize * 1.3;
+  const groupSpacing = 20; // Extra space between stacked texts
+  
+  // Calculate offset: center the group, then offset each item
+  const totalGroupHeight = (totalInGroup - 1) * (lineHeight + groupSpacing);
+  const baseOffset = -totalGroupHeight / 2; // Center the group
+  const stackOffset = indexInGroup * (lineHeight + groupSpacing);
+  const verticalOffset = baseOffset + stackOffset;
+  
+  // Position-based alignment
+  const position = textOverlay.position || 'center';
+  let alignItems: string;
+  let paddingTop = 0;
+  let paddingBottom = 0;
+  
+  switch (position) {
+    case 'top':
+      alignItems = 'flex-start';
+      paddingTop = 80 + indexInGroup * (lineHeight + groupSpacing);
+      break;
+    case 'bottom':
+      alignItems = 'flex-end';
+      paddingBottom = 80 + (totalInGroup - 1 - indexInGroup) * (lineHeight + groupSpacing);
+      break;
+    case 'center':
+    default:
+      alignItems = 'center';
+      break;
+  }
   
   return (
     <AbsoluteFill
       style={{
         display: 'flex',
         justifyContent: 'center',
-        alignItems: position.alignItems,
+        alignItems,
         padding: '60px',
+        paddingTop: paddingTop || undefined,
+        paddingBottom: paddingBottom || undefined,
         pointerEvents: 'none',
       }}
     >
       <div
         style={{
           opacity: textAnimation.opacity * (1 - exitProgress),
-          transform: textAnimation.transform,
+          transform: position === 'center' 
+            ? `${textAnimation.transform} translateY(${verticalOffset}px)`
+            : textAnimation.transform,
           transformOrigin: 'center center',
           textAlign: textOverlay.alignment || 'center',
         }}
