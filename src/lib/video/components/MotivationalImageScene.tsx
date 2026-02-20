@@ -28,12 +28,12 @@ export interface MotivationalImageSceneProps {
   animation?: AnimationPhase;
 }
 
-// Font size mapping
+// Font size mapping (larger for better visibility on vertical videos)
 const FONT_SIZES: Record<string, number> = {
-  small: 24,
-  medium: 36,
-  large: 48,
-  xlarge: 72,
+  small: 36,
+  medium: 52,
+  large: 72,
+  xlarge: 96,
 };
 
 // Image position mapping for object-position
@@ -324,31 +324,27 @@ function TextOverlayComponent({
   
   const fontSize = FONT_SIZES[textOverlay.fontSize || 'large'];
   
-  // Text shadow style
+  // Text shadow style - stronger for better readability
   const textShadow = textOverlay.shadow
-    ? `2px 2px 8px ${textOverlay.shadowColor || 'rgba(0,0,0,0.8)'}, 0 0 20px ${textOverlay.shadowColor || 'rgba(0,0,0,0.5)'}`
+    ? `0 4px 12px ${textOverlay.shadowColor || 'rgba(0,0,0,0.9)'}, 0 2px 4px ${textOverlay.shadowColor || 'rgba(0,0,0,0.8)'}, 0 0 40px rgba(0,0,0,0.5)`
     : 'none';
   
   return (
     <AbsoluteFill
       style={{
         display: 'flex',
-        justifyContent: textOverlay.alignment === 'left' ? 'flex-start' 
-          : textOverlay.alignment === 'right' ? 'flex-end' 
-          : 'center',
+        justifyContent: 'center',
         alignItems: position.alignItems,
-        padding: '40px',
+        padding: '60px',
         pointerEvents: 'none',
       }}
     >
       <div
         style={{
-          position: 'absolute',
-          left: position.x !== undefined ? `${position.x}%` : undefined,
-          top: position.y !== undefined ? `${position.y}%` : undefined,
-          transform: position.transform,
           opacity: textAnimation.opacity * (1 - exitProgress),
+          transform: textAnimation.transform,
           transformOrigin: 'center center',
+          textAlign: textOverlay.alignment || 'center',
         }}
       >
         <TextWithAnimation
@@ -363,10 +359,10 @@ function TextOverlayComponent({
             textAlign: textOverlay.alignment || 'center',
             textShadow,
             textWrap: 'balance',
-            maxWidth: '90%',
+            maxWidth: '900px',
             fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             letterSpacing: '-0.02em',
-            lineHeight: 1.2,
+            lineHeight: 1.3,
           }}
         />
       </div>
