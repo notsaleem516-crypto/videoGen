@@ -11,7 +11,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
-    "video:bundle": "npx remotion bundle out/bundle && cp -r out/bundle mini-services/video-renderer/",
+    "video:bundle": "npx remotion bundle remotion-entry.tsx build && cp -r build/* mini-services/video-renderer/bundle/",
     "video:render": "bun run scripts/render.ts",
     "video:studio": "npx remotion studio"
   },

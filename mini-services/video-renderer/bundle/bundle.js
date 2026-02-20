@@ -2313,7 +2313,7 @@ const TextOverlaySchema = lib.z.object({
     y: lib.z.number().min(0).max(100).optional()
     // Percentage from top
   }).optional(),
-  fontSize: lib.z.enum(["small", "medium", "large", "xlarge"]).default("large"),
+  fontSize: lib.z.enum(["small", "medium", "large", "xlarge", "xxlarge"]).default("large"),
   fontWeight: lib.z.enum(["normal", "bold", "black"]).default("bold"),
   color: lib.z.string().default("#FFFFFF"),
   // Text color
@@ -2332,8 +2332,10 @@ const TextOverlaySchema = lib.z.object({
     "typewriter",
     "reveal"
   ]).default("fade"),
-  animationDelay: lib.z.number().min(0).max(5).default(0)
+  animationDelay: lib.z.number().min(0).max(5).default(0),
   // Delay before text animation starts
+  stackOrder: lib.z.number().int().min(0).max(10).optional()
+  // Order in stack (0 = top, higher = bottom)
 });
 const ImageEffectSchema = lib.z.enum([
   "none",
@@ -3987,10 +3989,11 @@ function TestimonialScene({
 
 
 const FONT_SIZES = {
-  small: 24,
-  medium: 36,
-  large: 48,
-  xlarge: 72
+  small: 36,
+  medium: 52,
+  large: 72,
+  xlarge: 96,
+  xxlarge: 120
 };
 const IMAGE_POSITIONS = {
   center: "center",
@@ -3999,6 +4002,51 @@ const IMAGE_POSITIONS = {
   left: "center left",
   right: "center right"
 };
+function renderTextOverlays(textOverlays, frame, fps, width, height, exitProgress) {
+  const positionGroups = {
+    top: [],
+    center: [],
+    bottom: [],
+    custom: []
+  };
+  textOverlays.forEach((overlay) => {
+    const pos = overlay.position || "center";
+    if (!positionGroups[pos]) {
+      positionGroups[pos] = [];
+    }
+    positionGroups[pos].push(overlay);
+  });
+  Object.keys(positionGroups).forEach((pos) => {
+    positionGroups[pos].sort((a, b) => {
+      const orderA = a.stackOrder ?? 999;
+      const orderB = b.stackOrder ?? 999;
+      return orderA - orderB;
+    });
+  });
+  const elements = [];
+  let globalIndex = 0;
+  Object.entries(positionGroups).forEach(([position, overlays]) => {
+    overlays.forEach((overlay, indexInGroup) => {
+      elements.push(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
+          TextOverlayComponent,
+          {
+            textOverlay: overlay,
+            frame,
+            fps,
+            width,
+            height,
+            exitProgress,
+            indexInGroup,
+            totalInGroup: overlays.length
+          },
+          `text-${globalIndex++}`
+        )
+      );
+    });
+  });
+  return elements;
+}
 function MotivationalImageScene({
   data,
   theme = "dark_modern",
@@ -4061,19 +4109,7 @@ function MotivationalImageScene({
             }
           }
         ),
-        data.textOverlays.map((textOverlay, index) => /* @__PURE__ */ (0,jsx_runtime.jsx)(
-          TextOverlayComponent,
-          {
-            textOverlay,
-            frame,
-            fps,
-            enterDuration,
-            width,
-            height,
-            exitProgress
-          },
-          index
-        ))
+        renderTextOverlays(data.textOverlays, frame, fps, width, height, exitProgress)
       ]
     }
   );
@@ -4190,43 +4226,67 @@ function TextOverlayComponent({
   textOverlay,
   frame,
   fps,
-  enterDuration,
   width,
   height,
-  exitProgress
+  exitProgress,
+  indexInGroup,
+  totalInGroup
 }) {
   const delay = (textOverlay.animationDelay || 0) * fps;
   const adjustedFrame = Math.max(0, frame - delay);
   const animationDuration = 0.8 * fps;
-  const position = getTextPosition(textOverlay, width, height);
+  const fontSize = FONT_SIZES[textOverlay.fontSize || "large"];
   const textAnimation = getTextAnimation({
     animation: textOverlay.animation || "fade",
     frame: adjustedFrame,
     fps,
     duration: animationDuration
   });
-  const fontSize = FONT_SIZES[textOverlay.fontSize || "large"];
-  const textShadow = textOverlay.shadow ? `2px 2px 8px ${textOverlay.shadowColor || "rgba(0,0,0,0.8)"}, 0 0 20px ${textOverlay.shadowColor || "rgba(0,0,0,0.5)"}` : "none";
+  const textShadow = textOverlay.shadow ? `0 4px 12px ${textOverlay.shadowColor || "rgba(0,0,0,0.9)"}, 0 2px 4px ${textOverlay.shadowColor || "rgba(0,0,0,0.8)"}, 0 0 40px rgba(0,0,0,0.5)` : "none";
+  const lineHeight = fontSize * 1.3;
+  const groupSpacing = 20;
+  const totalGroupHeight = (totalInGroup - 1) * (lineHeight + groupSpacing);
+  const baseOffset = -totalGroupHeight / 2;
+  const stackOffset = indexInGroup * (lineHeight + groupSpacing);
+  const verticalOffset = baseOffset + stackOffset;
+  const position = textOverlay.position || "center";
+  let alignItems;
+  let paddingTop = 0;
+  let paddingBottom = 0;
+  switch (position) {
+    case "top":
+      alignItems = "flex-start";
+      paddingTop = 80 + indexInGroup * (lineHeight + groupSpacing);
+      break;
+    case "bottom":
+      alignItems = "flex-end";
+      paddingBottom = 80 + (totalInGroup - 1 - indexInGroup) * (lineHeight + groupSpacing);
+      break;
+    case "center":
+    default:
+      alignItems = "center";
+      break;
+  }
   return /* @__PURE__ */ (0,jsx_runtime.jsx)(
     esm.AbsoluteFill,
     {
       style: {
         display: "flex",
-        justifyContent: textOverlay.alignment === "left" ? "flex-start" : textOverlay.alignment === "right" ? "flex-end" : "center",
-        alignItems: position.alignItems,
-        padding: "40px",
+        justifyContent: "center",
+        alignItems,
+        padding: "60px",
+        paddingTop: paddingTop || void 0,
+        paddingBottom: paddingBottom || void 0,
         pointerEvents: "none"
       },
       children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
         "div",
         {
           style: {
-            position: "absolute",
-            left: position.x !== void 0 ? `${position.x}%` : void 0,
-            top: position.y !== void 0 ? `${position.y}%` : void 0,
-            transform: position.transform,
             opacity: textAnimation.opacity * (1 - exitProgress),
-            transformOrigin: "center center"
+            transform: position === "center" ? `${textAnimation.transform} translateY(${verticalOffset}px)` : textAnimation.transform,
+            transformOrigin: "center center",
+            textAlign: textOverlay.alignment || "center"
           },
           children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
             TextWithAnimation,
@@ -4242,10 +4302,10 @@ function TextOverlayComponent({
                 textAlign: textOverlay.alignment || "center",
                 textShadow,
                 textWrap: "balance",
-                maxWidth: "90%",
+                maxWidth: "900px",
                 fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                 letterSpacing: "-0.02em",
-                lineHeight: 1.2
+                lineHeight: 1.3
               }
             }
           )
