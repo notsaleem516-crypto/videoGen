@@ -1491,56 +1491,134 @@ var react = __webpack_require__(6540);
 
 const DEFAULT_SOUND_CONFIG = {
   enabled: true,
-  volume: 0.5,
-  sentToneFrequency: 800,
-  // Higher pitch - like a sent confirmation
-  receivedToneFrequency: 600
-  // Lower pitch - like a notification
+  volume: 0.5
 };
-function generateBeepSound(frequency = 800, durationMs = 150, volume = 0.5) {
+function writeString(view, offset, string) {
+  for (let i = 0; i < string.length; i++) {
+    view.setUint8(offset + i, string.charCodeAt(i));
+  }
+}
+function generateComplexTone(baseFrequency, durationMs, volume, harmonics = [1, 2, 3, 4], harmonicVolumes = [1, 0.5, 0.25, 0.125]) {
   const sampleRate = 44100;
   const numSamples = Math.floor(sampleRate * (durationMs / 1e3));
-  const numChannels = 1;
-  const bitsPerSample = 16;
   const samples = new Int16Array(numSamples);
   for (let i = 0; i < numSamples; i++) {
     const t = i / sampleRate;
-    const envelope = Math.sin(Math.PI * i / numSamples);
-    const sample = Math.sin(2 * Math.PI * frequency * t) * envelope * volume * 32767;
+    const progress = i / numSamples;
+    let envelope;
+    const attackEnd = 0.05;
+    const decayEnd = 0.15;
+    const sustainEnd = 0.7;
+    if (progress < attackEnd) {
+      envelope = Math.sin(progress / attackEnd * Math.PI * 0.5);
+    } else if (progress < decayEnd) {
+      const decayProgress = (progress - attackEnd) / (decayEnd - attackEnd);
+      envelope = 1 - decayProgress * 0.3;
+    } else if (progress < sustainEnd) {
+      envelope = 0.7;
+    } else {
+      const releaseProgress = (progress - sustainEnd) / (1 - sustainEnd);
+      envelope = 0.7 * (1 - Math.pow(releaseProgress, 2));
+    }
+    let sample = 0;
+    for (let h = 0; h < harmonics.length; h++) {
+      const freq = baseFrequency * harmonics[h];
+      const harmonicVolume = harmonicVolumes[h] || 0.1;
+      sample += Math.sin(2 * Math.PI * freq * t) * harmonicVolume;
+    }
+    sample = sample / harmonics.length * envelope * volume * 32767;
+    samples[i] = Math.max(-32767, Math.min(32767, Math.floor(sample)));
+  }
+  return samples;
+}
+function generateSentSound() {
+  const sampleRate = 44100;
+  const durationMs = 100;
+  const numSamples = Math.floor(sampleRate * (durationMs / 1e3));
+  const samples = new Int16Array(numSamples);
+  for (let i = 0; i < numSamples; i++) {
+    const t = i / sampleRate;
+    const progress = i / numSamples;
+    const envelope = Math.sin(Math.PI * progress) * Math.exp(-progress * 4);
+    const freq1 = Math.sin(2 * Math.PI * 1400 * t);
+    const freq2 = Math.sin(2 * Math.PI * 800 * t);
+    const freq3 = Math.sin(2 * Math.PI * 400 * t);
+    const sweep = Math.sin(2 * Math.PI * (1200 - progress * 800) * t);
+    const sample = (freq1 * 0.3 + freq2 * 0.4 + freq3 * 0.2 + sweep * 0.1) * envelope * 0.4 * 32767;
+    samples[i] = Math.floor(Math.max(-32767, Math.min(32767, sample)));
+  }
+  return samples;
+}
+function generateReceivedSound() {
+  const sampleRate = 44100;
+  const durationMs = 350;
+  const numSamples = Math.floor(sampleRate * (durationMs / 1e3));
+  const samples = new Int16Array(numSamples);
+  const note1Freq = 1568;
+  const note2Freq = 1319;
+  const note1Start = 0;
+  const note2Start = 0.12;
+  for (let i = 0; i < numSamples; i++) {
+    const t = i / sampleRate;
+    const progress = i / numSamples;
+    let sample = 0;
+    if (t < 0.18) {
+      const note1Progress = t / 0.18;
+      const env1 = Math.exp(-note1Progress * 8) * Math.sin(Math.PI * note1Progress * 0.5);
+      sample += Math.sin(2 * Math.PI * note1Freq * t) * env1 * 0.5;
+      sample += Math.sin(2 * Math.PI * note1Freq * 2 * t) * env1 * 0.15;
+    }
+    if (t >= note2Start) {
+      const note2Time = t - note2Start;
+      const note2Progress = note2Time / 0.22;
+      if (note2Progress < 1) {
+        const env2 = Math.exp(-note2Progress * 6) * Math.sin(Math.PI * note2Progress * 0.5);
+        sample += Math.sin(2 * Math.PI * note2Freq * (t - note2Start)) * env2 * 0.45;
+        sample += Math.sin(2 * Math.PI * note2Freq * 1.5 * (t - note2Start)) * env2 * 0.1;
+      }
+    }
+    samples[i] = Math.floor(Math.max(-32767, Math.min(32767, sample * 32767)));
+  }
+  return samples;
+}
+function generateTypingSound() {
+  const sampleRate = 44100;
+  const durationMs = 40;
+  const numSamples = Math.floor(sampleRate * (durationMs / 1e3));
+  const samples = new Int16Array(numSamples);
+  for (let i = 0; i < numSamples; i++) {
+    const t = i / sampleRate;
+    const progress = i / numSamples;
+    const envelope = Math.sin(Math.PI * progress) * Math.exp(-progress * 6);
+    const freq = 600 - progress * 400;
+    const sample = Math.sin(2 * Math.PI * freq * t) * envelope * 0.15 * 32767;
     samples[i] = Math.floor(sample);
   }
-  const dataSize = numSamples * numChannels * (bitsPerSample / 8);
-  const headerSize = 44;
-  const totalSize = headerSize + dataSize;
-  const buffer = new ArrayBuffer(totalSize);
+  return samples;
+}
+function samplesToWav(samples) {
+  const sampleRate = 44100;
+  const numChannels = 1;
+  const bitsPerSample = 16;
+  const dataSize = samples.length * 2;
+  const fileSize = 44 + dataSize;
+  const buffer = new ArrayBuffer(fileSize);
   const view = new DataView(buffer);
-  view.setUint8(0, 82);
-  view.setUint8(1, 73);
-  view.setUint8(2, 70);
-  view.setUint8(3, 70);
-  view.setUint32(4, totalSize - 8, true);
-  view.setUint8(8, 87);
-  view.setUint8(9, 65);
-  view.setUint8(10, 86);
-  view.setUint8(11, 69);
-  view.setUint8(12, 102);
-  view.setUint8(13, 109);
-  view.setUint8(14, 116);
-  view.setUint8(15, 32);
+  writeString(view, 0, "RIFF");
+  view.setUint32(4, fileSize - 8, true);
+  writeString(view, 8, "WAVE");
+  writeString(view, 12, "fmt ");
   view.setUint32(16, 16, true);
   view.setUint16(20, 1, true);
   view.setUint16(22, numChannels, true);
   view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * numChannels * (bitsPerSample / 8), true);
-  view.setUint16(32, numChannels * (bitsPerSample / 8), true);
+  view.setUint32(28, sampleRate * numChannels * 2, true);
+  view.setUint16(32, numChannels * 2, true);
   view.setUint16(34, bitsPerSample, true);
-  view.setUint8(36, 100);
-  view.setUint8(37, 97);
-  view.setUint8(38, 116);
-  view.setUint8(39, 97);
+  writeString(view, 36, "data");
   view.setUint32(40, dataSize, true);
   let offset = 44;
-  for (let i = 0; i < numSamples; i++) {
+  for (let i = 0; i < samples.length; i++) {
     view.setInt16(offset, samples[i], true);
     offset += 2;
   }
@@ -1551,9 +1629,25 @@ function generateBeepSound(frequency = 800, durationMs = 150, volume = 0.5) {
   }
   return "data:audio/wav;base64," + btoa(binary);
 }
-const MESSAGE_SENT_SOUND = generateBeepSound(800, 120, 0.4);
-const MESSAGE_RECEIVED_SOUND = generateBeepSound(600, 150, 0.4);
-const TYPING_SOUND = generateBeepSound(400, 80, 0.2);
+const MESSAGE_SENT_SOUND = samplesToWav(generateSentSound());
+const MESSAGE_RECEIVED_SOUND = samplesToWav(generateReceivedSound());
+const TYPING_SOUND = samplesToWav(generateTypingSound());
+const SOUND_VARIATIONS = {
+  // Alternative sent sounds (different tones)
+  sentSoft: samplesToWav(generateComplexTone(1e3, 80, 0.3, [1, 1.5], [1, 0.3])),
+  sentConfirm: samplesToWav(generateComplexTone(1200, 100, 0.35, [1, 2], [1, 0.4])),
+  // Alternative received sounds
+  receivedBright: samplesToWav(generateComplexTone(1650, 300, 0.45, [1, 1.26, 2], [1, 0.6, 0.3])),
+  receivedSoft: samplesToWav(generateComplexTone(1400, 250, 0.35, [1, 1.5], [1, 0.5]))
+};
+function getRandomSentSound() {
+  const sounds = [MESSAGE_SENT_SOUND, SOUND_VARIATIONS.sentSoft, SOUND_VARIATIONS.sentConfirm];
+  return sounds[Math.floor(Math.random() * sounds.length)];
+}
+function getRandomReceivedSound() {
+  const sounds = [MESSAGE_RECEIVED_SOUND, SOUND_VARIATIONS.receivedBright, SOUND_VARIATIONS.receivedSoft];
+  return sounds[Math.floor(Math.random() * sounds.length)];
+}
 
 ;// ./src/lib/video/components/WhatsAppChatScene.tsx
 
