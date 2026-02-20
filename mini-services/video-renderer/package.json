@@ -1,0 +1,17 @@
+{
+  "name": "video-renderer-service",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot index.ts",
+    "start": "bun index.ts"
+  },
+  "dependencies": {
+    "@remotion/renderer": "4.0.424",
+    "@remotion/bundler": "4.0.424",
+    "remotion": "4.0.424",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^3.22.3"
+  }
+}
