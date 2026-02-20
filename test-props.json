@@ -1,0 +1,35 @@
+{
+  "input": {
+    "videoMeta": {
+      "aspectRatio": "9:16",
+      "theme": "dark_modern",
+      "fps": 30
+    },
+    "contentBlocks": [
+      {
+        "type": "stat",
+        "heading": "Revenue",
+        "value": "400K",
+        "subtext": "Year over year growth"
+      },
+      {
+        "type": "comparison",
+        "title": "Market Share",
+        "items": [
+          { "label": "Product A", "value": 45 },
+          { "label": "Product B", "value": 30 },
+          { "label": "Product C", "value": 25 }
+        ]
+      }
+    ]
+  },
+  "plan": {
+    "decisions": [
+      { "componentId": "stat-scene", "motionProfile": "dynamic", "duration": 3, "animation": { "enter": 0.4, "hold": 2.2, "exit": 0.4 } },
+      { "componentId": "comparison-scene", "motionProfile": "dynamic", "duration": 4, "animation": { "enter": 0.4, "hold": 3.2, "exit": 0.4 } }
+    ],
+    "totalDuration": 7,
+    "suggestedTransitions": ["fade"]
+  },
+  "title": "Test Video"
+}
