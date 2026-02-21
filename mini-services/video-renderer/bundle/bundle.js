@@ -2411,7 +2411,14 @@ const MotivationalImageBlockSchema = lib.z.object({
   backgroundColor: lib.z.string().default("#000000"),
   // Image fit options
   imageFit: lib.z.enum(["cover", "contain", "fill"]).default("cover"),
-  imagePosition: lib.z.enum(["center", "top", "bottom", "left", "right"]).default("center")
+  imagePosition: lib.z.enum(["center", "top", "bottom", "left", "right"]).default("center"),
+  // Audio support (optional)
+  audioSrc: lib.z.string().optional(),
+  // URL to mp3 audio file
+  audioVolume: lib.z.number().min(0).max(1).default(0.7),
+  // Volume level (0-1)
+  duration: lib.z.number().min(1).max(120).optional()
+  // Optional duration override in seconds
 });
 const ContentBlockSchema = lib.z.discriminatedUnion("type", [
   StatBlockSchema,
@@ -4054,6 +4061,13 @@ function MotivationalImageScene({
         backgroundColor: data.backgroundColor || "#000000"
       },
       children: [
+        data.audioSrc && /* @__PURE__ */ (0,jsx_runtime.jsx)(
+          esm.Audio,
+          {
+            src: data.audioSrc,
+            volume: data.audioVolume ?? 0.7
+          }
+        ),
         /* @__PURE__ */ (0,jsx_runtime.jsx)(
           esm.AbsoluteFill,
           {

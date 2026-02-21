@@ -180,6 +180,7 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     lastSeen: z.string().max(50).optional(),
   }),
   // Motivational Image block (Simplified: Single text with style options)
+  // Audio support: Optional background audio with duration control
   z.object({
     type: z.literal('motivational-image'),
     imageSrc: z.string().min(1),
@@ -209,6 +210,10 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     backgroundColor: z.string().default('#000000'),
     imageFit: z.enum(['cover', 'contain', 'fill']).default('cover'),
     imagePosition: z.enum(['center', 'top', 'bottom', 'left', 'right']).default('center'),
+    // Audio support (optional)
+    audioSrc: z.string().optional(), // URL to mp3 audio file
+    audioVolume: z.number().min(0).max(1).default(0.7), // Volume level (0-1)
+    duration: z.number().min(1).max(120).optional(), // Optional duration override in seconds
   }),
 ]);
 
@@ -255,11 +260,25 @@ function calculateCompositionConfig(input: z.infer<typeof VideoInputSchema>) {
       const chatDuration = 0.5 + typingDuration + messageCount * messageDelay + 1.5;
       contentDuration += Math.min(60, chatDuration); // Cap at 60 seconds
     } else if (blockType === 'motivational-image') {
-      // Motivational image duration based on text length
-      const text = (block as { text?: string }).text || '';
-      const textLength = text.length;
-      const readingTime = Math.ceil(textLength / 30);
-      contentDuration += Math.min(10, 4 + readingTime);
+      // Motivational image duration logic:
+      // 1. If duration is provided → use it directly
+      // 2. If audioSrc provided but no duration → calculate from text + extra for audio
+      // 3. If no audio, no duration → calculate from text length
+      const motivationalBlock = block as { duration?: number; audioSrc?: string; text?: string };
+      if (motivationalBlock.duration) {
+        // Duration explicitly provided - use it
+        contentDuration += motivationalBlock.duration;
+      } else if (motivationalBlock.audioSrc) {
+        // Audio provided but no duration - calculate from text + buffer for audio
+        const textLength = motivationalBlock.text?.length || 0;
+        const readingTime = Math.ceil(textLength / 20); // ~20 chars per second with audio
+        contentDuration += Math.max(5, readingTime + 3); // At least 5s, with buffer
+      } else {
+        // No audio, no duration - calculate from text length
+        const textLength = motivationalBlock.text?.length || 0;
+        const readingTime = Math.ceil(textLength / 30);
+        contentDuration += Math.min(10, 4 + readingTime);
+      }
     } else if (blockType === 'code') {
       const code = (block as { code?: string }).code || '';
       contentDuration += Math.min(8, Math.ceil(code.length / 100));
@@ -332,11 +351,25 @@ async function generateVideoPlan(videoMeta: z.infer<typeof VideoMetaSchema>, con
       const chatDuration = 0.5 + typingDuration + messageCount * messageDelay + 1.5;
       duration = Math.min(60, chatDuration); // Cap at 60 seconds
     } else if (blockType === 'motivational-image') {
-      // Motivational image duration based on text length
-      const text = (block as { text?: string }).text || '';
-      const textLength = text.length;
-      const readingTime = Math.ceil(textLength / 30);
-      duration = Math.min(10, 4 + readingTime);
+      // Motivational image duration logic:
+      // 1. If duration is provided → use it directly
+      // 2. If audioSrc provided but no duration → calculate from text + extra for audio
+      // 3. If no audio, no duration → calculate from text length
+      const motivationalBlock = block as { duration?: number; audioSrc?: string; text?: string };
+      if (motivationalBlock.duration) {
+        // Duration explicitly provided - use it
+        duration = motivationalBlock.duration;
+      } else if (motivationalBlock.audioSrc) {
+        // Audio provided but no duration - calculate from text + buffer for audio
+        const textLength = motivationalBlock.text?.length || 0;
+        const readingTime = Math.ceil(textLength / 20); // ~20 chars per second with audio
+        duration = Math.max(5, readingTime + 3); // At least 5s, with buffer
+      } else {
+        // No audio, no duration - calculate from text length
+        const textLength = motivationalBlock.text?.length || 0;
+        const readingTime = Math.ceil(textLength / 30);
+        duration = Math.min(10, 4 + readingTime);
+      }
     } else if (blockType === 'code') {
       const code = (block as { code?: string }).code || '';
       duration = Math.min(8, Math.ceil(code.length / 100));
