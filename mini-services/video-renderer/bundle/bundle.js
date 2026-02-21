@@ -2396,8 +2396,8 @@ const MotivationalImageBlockSchema = lib.z.object({
   // Image animation effect
   imageEffect: ImageEffectSchema.default("fade"),
   imageEffectDuration: lib.z.number().min(0.5).max(5).default(1.5),
-  // Text (single text field)
-  text: lib.z.string().min(1).max(500),
+  // Text (single text field) - optional if you want image+audio only
+  text: lib.z.string().min(1).max(500).optional(),
   textStyle: TextStyleSchema.default("default"),
   fontSize: lib.z.enum(["small", "medium", "large", "xlarge", "xxlarge"]).default("xlarge"),
   fontWeight: lib.z.enum(["normal", "bold", "black"]).default("bold"),

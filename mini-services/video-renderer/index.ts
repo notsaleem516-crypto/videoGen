@@ -190,8 +190,8 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
       'zoom-in', 'zoom-out', 'ken-burns', 'blur', 'rotate', 'bounce'
     ]).default('fade'),
     imageEffectDuration: z.number().min(0.5).max(5).default(1.5),
-    // Single text field with style options
-    text: z.string().min(1).max(500),
+    // Single text field with style options - optional if you want image+audio only
+    text: z.string().min(1).max(500).optional(),
     textStyle: z.enum([
       'default', 'quote', 'typing', 'words', 'glow', 'outline', 'bold-glow', 'shadow'
     ]).default('default'),
