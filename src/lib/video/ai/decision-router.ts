@@ -44,7 +44,7 @@ Rules:
 - code→code-scene, testimonial→testimonial-scene, whatsapp-chat→whatsapp-chat-scene
 - motivational-image→motivational-image-scene
 - motionProfile: subtle|dynamic|energetic (complexity-based)
-- duration: 2-8s for most content, 5-60s for whatsapp-chat (based on message count, ~1-2s per message), 4-10s for motivational-image
+- duration: 2-8s for most content, 5-60s for whatsapp-chat, 4-120s for motivational-image (use provided duration if available)
 - animation: enter/hold/exit in seconds, total=duration`;
 
 /**
@@ -212,11 +212,25 @@ function getDefaultDecision(block: ContentBlock, index: number): AIDecision {
   } else if (block.type === 'testimonial') {
     duration = 4;
   } else if (block.type === 'motivational-image') {
-    // Motivational image duration: based on text length and style
-    const textLength = block.text?.length || 0;
-    const baseDuration = 4;
-    const readingTime = Math.ceil(textLength / 30); // ~30 chars per second reading
-    duration = Math.min(10, baseDuration + readingTime);
+    // Motivational image duration logic:
+    // 1. If duration is provided → use it directly
+    // 2. If audioSrc provided but no duration → calculate from text + extra for audio
+    // 3. If no audio, no duration → calculate from text length
+    if (block.duration) {
+      // Duration explicitly provided - use it
+      duration = block.duration;
+    } else if (block.audioSrc) {
+      // Audio provided but no duration - calculate from text + buffer for audio
+      const textLength = block.text?.length || 0;
+      const readingTime = Math.ceil(textLength / 20); // ~20 chars per second with audio
+      duration = Math.max(5, readingTime + 3); // At least 5s, with buffer
+    } else {
+      // No audio, no duration - calculate from text length (existing behavior)
+      const textLength = block.text?.length || 0;
+      const baseDuration = 4;
+      const readingTime = Math.ceil(textLength / 30); // ~30 chars per second reading
+      duration = Math.min(10, baseDuration + readingTime);
+    }
   }
 
   return {

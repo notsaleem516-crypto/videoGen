@@ -356,6 +356,7 @@ export type TextStyle = z.infer<typeof TextStyleSchema>;
 /**
  * Motivational image content block schema
  * Simplified: Single text with different style options
+ * Audio support: Optional background audio with duration control
  */
 export const MotivationalImageBlockSchema = z.object({
   type: z.literal('motivational-image'),
@@ -387,6 +388,11 @@ export const MotivationalImageBlockSchema = z.object({
   // Image fit options
   imageFit: z.enum(['cover', 'contain', 'fill']).default('cover'),
   imagePosition: z.enum(['center', 'top', 'bottom', 'left', 'right']).default('center'),
+  
+  // Audio support (optional)
+  audioSrc: z.string().optional(), // URL to mp3 audio file
+  audioVolume: z.number().min(0).max(1).default(0.7), // Volume level (0-1)
+  duration: z.number().min(1).max(120).optional(), // Optional duration override in seconds
 });
 
 export type MotivationalImageBlock = z.infer<typeof MotivationalImageBlockSchema>;

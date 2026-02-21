@@ -6,6 +6,7 @@ import {
   interpolate,
   spring,
   Img,
+  Audio,
 } from 'remotion';
 import { 
   type MotivationalImageBlock,
@@ -89,6 +90,14 @@ export function MotivationalImageScene({
         backgroundColor: data.backgroundColor || '#000000',
       }}
     >
+      {/* Audio Layer - Plays background audio if provided */}
+      {data.audioSrc && (
+        <Audio
+          src={data.audioSrc}
+          volume={data.audioVolume ?? 0.7}
+        />
+      )}
+      
       {/* Image Layer */}
       <AbsoluteFill
         style={{
