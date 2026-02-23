@@ -1,0 +1,123 @@
+{
+  "videoMeta": {
+    "aspectRatio": "9:16",
+    "theme": "dark_modern",
+    "fps": 30
+  },
+  "contentBlocks": [
+    {
+      "type": "stat",
+      "heading": "Total Downloads",
+      "value": "5M+",
+      "subtext": "Downloads worldwide"
+    },
+    {
+      "type": "comparison",
+      "title": "Performance",
+      "items": [
+        { "label": "Our Product", "value": 95, "color": "#10B981" },
+        { "label": "Competitor", "value": 72, "color": "#3B82F6" }
+      ]
+    },
+    {
+      "type": "text",
+      "content": "This is a simple text block with high emphasis.",
+      "emphasis": "high"
+    },
+    {
+      "type": "image",
+      "src": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800",
+      "alt": "Technology",
+      "caption": "Tech Solutions"
+    },
+    {
+      "type": "quote",
+      "text": "Innovation distinguishes between a leader and a follower.",
+      "author": "Steve Jobs"
+    },
+    {
+      "type": "list",
+      "title": "Features",
+      "items": ["Fast rendering", "Easy to use", "Multiple formats"],
+      "style": "checkmarks"
+    },
+    {
+      "type": "timeline",
+      "title": "Journey",
+      "events": [
+        { "year": "2020", "title": "Founded" },
+        { "year": "2022", "title": "Series A" },
+        { "year": "2024", "title": "1M Users" }
+      ]
+    },
+    {
+      "type": "callout",
+      "title": "Limited Offer",
+      "content": "Get 50% off on all plans!",
+      "variant": "warning"
+    },
+    {
+      "type": "icon-list",
+      "title": "Why Us",
+      "items": [
+        { "icon": "🚀", "title": "Fast", "description": "Quick processing" },
+        { "icon": "🔒", "title": "Secure", "description": "Enterprise security" }
+      ]
+    },
+    {
+      "type": "line-chart",
+      "title": "Growth",
+      "data": [10, 25, 40, 60, 85, 100],
+      "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      "lineColor": "#10B981"
+    },
+    {
+      "type": "pie-chart",
+      "title": "Revenue",
+      "segments": [
+        { "label": "Enterprise", "value": 45, "color": "#3B82F6" },
+        { "label": "Pro", "value": 35, "color": "#10B981" },
+        { "label": "Free", "value": 20, "color": "#F59E0B" }
+      ]
+    },
+    {
+      "type": "code",
+      "code": "const app = new VideoGen();\nawait app.render();",
+      "language": "javascript",
+      "title": "Example"
+    },
+    {
+      "type": "testimonial",
+      "quote": "Amazing product! Changed our workflow completely.",
+      "author": "John Doe",
+      "role": "CEO",
+      "company": "TechCorp"
+    },
+    {
+      "type": "whatsapp-chat",
+      "person1": { "name": "You", "isOnline": true },
+      "person2": { "name": "Support", "isOnline": true },
+      "messages": [
+        { "from": "person2", "text": "Hi! How can I help?" },
+        { "from": "person1", "text": "I need help with pricing" },
+        { "from": "person2", "text": "Sure! Let me explain our plans" }
+      ]
+    },
+    {
+      "type": "motivational-image",
+      "imageSrc": "https://images.unsplash.com/photo-1504805572947-34fad45aed93?w=800",
+      "imageEffect": "ken-burns",
+      "text": "Believe in yourself",
+      "textStyle": "bold-glow",
+      "fontSize": "xlarge",
+      "textColor": "#FFFFFF",
+      "textPosition": "center",
+      "colorOverlay": {
+        "enabled": true,
+        "color": "#000000",
+        "opacity": 0.5
+      },
+      "duration": 6
+    }
+  ]
+}

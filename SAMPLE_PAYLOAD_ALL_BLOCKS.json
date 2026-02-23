@@ -1,0 +1,179 @@
+{
+  "videoMeta": {
+    "aspectRatio": "9:16",
+    "theme": "dark_modern",
+    "fps": 30,
+    "intro": {
+      "title": "Video Generator",
+      "subtitle": "Complete Feature Demo",
+      "logoUrl": "https://via.placeholder.com/200x200/3B82F6/FFFFFF?text=LOGO",
+      "duration": 2
+    },
+    "outro": {
+      "title": "Thanks for Watching",
+      "subtitle": "Subscribe for more content",
+      "logoUrl": "https://via.placeholder.com/200x200/3B82F6/FFFFFF?text=LOGO",
+      "duration": 2
+    }
+  },
+  "contentBlocks": [
+    {
+      "type": "stat",
+      "heading": "Total Downloads",
+      "value": "5M+",
+      "subtext": "Downloads across all platforms"
+    },
+    {
+      "type": "comparison",
+      "title": "Performance Comparison",
+      "items": [
+        { "label": "Our Product", "value": 95, "color": "#10B981" },
+        { "label": "Competitor A", "value": 72, "color": "#3B82F6" },
+        { "label": "Competitor B", "value": 58, "color": "#F59E0B" },
+        { "label": "Industry Avg", "value": 45, "color": "#EF4444" }
+      ]
+    },
+    {
+      "type": "text",
+      "content": "This is a simple text block with high emphasis. Perfect for important announcements or key messages.",
+      "emphasis": "high"
+    },
+    {
+      "type": "image",
+      "src": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800",
+      "alt": "Technology Background",
+      "caption": "Advanced Technology Solutions"
+    },
+    {
+      "type": "quote",
+      "text": "Innovation distinguishes between a leader and a follower.",
+      "author": "Steve Jobs"
+    },
+    {
+      "type": "list",
+      "title": "Key Features",
+      "items": [
+        "Lightning fast rendering",
+        "Easy to use interface",
+        "Multiple export formats",
+        "Cloud storage integration",
+        "Real-time collaboration"
+      ],
+      "style": "checkmarks"
+    },
+    {
+      "type": "timeline",
+      "title": "Our Journey",
+      "events": [
+        { "year": "2019", "title": "Founded", "description": "Started with a vision" },
+        { "year": "2020", "title": "Beta Launch", "description": "First 1000 users" },
+        { "year": "2022", "title": "Series A", "description": "Raised $5M funding" },
+        { "year": "2023", "title": "Global Expansion", "description": "Launched in 50 countries" },
+        { "year": "2024", "title": "1M Users", "description": "Reached milestone" }
+      ]
+    },
+    {
+      "type": "callout",
+      "title": "Limited Time Offer",
+      "content": "Get 50% off on all premium plans. Offer expires in 48 hours!",
+      "variant": "warning"
+    },
+    {
+      "type": "icon-list",
+      "title": "Why Choose Us",
+      "items": [
+        { "icon": "🚀", "title": "Fast Performance", "description": "Lightning quick processing" },
+        { "icon": "🔒", "title": "Secure", "description": "Enterprise-grade security" },
+        { "icon": "💡", "title": "Smart AI", "description": "Powered by latest AI" },
+        { "icon": "🌟", "title": "Top Rated", "description": "4.9/5 star rating" },
+        { "icon": "🎯", "title": "Accurate", "description": "99.9% accuracy rate" },
+        { "icon": "🛠️", "title": "Customizable", "description": "Fully configurable" }
+      ]
+    },
+    {
+      "type": "line-chart",
+      "title": "Monthly Revenue Growth",
+      "data": [12000, 15000, 18000, 25000, 32000, 45000, 58000, 72000, 85000, 95000, 110000, 125000],
+      "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+      "lineColor": "#10B981"
+    },
+    {
+      "type": "pie-chart",
+      "title": "Revenue by Product",
+      "segments": [
+        { "label": "Enterprise", "value": 45, "color": "#3B82F6" },
+        { "label": "Professional", "value": 30, "color": "#10B981" },
+        { "label": "Starter", "value": 15, "color": "#F59E0B" },
+        { "label": "Free Tier", "value": 10, "color": "#EF4444" }
+      ]
+    },
+    {
+      "type": "code",
+      "code": "// Initialize the video generator\nconst generator = new VideoGenerator({\n  theme: 'dark_modern',\n  aspectRatio: '9:16',\n  fps: 30\n});\n\n// Render the video\nconst result = await generator.render({\n  videoMeta: { ... },\n  contentBlocks: [ ... ]\n});\n\nconsole.log('Video URL:', result.url);",
+      "language": "javascript",
+      "title": "Quick Start Example"
+    },
+    {
+      "type": "testimonial",
+      "quote": "This video generator has completely transformed our content creation workflow. We can now produce professional videos in minutes instead of hours. The AI-powered features are game-changing!",
+      "author": "Sarah Johnson",
+      "role": "Marketing Director",
+      "company": "TechCorp Inc.",
+      "avatar": "https://i.pravatar.cc/150?img=1"
+    },
+    {
+      "type": "whatsapp-chat",
+      "title": "Customer Support",
+      "person1": {
+        "name": "You",
+        "avatar": "https://i.pravatar.cc/150?img=5",
+        "isOnline": true
+      },
+      "person2": {
+        "name": "Support Team",
+        "avatar": "https://i.pravatar.cc/150?img=68",
+        "isOnline": true
+      },
+      "messages": [
+        { "from": "person1", "text": "Hi, I need help with my subscription", "time": "10:30 AM", "showReadReceipt": true },
+        { "from": "person2", "text": "Hello! I'd be happy to help you with your subscription. What do you need assistance with?", "time": "10:31 AM", "showReadReceipt": true },
+        { "from": "person1", "text": "I want to upgrade to the Pro plan", "time": "10:32 AM", "showReadReceipt": true },
+        { "from": "person2", "text": "Great choice! The Pro plan includes unlimited exports and premium templates.", "time": "10:33 AM", "showReadReceipt": true },
+        { "from": "person2", "text": "I've sent you an upgrade link to your email. Would you like me to explain the benefits?", "time": "10:33 AM", "showReadReceipt": true },
+        { "from": "person1", "text": "Yes, please tell me more about the premium templates", "time": "10:34 AM", "showReadReceipt": true },
+        { "from": "person2", "text": "Pro plan gives you access to 100+ premium templates, custom branding, priority support, and much more!", "time": "10:35 AM", "showReadReceipt": true },
+        { "from": "person1", "text": "Perfect! I'll check my email and upgrade now. Thanks for your help! 🙏", "time": "10:36 AM", "showReadReceipt": true },
+        { "from": "person2", "text": "You're welcome! Let me know if you need anything else. Happy creating! 🎬", "time": "10:37 AM", "showReadReceipt": true }
+      ],
+      "showTypingIndicator": true,
+      "lastSeen": "last seen today at 10:25 AM"
+    },
+    {
+      "type": "motivational-image",
+      "imageSrc": "https://images.unsplash.com/photo-1504805572947-34fad45aed93?w=800",
+      "imageAlt": "Motivational Background",
+      "imageEffect": "ken-burns",
+      "imageEffectDuration": 2,
+      "text": "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+      "textStyle": "quote",
+      "fontSize": "xlarge",
+      "fontWeight": "bold",
+      "textColor": "#FFFFFF",
+      "textAlign": "center",
+      "textPosition": "center",
+      "textAnimationDelay": 0.5,
+      "colorOverlay": {
+        "enabled": true,
+        "color": "#000000",
+        "opacity": 0.5,
+        "animation": "fade"
+      },
+      "backgroundColor": "#000000",
+      "imageFit": "cover",
+      "imagePosition": "center",
+      "audioSrc": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+      "audioVolume": 0.5,
+      "duration": 10
+    }
+  ]
+}
