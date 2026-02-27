@@ -2503,7 +2503,7 @@ function AncientRuinsBackground() {
           {/* Capital */}
           <Box args={[6, 2, 6]} position={[x, 26, -50]}>
             <meshStandardMaterial color="#6a5a4a" metalness={0.1} roughness={0.9} />
-          </Cylinder>
+          </Box>
         </group>
       ))}
       
