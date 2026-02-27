@@ -705,14 +705,28 @@ export const TowerChart3DBlockSchema = z.object({
   
   // Background Preset - Built-in 3D environments
   backgroundPreset: z.enum([
-    'none',           // No background, just stars
-    'cyber-grid',     // Neon grid floor with glow
-    'mountain-range', // Distant mountain silhouettes
-    'ocean-waves',    // Animated ocean/water plane
-    'forest-trees',   // Stylized low-poly trees
-    'city-skyline',   // Distant city buildings
-    'abstract-waves', // Abstract wave/mesh terrain
-    'space-station',  // Space station interior feel
+    'none',             // No background, just stars
+    'cyber-grid',       // Neon grid floor with glow
+    'mountain-range',   // Distant mountain silhouettes
+    'ocean-waves',      // Animated ocean/water plane
+    'forest-trees',     // Stylized low-poly trees
+    'city-skyline',     // Distant city buildings
+    'abstract-waves',   // Abstract wave/mesh terrain
+    'space-station',    // Space station interior feel
+    // Advanced presets
+    'aurora-borealis',  // Northern lights effect
+    'volcanic-inferno', // Lava pools and volcanic environment
+    'crystal-caves',    // Crystalline formations with reflections
+    'desert-dunes',     // Sand dunes with heat shimmer
+    'neon-tokyo',       // Cyberpunk Japanese city aesthetic
+    'floating-islands', // Sky islands with waterfalls
+    'deep-ocean',       // Underwater environment with bubbles
+    'galaxy-nebula',    // Colorful space clouds
+    'matrix-rain',      // Digital rain effect
+    'ice-glacier',      // Frozen environment with ice formations
+    'steampunk-gears',  // Industrial Victorian machinery
+    'alien-planet',     // Extraterrestrial landscape
+    'tron-grid',        // Iconic Tron-style light grid
   ]).default('cyber-grid'),
   
   // Animation

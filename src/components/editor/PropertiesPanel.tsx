@@ -1894,8 +1894,9 @@ function TowerChart3DEditor({ block, index }: EditorProps) {
               <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-9 text-xs mt-1">
                 <SelectValue placeholder="Select environment" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
-                <SelectItem value="none" className="text-white text-xs">None (Stars only)</SelectItem>
+              <SelectContent className="bg-gray-800 border-gray-700 max-h-64 overflow-y-auto">
+                {/* Basic Presets */}
+                <SelectItem value="none" className="text-white text-xs">✨ None (Stars only)</SelectItem>
                 <SelectItem value="cyber-grid" className="text-white text-xs">🌟 Cyber Grid (Neon)</SelectItem>
                 <SelectItem value="mountain-range" className="text-white text-xs">🏔️ Mountain Range</SelectItem>
                 <SelectItem value="ocean-waves" className="text-white text-xs">🌊 Ocean Waves</SelectItem>
@@ -1903,6 +1904,20 @@ function TowerChart3DEditor({ block, index }: EditorProps) {
                 <SelectItem value="city-skyline" className="text-white text-xs">🏙️ City Skyline</SelectItem>
                 <SelectItem value="abstract-waves" className="text-white text-xs">〰️ Abstract Waves</SelectItem>
                 <SelectItem value="space-station" className="text-white text-xs">🚀 Space Station</SelectItem>
+                {/* Advanced Presets */}
+                <SelectItem value="aurora-borealis" className="text-white text-xs">🌌 Aurora Borealis</SelectItem>
+                <SelectItem value="volcanic-inferno" className="text-white text-xs">🌋 Volcanic Inferno</SelectItem>
+                <SelectItem value="crystal-caves" className="text-white text-xs">💎 Crystal Caves</SelectItem>
+                <SelectItem value="desert-dunes" className="text-white text-xs">🏜️ Desert Dunes</SelectItem>
+                <SelectItem value="neon-tokyo" className="text-white text-xs">🏯 Neon Tokyo</SelectItem>
+                <SelectItem value="floating-islands" className="text-white text-xs">🏝️ Floating Islands</SelectItem>
+                <SelectItem value="deep-ocean" className="text-white text-xs">🪸 Deep Ocean</SelectItem>
+                <SelectItem value="galaxy-nebula" className="text-white text-xs">🌠 Galaxy Nebula</SelectItem>
+                <SelectItem value="matrix-rain" className="text-white text-xs">💧 Matrix Rain</SelectItem>
+                <SelectItem value="ice-glacier" className="text-white text-xs">❄️ Ice Glacier</SelectItem>
+                <SelectItem value="steampunk-gears" className="text-white text-xs">⚙️ Steampunk Gears</SelectItem>
+                <SelectItem value="alien-planet" className="text-white text-xs">👽 Alien Planet</SelectItem>
+                <SelectItem value="tron-grid" className="text-white text-xs">🔷 Tron Grid</SelectItem>
               </SelectContent>
             </Select>
           </div>
