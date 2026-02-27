@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
-import { BaseScene } from './BaseScene';
+import { BaseScene, extractCustomization } from './BaseScene';
 import { 
   useFadeIn, 
   useScaleIn, 
@@ -33,6 +33,9 @@ export function ComparisonScene({
   const { fps } = useVideoConfig();
   const colors = getTheme(theme);
   
+  // Extract customizations
+  const customization = extractCustomization(data);
+  
   // Animation timings
   const enterDuration = animation?.enter ?? 0.5;
   const holdDuration = animation?.hold ?? 3;
@@ -52,7 +55,7 @@ export function ComparisonScene({
   const exitOpacity = 1 - exitProgress;
   
   return (
-    <BaseScene theme={theme} opacity={exitOpacity}>
+    <BaseScene theme={theme} opacity={exitOpacity} customization={customization} animation={animation}>
       <div
         style={{
           display: 'flex',

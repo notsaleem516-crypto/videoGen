@@ -1,21 +1,14 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, spring } from 'remotion';
+import { useCurrentFrame, spring } from 'remotion';
+import { BaseScene, extractCustomization } from './BaseScene';
 import { getTheme } from '../utils/theme';
 import type { MotionProfileType } from '../utils/animations';
+import type { AvatarGridBlock, AnimationPhase } from '../schemas';
 
 interface Avatar {
   name: string;
   role?: string;
   image?: string;
-}
-
-interface AvatarGridBlock {
-  type: 'avatar-grid';
-  title?: string;
-  subtitle?: string;
-  avatars?: Avatar[];
-  layout?: 'grid' | 'carousel' | 'stacked';
-  columns?: number;
 }
 
 interface AvatarGridSceneProps {
@@ -27,9 +20,9 @@ interface AvatarGridSceneProps {
 
 // Generate placeholder avatar color
 function getAvatarColor(name: string): string {
-  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316'];
+  const avatarColors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316'];
   const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return colors[hash % colors.length];
+  return avatarColors[hash % avatarColors.length];
 }
 
 // Get initials from name
@@ -42,12 +35,15 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
-export function AvatarGridScene({ data, theme, animation }: AvatarGridSceneProps) {
+export function AvatarGridScene({ data, theme, motionProfile, animation }: AvatarGridSceneProps) {
   const frame = useCurrentFrame();
   const colors = getTheme(theme);
   const fps = 30;
   
   const { title, subtitle, avatars = [], layout = 'grid', columns = 3 } = data;
+  
+  // Extract customizations
+  const customization = extractCustomization(data);
   
   // Default avatars if none provided
   const displayAvatars = avatars.length > 0 ? avatars : [
@@ -64,14 +60,7 @@ export function AvatarGridScene({ data, theme, animation }: AvatarGridSceneProps
   });
   
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: colors.background,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 40,
-      }}
-    >
+    <BaseScene theme={theme} customization={customization} animation={animation} style={{ padding: 40 }}>
       <div
         style={{
           display: 'flex',
@@ -87,7 +76,7 @@ export function AvatarGridScene({ data, theme, animation }: AvatarGridSceneProps
             style={{
               fontSize: 36,
               fontFamily: 'system-ui, sans-serif',
-              color: colors.text,
+              color: colors.foreground,
               fontWeight: 700,
               textAlign: 'center',
             }}
@@ -102,7 +91,7 @@ export function AvatarGridScene({ data, theme, animation }: AvatarGridSceneProps
             style={{
               fontSize: 20,
               fontFamily: 'system-ui, sans-serif',
-              color: colors.textSecondary,
+              color: colors.muted,
               textAlign: 'center',
             }}
           >
@@ -173,7 +162,7 @@ export function AvatarGridScene({ data, theme, animation }: AvatarGridSceneProps
                   style={{
                     fontSize: 20,
                     fontFamily: 'system-ui, sans-serif',
-                    color: colors.text,
+                    color: colors.foreground,
                     fontWeight: 600,
                     textAlign: 'center',
                   }}
@@ -187,7 +176,7 @@ export function AvatarGridScene({ data, theme, animation }: AvatarGridSceneProps
                     style={{
                       fontSize: 14,
                       fontFamily: 'system-ui, sans-serif',
-                      color: colors.textSecondary,
+                      color: colors.muted,
                       textAlign: 'center',
                     }}
                   >
@@ -199,6 +188,6 @@ export function AvatarGridScene({ data, theme, animation }: AvatarGridSceneProps
           })}
         </div>
       </div>
-    </AbsoluteFill>
+    </BaseScene>
   );
 }

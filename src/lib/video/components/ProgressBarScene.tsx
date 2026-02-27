@@ -1,19 +1,9 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, interpolate, spring } from 'remotion';
+import { useCurrentFrame, interpolate, spring } from 'remotion';
+import { BaseScene, extractCustomization } from './BaseScene';
 import { getTheme } from '../utils/theme';
 import type { MotionProfileType } from '../utils/animations';
-
-interface ProgressBarBlock {
-  type: 'progress-bar';
-  label?: string;
-  value?: number;
-  color?: string;
-  backgroundColor?: string;
-  height?: 'small' | 'medium' | 'large';
-  showPercentage?: boolean;
-  animated?: boolean;
-  stripes?: boolean;
-}
+import type { ProgressBarBlock, AnimationPhase } from '../schemas';
 
 interface ProgressBarSceneProps {
   data: ProgressBarBlock;
@@ -22,7 +12,7 @@ interface ProgressBarSceneProps {
   animation: { enter: number; hold: number; exit: number };
 }
 
-export function ProgressBarScene({ data, theme, animation }: ProgressBarSceneProps) {
+export function ProgressBarScene({ data, theme, motionProfile, animation }: ProgressBarSceneProps) {
   const frame = useCurrentFrame();
   const colors = getTheme(theme);
   const fps = 30;
@@ -31,12 +21,15 @@ export function ProgressBarScene({ data, theme, animation }: ProgressBarScenePro
     label, 
     value = 75, 
     color, 
-    backgroundColor, 
+    backgroundColor: barBgColor, 
     height = 'medium', 
     showPercentage = true, 
     animated = true,
     stripes = false 
   } = data;
+  
+  // Extract customizations
+  const customization = extractCustomization(data);
   
   const heights = { small: 12, medium: 24, large: 40 };
   const barHeight = heights[height] || 24;
@@ -64,15 +57,7 @@ export function ProgressBarScene({ data, theme, animation }: ProgressBarScenePro
   const stripeOffset = stripes ? frame % 20 : 0;
   
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: colors.background,
-        justifyContent: 'center',
-        alignItems: 'center',
-        opacity,
-        padding: 40,
-      }}
-    >
+    <BaseScene theme={theme} customization={customization} animation={animation} opacity={opacity} style={{ padding: 40 }}>
       <div
         style={{
           width: '100%',
@@ -86,7 +71,7 @@ export function ProgressBarScene({ data, theme, animation }: ProgressBarScenePro
             style={{
               fontSize: 32,
               fontFamily: 'system-ui, sans-serif',
-              color: colors.text,
+              color: colors.foreground,
               marginBottom: 16,
               fontWeight: 600,
             }}
@@ -100,7 +85,7 @@ export function ProgressBarScene({ data, theme, animation }: ProgressBarScenePro
           style={{
             width: '100%',
             height: barHeight,
-            backgroundColor: backgroundColor || colors.surface,
+            backgroundColor: barBgColor || colors.surface,
             borderRadius: barHeight / 2,
             overflow: 'hidden',
             boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.3)',
@@ -133,7 +118,7 @@ export function ProgressBarScene({ data, theme, animation }: ProgressBarScenePro
             style={{
               fontSize: 48,
               fontFamily: 'system-ui, sans-serif',
-              color: colors.text,
+              color: colors.foreground,
               marginTop: 20,
               fontWeight: 700,
               textAlign: 'center',
@@ -143,6 +128,6 @@ export function ProgressBarScene({ data, theme, animation }: ProgressBarScenePro
           </div>
         )}
       </div>
-    </AbsoluteFill>
+    </BaseScene>
   );
 }

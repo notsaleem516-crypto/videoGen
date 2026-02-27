@@ -5,3 +5,4 @@ export { PropertiesPanel } from './PropertiesPanel';
 export { VideoMetaEditor } from './VideoMetaEditor';
 export { EditorToolbar } from './EditorToolbar';
 export { VideoEditor } from './VideoEditor';
+export { AudioTracksPanel } from './AudioTracksPanel';

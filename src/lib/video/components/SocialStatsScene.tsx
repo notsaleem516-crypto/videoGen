@@ -1,19 +1,9 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, spring } from 'remotion';
+import { useCurrentFrame, spring } from 'remotion';
+import { BaseScene, extractCustomization } from './BaseScene';
 import { getTheme } from '../utils/theme';
 import type { MotionProfileType } from '../utils/animations';
-
-interface SocialStatsBlock {
-  type: 'social-stats';
-  platform?: 'twitter' | 'instagram' | 'youtube' | 'tiktok' | 'linkedin' | 'facebook';
-  username?: string;
-  followers?: number;
-  posts?: number;
-  likes?: number;
-  verified?: boolean;
-  showGrowth?: boolean;
-  growthPercentage?: number;
-}
+import type { SocialStatsBlock, AnimationPhase } from '../schemas';
 
 interface SocialStatsSceneProps {
   data: SocialStatsBlock;
@@ -32,7 +22,7 @@ const platformConfig: Record<string, { color: string; icon: string }> = {
   facebook: { color: '#1877F2', icon: '📘' },
 };
 
-export function SocialStatsScene({ data, theme, animation }: SocialStatsSceneProps) {
+export function SocialStatsScene({ data, theme, motionProfile, animation }: SocialStatsSceneProps) {
   const frame = useCurrentFrame();
   const colors = getTheme(theme);
   const fps = 30;
@@ -47,6 +37,9 @@ export function SocialStatsScene({ data, theme, animation }: SocialStatsScenePro
     showGrowth = true,
     growthPercentage = 15.5,
   } = data;
+  
+  // Extract customizations
+  const customization = extractCustomization(data);
   
   const platformData = platformConfig[platform] || platformConfig.twitter;
   
@@ -65,13 +58,7 @@ export function SocialStatsScene({ data, theme, animation }: SocialStatsScenePro
   };
   
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: colors.background,
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
+    <BaseScene theme={theme} customization={customization} animation={animation}>
       <div
         style={{
           display: 'flex',
@@ -115,7 +102,7 @@ export function SocialStatsScene({ data, theme, animation }: SocialStatsScenePro
                 style={{
                   fontSize: 28,
                   fontFamily: 'system-ui, sans-serif',
-                  color: colors.text,
+                  color: colors.foreground,
                   fontWeight: 700,
                 }}
               >
@@ -143,7 +130,7 @@ export function SocialStatsScene({ data, theme, animation }: SocialStatsScenePro
               style={{
                 fontSize: 16,
                 fontFamily: 'system-ui, sans-serif',
-                color: colors.textSecondary,
+                color: colors.muted,
               }}
             >
               {platform.charAt(0).toUpperCase() + platform.slice(1)}
@@ -165,7 +152,7 @@ export function SocialStatsScene({ data, theme, animation }: SocialStatsScenePro
               style={{
                 fontSize: 64,
                 fontFamily: 'system-ui, sans-serif',
-                color: colors.text,
+                color: colors.foreground,
                 fontWeight: 800,
               }}
             >
@@ -175,7 +162,7 @@ export function SocialStatsScene({ data, theme, animation }: SocialStatsScenePro
               style={{
                 fontSize: 18,
                 fontFamily: 'system-ui, sans-serif',
-                color: colors.textSecondary,
+                color: colors.muted,
                 textTransform: 'uppercase',
                 letterSpacing: 2,
               }}
@@ -207,7 +194,7 @@ export function SocialStatsScene({ data, theme, animation }: SocialStatsScenePro
                 style={{
                   fontSize: 40,
                   fontFamily: 'system-ui, sans-serif',
-                  color: colors.textSecondary,
+                  color: colors.muted,
                   fontWeight: 700,
                 }}
               >
@@ -217,7 +204,7 @@ export function SocialStatsScene({ data, theme, animation }: SocialStatsScenePro
                 style={{
                   fontSize: 14,
                   fontFamily: 'system-ui, sans-serif',
-                  color: colors.textTertiary,
+                  color: colors.muted,
                   textTransform: 'uppercase',
                 }}
               >
@@ -233,7 +220,7 @@ export function SocialStatsScene({ data, theme, animation }: SocialStatsScenePro
                 style={{
                   fontSize: 40,
                   fontFamily: 'system-ui, sans-serif',
-                  color: colors.textSecondary,
+                  color: colors.muted,
                   fontWeight: 700,
                 }}
               >
@@ -243,7 +230,7 @@ export function SocialStatsScene({ data, theme, animation }: SocialStatsScenePro
                 style={{
                   fontSize: 14,
                   fontFamily: 'system-ui, sans-serif',
-                  color: colors.textTertiary,
+                  color: colors.muted,
                   textTransform: 'uppercase',
                 }}
               >
@@ -253,6 +240,6 @@ export function SocialStatsScene({ data, theme, animation }: SocialStatsScenePro
           )}
         </div>
       </div>
-    </AbsoluteFill>
+    </BaseScene>
   );
 }

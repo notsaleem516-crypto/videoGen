@@ -1,20 +1,9 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, interpolate, spring, Easing } from 'remotion';
+import { useCurrentFrame, interpolate, spring, Easing } from 'remotion';
+import { BaseScene, extractCustomization } from './BaseScene';
 import { getTheme } from '../utils/theme';
 import type { MotionProfileType } from '../utils/animations';
-
-interface CounterBlock {
-  type: 'counter';
-  label: string;
-  from?: number;
-  to?: number;
-  duration?: number;
-  prefix?: string;
-  suffix?: string;
-  decimals?: number;
-  color?: string;
-  animationStyle?: 'linear' | 'easeOut' | 'easeInOut' | 'bounce';
-}
+import type { CounterBlock, AnimationPhase, BlockCustomization } from '../schemas';
 
 interface CounterSceneProps {
   data: CounterBlock;
@@ -23,7 +12,7 @@ interface CounterSceneProps {
   animation: { enter: number; hold: number; exit: number };
 }
 
-export function CounterScene({ data, theme, animation }: CounterSceneProps) {
+export function CounterScene({ data, theme, motionProfile, animation }: CounterSceneProps) {
   const frame = useCurrentFrame();
   const colors = getTheme(theme);
   const fps = 30;
@@ -39,6 +28,9 @@ export function CounterScene({ data, theme, animation }: CounterSceneProps) {
     color, 
     animationStyle = 'easeOut' 
   } = data;
+  
+  // Extract customizations
+  const customization = extractCustomization(data);
   
   // Calculate current value based on animation progress
   const progress = Math.min(frame / (duration * fps), 1);
@@ -96,14 +88,7 @@ export function CounterScene({ data, theme, animation }: CounterSceneProps) {
     : Math.round(currentValue).toLocaleString();
   
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: colors.background,
-        justifyContent: 'center',
-        alignItems: 'center',
-        opacity,
-      }}
-    >
+    <BaseScene theme={theme} customization={customization} animation={animation} opacity={opacity}>
       <div
         style={{
           transform: `translateY(${y}px) scale(${scale})`,
@@ -131,7 +116,7 @@ export function CounterScene({ data, theme, animation }: CounterSceneProps) {
           style={{
             fontSize: 36,
             fontFamily: 'system-ui, sans-serif',
-            color: colors.textSecondary,
+            color: colors.muted,
             letterSpacing: 1,
             textTransform: 'uppercase',
           }}
@@ -139,6 +124,6 @@ export function CounterScene({ data, theme, animation }: CounterSceneProps) {
           {label}
         </div>
       </div>
-    </AbsoluteFill>
+    </BaseScene>
   );
 }

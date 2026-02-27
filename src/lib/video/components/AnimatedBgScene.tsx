@@ -1,27 +1,18 @@
 import React from 'react';
 import { AbsoluteFill, useCurrentFrame, spring } from 'remotion';
+import { BaseScene, extractCustomization } from './BaseScene';
 import { getTheme } from '../utils/theme';
 import type { MotionProfileType } from '../utils/animations';
-
-interface AnimatedBgBlock {
-  type: 'animated-bg';
-  style?: 'particles' | 'waves' | 'gradient' | 'noise' | 'geometric' | 'aurora';
-  primaryColor?: string;
-  secondaryColor?: string;
-  speed?: number;
-  intensity?: number;
-  overlay?: boolean;
-  overlayOpacity?: number;
-}
+import type { AnimatedBackgroundBlock, AnimationPhase } from '../schemas';
 
 interface AnimatedBgSceneProps {
-  data: AnimatedBgBlock;
+  data: AnimatedBackgroundBlock;
   theme: string;
   motionProfile: MotionProfileType;
   animation: { enter: number; hold: number; exit: number };
 }
 
-export function AnimatedBgScene({ data, theme, animation }: AnimatedBgSceneProps) {
+export function AnimatedBgScene({ data, theme, motionProfile, animation }: AnimatedBgSceneProps) {
   const frame = useCurrentFrame();
   const colors = getTheme(theme);
   const fps = 30;
@@ -36,6 +27,9 @@ export function AnimatedBgScene({ data, theme, animation }: AnimatedBgSceneProps
     overlayOpacity = 0.3,
   } = data;
   
+  // Extract customizations
+  const customization = extractCustomization(data);
+  
   // Entrance animation
   const scale = spring({
     frame,
@@ -46,13 +40,7 @@ export function AnimatedBgScene({ data, theme, animation }: AnimatedBgSceneProps
   const particleCount = Math.round(20 * intensity);
   
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: colors.background,
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
+    <BaseScene theme={theme} customization={customization} animation={animation}>
       {/* Background Effects */}
       <AbsoluteFill style={{ overflow: 'hidden' }}>
         {/* Particles Style */}
@@ -91,7 +79,7 @@ export function AnimatedBgScene({ data, theme, animation }: AnimatedBgSceneProps
           <>
             {Array.from({ length: 5 }).map((_, i) => {
               const offset = i * 20;
-              const opacity = (1 - i / 5) * 0.3 * intensity;
+              const waveOpacity = (1 - i / 5) * 0.3 * intensity;
               const waveSize = 200 + offset + Math.sin(frame * 0.05 * speed) * 50;
               
               return (
@@ -105,7 +93,7 @@ export function AnimatedBgScene({ data, theme, animation }: AnimatedBgSceneProps
                     height: waveSize,
                     borderRadius: '50%',
                     border: `2px solid ${primaryColor}`,
-                    opacity,
+                    opacity: waveOpacity,
                     transform: 'translate(-50%, -50%)',
                   }}
                 />
@@ -211,7 +199,7 @@ export function AnimatedBgScene({ data, theme, animation }: AnimatedBgSceneProps
           style={{
             fontSize: 48,
             fontFamily: 'system-ui, sans-serif',
-            color: colors.text,
+            color: colors.foreground,
             fontWeight: 700,
             textShadow: '0 4px 20px rgba(0,0,0,0.5)',
           }}
@@ -219,6 +207,6 @@ export function AnimatedBgScene({ data, theme, animation }: AnimatedBgSceneProps
           Animated Background
         </div>
       </div>
-    </AbsoluteFill>
+    </BaseScene>
   );
 }

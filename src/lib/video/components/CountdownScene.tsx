@@ -1,19 +1,9 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, interpolate, spring } from 'remotion';
+import { useCurrentFrame, interpolate, spring } from 'remotion';
+import { BaseScene, extractCustomization } from './BaseScene';
 import { getTheme } from '../utils/theme';
 import type { MotionProfileType } from '../utils/animations';
-
-interface CountdownBlock {
-  type: 'countdown';
-  title?: string;
-  days?: number;
-  hours?: number;
-  minutes?: number;
-  seconds?: number;
-  style?: 'modern' | 'classic' | 'minimal' | 'flip';
-  color?: string;
-  showLabels?: boolean;
-}
+import type { CountdownBlock, AnimationPhase } from '../schemas';
 
 interface CountdownSceneProps {
   data: CountdownBlock;
@@ -22,7 +12,7 @@ interface CountdownSceneProps {
   animation: { enter: number; hold: number; exit: number };
 }
 
-export function CountdownScene({ data, theme, animation }: CountdownSceneProps) {
+export function CountdownScene({ data, theme, motionProfile, animation }: CountdownSceneProps) {
   const frame = useCurrentFrame();
   const colors = getTheme(theme);
   const fps = 30;
@@ -37,6 +27,9 @@ export function CountdownScene({ data, theme, animation }: CountdownSceneProps) 
     color, 
     showLabels = true 
   } = data;
+  
+  // Extract customizations
+  const customization = extractCustomization(data);
   
   // Entrance animation
   const opacity = interpolate(
@@ -96,14 +89,7 @@ export function CountdownScene({ data, theme, animation }: CountdownSceneProps) 
   const styleConfig = styles[style] || styles.modern;
   
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: colors.background,
-        justifyContent: 'center',
-        alignItems: 'center',
-        opacity,
-      }}
-    >
+    <BaseScene theme={theme} customization={customization} animation={animation} opacity={opacity}>
       <div
         style={{
           display: 'flex',
@@ -119,7 +105,7 @@ export function CountdownScene({ data, theme, animation }: CountdownSceneProps) 
             style={{
               fontSize: 36,
               fontFamily: 'system-ui, sans-serif',
-              color: colors.textSecondary,
+              color: colors.muted,
               fontWeight: 600,
               textAlign: 'center',
               textTransform: 'uppercase',
@@ -163,7 +149,7 @@ export function CountdownScene({ data, theme, animation }: CountdownSceneProps) 
                 <div
                   style={{
                     fontFamily: 'system-ui, sans-serif',
-                    color: color || colors.text,
+                    color: color || colors.foreground,
                     fontSize: 72,
                     fontWeight: 800,
                   }}
@@ -174,7 +160,7 @@ export function CountdownScene({ data, theme, animation }: CountdownSceneProps) 
                   <div
                     style={{
                       fontFamily: 'system-ui, sans-serif',
-                      color: colors.textSecondary,
+                      color: colors.muted,
                       fontSize: 16,
                       textTransform: 'uppercase',
                       letterSpacing: 2,
@@ -188,6 +174,6 @@ export function CountdownScene({ data, theme, animation }: CountdownSceneProps) 
           })}
         </div>
       </div>
-    </AbsoluteFill>
+    </BaseScene>
   );
 }

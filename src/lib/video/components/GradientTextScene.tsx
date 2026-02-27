@@ -1,18 +1,9 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, interpolate, spring } from 'remotion';
+import { useCurrentFrame, interpolate, spring } from 'remotion';
+import { BaseScene, extractCustomization } from './BaseScene';
 import { getTheme } from '../utils/theme';
 import type { MotionProfileType } from '../utils/animations';
-
-interface GradientTextBlock {
-  type: 'gradient-text';
-  text: string;
-  gradient?: string[];
-  angle?: number;
-  animate?: boolean;
-  animationSpeed?: number;
-  fontSize?: 'small' | 'medium' | 'large' | 'xlarge' | 'xxlarge';
-  fontWeight?: 'normal' | 'bold' | 'black';
-}
+import type { GradientTextBlock, AnimationPhase } from '../schemas';
 
 interface GradientTextSceneProps {
   data: GradientTextBlock;
@@ -21,7 +12,7 @@ interface GradientTextSceneProps {
   animation: { enter: number; hold: number; exit: number };
 }
 
-export function GradientTextScene({ data, theme, animation }: GradientTextSceneProps) {
+export function GradientTextScene({ data, theme, motionProfile, animation }: GradientTextSceneProps) {
   const frame = useCurrentFrame();
   const colors = getTheme(theme);
   const fps = 30;
@@ -35,6 +26,9 @@ export function GradientTextScene({ data, theme, animation }: GradientTextSceneP
     fontSize: fontSizeName = 'xlarge', 
     fontWeight: fontWeightName = 'bold' 
   } = data;
+  
+  // Extract customizations
+  const customization = extractCustomization(data);
   
   // Font size mapping
   const fontSizes = {
@@ -79,14 +73,7 @@ export function GradientTextScene({ data, theme, animation }: GradientTextSceneP
     : `linear-gradient(${currentAngle}deg, #3B82F6, #8B5CF6)`;
   
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: colors.background,
-        justifyContent: 'center',
-        alignItems: 'center',
-        opacity,
-      }}
-    >
+    <BaseScene theme={theme} customization={customization} animation={animation} opacity={opacity}>
       <div
         style={{
           textAlign: 'center',
@@ -140,6 +127,6 @@ export function GradientTextScene({ data, theme, animation }: GradientTextSceneP
           </div>
         </div>
       </div>
-    </AbsoluteFill>
+    </BaseScene>
   );
 }

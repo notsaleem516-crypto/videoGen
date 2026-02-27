@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
-import { BaseScene } from './BaseScene';
+import { BaseScene, extractCustomization } from './BaseScene';
 import { 
   useFadeIn, 
   useSlideIn, 
@@ -31,6 +31,9 @@ export function TimelineScene({
   const { fps } = useVideoConfig();
   const colors = getTheme(theme);
   
+  // Extract customizations
+  const customization = extractCustomization(data);
+  
   // Animation timings
   const enterDuration = animation?.enter ?? 0.5;
   const holdDuration = animation?.hold ?? 4;
@@ -50,7 +53,7 @@ export function TimelineScene({
   const lineProgress = useFadeIn(0.8, 0.2, motionProfile);
   
   return (
-    <BaseScene theme={theme} opacity={exitOpacity}>
+    <BaseScene theme={theme} opacity={exitOpacity} customization={customization} animation={animation}>
       <div
         style={{
           display: 'flex',

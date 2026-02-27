@@ -1,5 +1,22 @@
 import { create } from 'zustand';
-import { ContentBlock, VideoMeta, VideoInput } from '@/lib/video/schemas';
+import { ContentBlock, VideoMeta, VideoInput, AudioTrack, BlockCustomization } from '@/lib/video/schemas';
+
+// Default customization values for all blocks
+// Only set values that should override the BaseScene defaults
+const DEFAULT_CUSTOMIZATION: Partial<BlockCustomization> = {
+  enterAnimation: 'fade',
+  exitAnimation: 'fade',
+  animationDuration: 0.5,
+  backgroundBlur: 0,
+  borderWidth: 0,
+  borderRadius: 0,
+  shadowEnabled: false,
+  shadowColor: 'rgba(0,0,0,0.5)',
+  shadowBlur: 20,
+  // Don't set padding - let BaseScene use its default of 60
+  // padding: 20,  // Removed - this was causing blocks to appear at top
+  margin: 0,
+};
 
 // Block templates for adding new blocks
 export const BLOCK_TEMPLATES: Record<string, Partial<ContentBlock>> = {
@@ -245,6 +262,12 @@ interface EditorStore {
   moveBlock: (fromIndex: number, toIndex: number) => void;
   selectBlock: (index: number | null) => void;
   
+  // Audio Track actions
+  addAudioTrack: (track: Omit<AudioTrack, 'id'>) => void;
+  updateAudioTrack: (trackId: string, track: Partial<AudioTrack>) => void;
+  removeAudioTrack: (trackId: string) => void;
+  moveAudioTrack: (fromIndex: number, toIndex: number) => void;
+  
   // Playback
   setIsPlaying: (playing: boolean) => void;
   setCurrentTime: (time: number) => void;
@@ -264,6 +287,7 @@ const defaultVideoMeta: VideoMeta = {
   aspectRatio: '9:16',
   theme: 'dark_modern',
   fps: 30,
+  audioTracks: [],
 };
 
 const defaultVideoInput: VideoInput = {
@@ -324,7 +348,11 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     if (!template) return;
     
     const currentPresent = get().history.present;
-    const newBlock = { ...template } as ContentBlock;
+    // Merge template with default customization values
+    const newBlock = { 
+      ...DEFAULT_CUSTOMIZATION,
+      ...template 
+    } as ContentBlock;
     const newInput = {
       ...get().videoInput,
       contentBlocks: [...get().videoInput.contentBlocks, newBlock],
@@ -443,6 +471,114 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   // Select a block
   selectBlock: (index) => {
     set({ selectedBlockIndex: index });
+  },
+  
+  // Audio Track actions
+  addAudioTrack: (track) => {
+    const currentPresent = get().history.present;
+    const newTrack: AudioTrack = {
+      ...track,
+      id: `audio-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    };
+    
+    const currentTracks = get().videoInput.videoMeta.audioTracks || [];
+    const newInput = {
+      ...get().videoInput,
+      videoMeta: {
+        ...get().videoInput.videoMeta,
+        audioTracks: [...currentTracks, newTrack],
+      },
+    };
+    
+    set({
+      videoInput: newInput,
+      history: {
+        past: [...get().history.past, currentPresent].slice(-50),
+        present: createSnapshot(newInput),
+        future: [],
+      },
+    });
+  },
+  
+  updateAudioTrack: (trackId, trackUpdate) => {
+    const currentTracks = get().videoInput.videoMeta.audioTracks || [];
+    const trackIndex = currentTracks.findIndex(t => t.id === trackId);
+    if (trackIndex === -1) return;
+    
+    const currentPresent = get().history.present;
+    const newTracks = [...currentTracks];
+    newTracks[trackIndex] = { ...newTracks[trackIndex], ...trackUpdate };
+    
+    const newInput = {
+      ...get().videoInput,
+      videoMeta: {
+        ...get().videoInput.videoMeta,
+        audioTracks: newTracks,
+      },
+    };
+    
+    set({
+      videoInput: newInput,
+      history: {
+        past: [...get().history.past, currentPresent].slice(-50),
+        present: createSnapshot(newInput),
+        future: [],
+      },
+    });
+  },
+  
+  removeAudioTrack: (trackId) => {
+    const currentTracks = get().videoInput.videoMeta.audioTracks || [];
+    const trackIndex = currentTracks.findIndex(t => t.id === trackId);
+    if (trackIndex === -1) return;
+    
+    const currentPresent = get().history.present;
+    const newTracks = currentTracks.filter(t => t.id !== trackId);
+    
+    const newInput = {
+      ...get().videoInput,
+      videoMeta: {
+        ...get().videoInput.videoMeta,
+        audioTracks: newTracks,
+      },
+    };
+    
+    set({
+      videoInput: newInput,
+      history: {
+        past: [...get().history.past, currentPresent].slice(-50),
+        present: createSnapshot(newInput),
+        future: [],
+      },
+    });
+  },
+  
+  moveAudioTrack: (fromIndex, toIndex) => {
+    const currentTracks = get().videoInput.videoMeta.audioTracks || [];
+    if (fromIndex < 0 || fromIndex >= currentTracks.length) return;
+    if (toIndex < 0 || toIndex >= currentTracks.length) return;
+    
+    const currentPresent = get().history.present;
+    const newTracks = [...currentTracks];
+    const [movedTrack] = newTracks.splice(fromIndex, 1);
+    newTracks.splice(toIndex, 0, movedTrack);
+    
+    const newInput = {
+      ...get().videoInput,
+      videoMeta: {
+        ...get().videoInput.videoMeta,
+        audioTracks: newTracks,
+      },
+    };
+    
+    set({
+      videoInput: newInput,
+      history: {
+        past: [...get().history.past, currentPresent].slice(-50),
+        present: createSnapshot(newInput),
+        future: [],
+      },
+    });
   },
   
   // Playback controls

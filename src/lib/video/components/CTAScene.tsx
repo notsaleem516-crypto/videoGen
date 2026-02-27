@@ -1,18 +1,9 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, interpolate, spring } from 'remotion';
+import { useCurrentFrame, interpolate, spring } from 'remotion';
+import { BaseScene, extractCustomization } from './BaseScene';
 import { getTheme } from '../utils/theme';
 import type { MotionProfileType } from '../utils/animations';
-
-interface CTABlock {
-  type: 'cta';
-  text: string;
-  description?: string;
-  buttonStyle?: 'primary' | 'secondary' | 'outline' | 'ghost';
-  color?: string;
-  size?: 'small' | 'medium' | 'large';
-  icon?: string;
-  pulse?: boolean;
-}
+import type { CTABlock, AnimationPhase } from '../schemas';
 
 interface CTASceneProps {
   data: CTABlock;
@@ -21,7 +12,7 @@ interface CTASceneProps {
   animation: { enter: number; hold: number; exit: number };
 }
 
-export function CTAScene({ data, theme, animation }: CTASceneProps) {
+export function CTAScene({ data, theme, motionProfile, animation }: CTASceneProps) {
   const frame = useCurrentFrame();
   const colors = getTheme(theme);
   const fps = 30;
@@ -35,6 +26,9 @@ export function CTAScene({ data, theme, animation }: CTASceneProps) {
     icon, 
     pulse = true 
   } = data;
+  
+  // Extract customizations
+  const customization = extractCustomization(data);
   
   // Entrance animation
   const opacity = interpolate(
@@ -75,7 +69,7 @@ export function CTAScene({ data, theme, animation }: CTASceneProps) {
     },
     secondary: {
       backgroundColor: colors.surface,
-      color: colors.text,
+      color: colors.foreground,
       border: `2px solid ${colors.border}`,
     },
     outline: {
@@ -85,21 +79,14 @@ export function CTAScene({ data, theme, animation }: CTASceneProps) {
     },
     ghost: {
       backgroundColor: 'transparent',
-      color: colors.text,
+      color: colors.foreground,
       border: 'none',
     },
   };
   const styleConfig = buttonStyles[buttonStyle] || buttonStyles.primary;
   
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: colors.background,
-        justifyContent: 'center',
-        alignItems: 'center',
-        opacity,
-      }}
-    >
+    <BaseScene theme={theme} customization={customization} animation={animation} opacity={opacity}>
       <div
         style={{
           display: 'flex',
@@ -115,7 +102,7 @@ export function CTAScene({ data, theme, animation }: CTASceneProps) {
             style={{
               fontSize: 28,
               fontFamily: 'system-ui, sans-serif',
-              color: colors.textSecondary,
+              color: colors.muted,
               textAlign: 'center',
               maxWidth: 500,
               lineHeight: 1.5,
@@ -150,6 +137,6 @@ export function CTAScene({ data, theme, animation }: CTASceneProps) {
           {text}
         </button>
       </div>
-    </AbsoluteFill>
+    </BaseScene>
   );
 }

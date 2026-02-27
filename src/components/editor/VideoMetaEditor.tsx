@@ -15,6 +15,7 @@ import {
 import { motion } from 'framer-motion';
 import { Settings2, Maximize2, Palette, Gauge, Sparkles, Music, ArrowRightLeft } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { AudioTracksPanel } from './AudioTracksPanel';
 
 export function VideoMetaEditor() {
   const { videoInput, updateVideoMeta } = useEditorStore();
@@ -184,44 +185,11 @@ export function VideoMetaEditor() {
           <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-gray-800/50">
             <div className="flex items-center gap-2">
               <Music className="w-4 h-4 text-gray-400" />
-              <span className="text-sm font-medium text-white">Audio Track</span>
+              <span className="text-sm font-medium text-white">Audio Tracks</span>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4 space-y-4">
-            {/* Background Music */}
-            <div className="space-y-2">
-              <Label className="text-xs text-gray-400 font-medium">Background Music URL</Label>
-              <Input 
-                placeholder="https://..." 
-                className="bg-gray-800/50 border-gray-700/50 text-white h-9 text-xs"
-              />
-              <p className="text-[10px] text-gray-500">MP3 or WAV file URL</p>
-            </div>
-
-            {/* Volume */}
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <Label className="text-xs text-gray-400 font-medium">Volume</Label>
-                <span className="text-xs text-gray-500">70%</span>
-              </div>
-              <Slider defaultValue={[70]} min={0} max={100} step={5} />
-            </div>
-
-            {/* Audio Options */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label className="text-xs text-gray-400 font-medium">Loop</Label>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label className="text-xs text-gray-400 font-medium">Fade In</Label>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label className="text-xs text-gray-400 font-medium">Fade Out</Label>
-                <Switch defaultChecked />
-              </div>
-            </div>
+          <AccordionContent className="px-4 pb-4">
+            <AudioTracksPanel />
           </AccordionContent>
         </AccordionItem>
 

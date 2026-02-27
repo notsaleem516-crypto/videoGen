@@ -59,6 +59,35 @@ const IntroOutroSchema = z.object({
   duration: z.number().min(1).max(5).optional().default(2),
 });
 
+// Block customization schema - shared styling options
+const BlockCustomizationSchema = z.object({
+  // Position/Alignment settings
+  verticalAlign: z.enum(['top', 'center', 'bottom']).optional(),
+  horizontalAlign: z.enum(['left', 'center', 'right']).optional(),
+  
+  // Animation settings
+  enterAnimation: z.enum(['fade', 'slide-up', 'slide-down', 'slide-left', 'slide-right', 'zoom', 'bounce', 'rotate', 'flip', 'none']).optional(),
+  exitAnimation: z.enum(['fade', 'slide-up', 'slide-down', 'slide-left', 'slide-right', 'zoom', 'bounce', 'rotate', 'flip', 'none']).optional(),
+  animationDuration: z.number().min(0.1).max(2).optional(),
+  
+  // Background settings
+  backgroundColor: z.string().optional(),
+  backgroundImage: z.string().optional(),
+  backgroundBlur: z.number().min(0).max(20).optional(),
+  
+  // Border settings
+  borderColor: z.string().optional(),
+  borderWidth: z.number().min(0).max(10).optional(),
+  borderRadius: z.number().min(0).max(100).optional(),
+  shadowEnabled: z.boolean().optional(),
+  shadowColor: z.string().optional(),
+  shadowBlur: z.number().min(0).max(50).optional(),
+  
+  // Spacing settings
+  padding: z.number().min(0).max(100).optional(),
+  margin: z.number().min(0).max(50).optional(),
+});
+
 const VideoMetaSchema = z.object({
   aspectRatio: z.enum(['16:9', '9:16', '1:1', '4:5']).default('9:16'),
   theme: z.enum(['dark_modern', 'light_clean', 'gradient_vibrant', 'minimal_bw']).default('dark_modern'),
@@ -75,7 +104,7 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     value: z.string(),
     subtext: z.string().optional(),
     trend: z.enum(['up', 'down', 'neutral']).optional(),
-  }),
+  }).merge(BlockCustomizationSchema),
   z.object({
     type: z.literal('comparison'),
     items: z.array(z.object({
@@ -84,22 +113,22 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
       color: z.string().optional(),
     })),
     title: z.string().optional(),
-  }),
+  }).merge(BlockCustomizationSchema),
   z.object({
     type: z.literal('text'),
     content: z.string(),
     style: z.enum(['body', 'heading', 'caption']).optional(),
-  }),
+  }).merge(BlockCustomizationSchema),
   z.object({
     type: z.literal('quote'),
     text: z.string(),
     author: z.string().optional(),
-  }),
+  }).merge(BlockCustomizationSchema),
   z.object({
     type: z.literal('list'),
     items: z.array(z.string()),
     style: z.enum(['bullet', 'numbered', 'checklist']).optional(),
-  }),
+  }).merge(BlockCustomizationSchema),
   z.object({
     type: z.literal('timeline'),
     events: z.array(z.object({
@@ -107,13 +136,13 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
       title: z.string(),
       description: z.string().optional(),
     })),
-  }),
+  }).merge(BlockCustomizationSchema),
   z.object({
     type: z.literal('callout'),
     title: z.string(),
     content: z.string(),
     variant: z.enum(['success', 'warning', 'error', 'info']).optional(),
-  }),
+  }).merge(BlockCustomizationSchema),
   z.object({
     type: z.literal('icon-list'),
     items: z.array(z.object({
@@ -121,13 +150,13 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
       title: z.string(),
       description: z.string().optional(),
     })),
-  }),
+  }).merge(BlockCustomizationSchema),
   z.object({
     type: z.literal('line-chart'),
     data: z.array(z.number()),
     title: z.string().optional(),
     xAxis: z.array(z.string()).optional(),
-  }),
+  }).merge(BlockCustomizationSchema),
   z.object({
     type: z.literal('pie-chart'),
     segments: z.array(z.object({
@@ -136,26 +165,26 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
       color: z.string().optional(),
     })),
     title: z.string().optional(),
-  }),
+  }).merge(BlockCustomizationSchema),
   z.object({
     type: z.literal('code'),
     code: z.string(),
     language: z.string().optional(),
     filename: z.string().optional(),
-  }),
+  }).merge(BlockCustomizationSchema),
   z.object({
     type: z.literal('testimonial'),
     quote: z.string(),
     author: z.string(),
     role: z.string().optional(),
     avatar: z.string().optional(),
-  }),
+  }).merge(BlockCustomizationSchema),
   z.object({
     type: z.literal('image'),
     src: z.string(),
     alt: z.string().optional(),
     caption: z.string().optional(),
-  }),
+  }).merge(BlockCustomizationSchema),
   // WhatsApp Chat block
   z.object({
     type: z.literal('whatsapp-chat'),
@@ -175,12 +204,11 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
       text: z.string().max(500),
       time: z.string().max(20).optional(),
       showReadReceipt: z.boolean().optional().default(true),
-    })).min(1).max(50), // Increased from 12 to 50 messages
+    })).min(1).max(50),
     showTypingIndicator: z.boolean().optional().default(true),
     lastSeen: z.string().max(50).optional(),
-  }),
-  // Motivational Image block (Simplified: Single text with style options)
-  // Audio support: Optional background audio with duration control
+  }).merge(BlockCustomizationSchema),
+  // Motivational Image block
   z.object({
     type: z.literal('motivational-image'),
     imageSrc: z.string().min(1),
@@ -190,7 +218,6 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
       'zoom-in', 'zoom-out', 'ken-burns', 'blur', 'rotate', 'bounce'
     ]).default('fade'),
     imageEffectDuration: z.number().min(0.5).max(5).default(1.5),
-    // Single text field with style options - optional if you want image+audio only
     text: z.string().min(1).max(500).optional(),
     textStyle: z.enum([
       'default', 'quote', 'typing', 'words', 'glow', 'outline', 'bold-glow', 'shadow'
@@ -210,11 +237,140 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     backgroundColor: z.string().default('#000000'),
     imageFit: z.enum(['cover', 'contain', 'fill']).default('cover'),
     imagePosition: z.enum(['center', 'top', 'bottom', 'left', 'right']).default('center'),
-    // Audio support (optional)
-    audioSrc: z.string().optional(), // URL to mp3 audio file
-    audioVolume: z.number().min(0).max(1).default(0.7), // Volume level (0-1)
-    duration: z.number().min(1).max(120).optional(), // Optional duration override in seconds
-  }),
+    audioSrc: z.string().optional(),
+    audioVolume: z.number().min(0).max(1).default(0.7),
+    duration: z.number().min(1).max(120).optional(),
+  }).merge(BlockCustomizationSchema),
+  // ========================================================================
+  // NEW ADVANCED BLOCK SCHEMAS
+  // ========================================================================
+
+  // Counter Block - Animated counting numbers
+  z.object({
+    type: z.literal('counter'),
+    label: z.string().max(100),
+    from: z.number().default(0),
+    to: z.number().default(100),
+    duration: z.number().min(1).max(10).default(3),
+    prefix: z.string().max(20).optional(),
+    suffix: z.string().max(20).optional(),
+    decimals: z.number().min(0).max(5).default(0),
+    color: z.string().default('#3B82F6'),
+    animationStyle: z.enum(['linear', 'easeOut', 'easeInOut', 'bounce']).default('easeOut'),
+  }).merge(BlockCustomizationSchema),
+
+  // Progress Bar Block
+  z.object({
+    type: z.literal('progress-bar'),
+    label: z.string().max(100).optional(),
+    value: z.number().min(0).max(100).default(75),
+    color: z.string().default('#10B981'),
+    backgroundColor: z.string().default('#1F2937'),
+    height: z.enum(['small', 'medium', 'large']).default('medium'),
+    showPercentage: z.boolean().default(true),
+    animated: z.boolean().default(true),
+    stripes: z.boolean().default(false),
+  }).merge(BlockCustomizationSchema),
+
+  // QR Code Block
+  z.object({
+    type: z.literal('qr-code'),
+    data: z.string().min(1).max(500),
+    title: z.string().max(100).optional(),
+    subtitle: z.string().max(200).optional(),
+    size: z.enum(['small', 'medium', 'large']).default('medium'),
+    fgColor: z.string().default('#000000'),
+    bgColor: z.string().default('#FFFFFF'),
+  }).merge(BlockCustomizationSchema),
+
+  // Video/GIF Block
+  z.object({
+    type: z.literal('video'),
+    src: z.string().min(1),
+    poster: z.string().optional(),
+    autoPlay: z.boolean().default(true),
+    loop: z.boolean().default(false),
+    muted: z.boolean().default(true),
+    controls: z.boolean().default(false),
+    caption: z.string().max(200).optional(),
+  }).merge(BlockCustomizationSchema),
+
+  // Avatar Grid Block
+  z.object({
+    type: z.literal('avatar-grid'),
+    title: z.string().max(100).optional(),
+    subtitle: z.string().max(200).optional(),
+    avatars: z.array(z.object({
+      name: z.string().max(50),
+      role: z.string().max(100).optional(),
+      image: z.string().optional(),
+    })).min(1).max(12),
+    layout: z.enum(['grid', 'carousel', 'stacked']).default('grid'),
+    columns: z.number().min(2).max(6).default(3),
+  }).merge(BlockCustomizationSchema),
+
+  // Social Stats Block
+  z.object({
+    type: z.literal('social-stats'),
+    platform: z.enum(['twitter', 'instagram', 'youtube', 'tiktok', 'linkedin', 'facebook']),
+    username: z.string().max(50),
+    followers: z.number().min(0),
+    posts: z.number().min(0).optional(),
+    likes: z.number().min(0).optional(),
+    verified: z.boolean().default(false),
+    showGrowth: z.boolean().default(true),
+    growthPercentage: z.number().optional(),
+  }).merge(BlockCustomizationSchema),
+
+  // CTA Button Block
+  z.object({
+    type: z.literal('cta'),
+    text: z.string().max(50),
+    description: z.string().max(200).optional(),
+    buttonStyle: z.enum(['primary', 'secondary', 'outline', 'ghost']).default('primary'),
+    color: z.string().default('#3B82F6'),
+    size: z.enum(['small', 'medium', 'large']).default('large'),
+    icon: z.string().optional(),
+    pulse: z.boolean().default(true),
+  }).merge(BlockCustomizationSchema),
+
+  // Gradient Text Block
+  z.object({
+    type: z.literal('gradient-text'),
+    text: z.string().max(200),
+    gradient: z.array(z.string()).min(2).max(5).default(['#3B82F6', '#8B5CF6']),
+    angle: z.number().min(0).max(360).default(45),
+    animate: z.boolean().default(true),
+    animationSpeed: z.number().min(1).max(10).default(3),
+    fontSize: z.enum(['small', 'medium', 'large', 'xlarge', 'xxlarge']).default('xlarge'),
+    fontWeight: z.enum(['normal', 'bold', 'black']).default('bold'),
+  }).merge(BlockCustomizationSchema),
+
+  // Animated Background Block
+  z.object({
+    type: z.literal('animated-bg'),
+    style: z.enum(['particles', 'waves', 'gradient', 'noise', 'geometric', 'aurora']),
+    primaryColor: z.string().default('#3B82F6'),
+    secondaryColor: z.string().default('#8B5CF6'),
+    speed: z.number().min(0.5).max(5).default(1),
+    intensity: z.number().min(0.1).max(1).default(0.5),
+    overlay: z.boolean().default(false),
+    overlayOpacity: z.number().min(0).max(1).default(0.3),
+  }).merge(BlockCustomizationSchema),
+
+  // Countdown Timer Block
+  z.object({
+    type: z.literal('countdown'),
+    title: z.string().max(100).optional(),
+    targetDate: z.string().optional(),
+    days: z.number().min(0).optional(),
+    hours: z.number().min(0).max(23).optional(),
+    minutes: z.number().min(0).max(59).optional(),
+    seconds: z.number().min(0).max(59).optional(),
+    style: z.enum(['modern', 'classic', 'minimal', 'flip']).default('modern'),
+    color: z.string().default('#FFFFFF'),
+    showLabels: z.boolean().default(true),
+  }).merge(BlockCustomizationSchema),
 ]);
 
 const VideoInputSchema = z.object({
@@ -288,6 +444,40 @@ function calculateCompositionConfig(input: z.infer<typeof VideoInputSchema>) {
     } else if (blockType === 'list') {
       const items = (block as { items?: unknown[] }).items || [];
       contentDuration += 3 + Math.ceil(items.length * 0.5);
+    } else if (blockType === 'counter') {
+      // Counter duration is based on the duration field or defaults to 3 seconds
+      const counterBlock = block as { duration?: number };
+      contentDuration += counterBlock.duration || 3;
+    } else if (blockType === 'progress-bar') {
+      // Progress bar animation takes about 2-4 seconds
+      contentDuration += 3;
+    } else if (blockType === 'qr-code') {
+      // QR code display is typically 3-5 seconds
+      contentDuration += 4;
+    } else if (blockType === 'video') {
+      // Video block - default to 5 seconds unless it's a loop
+      const videoBlock = block as { loop?: boolean };
+      contentDuration += videoBlock.loop ? 10 : 5;
+    } else if (blockType === 'avatar-grid') {
+      // Avatar grid depends on number of avatars
+      const avatars = (block as { avatars?: unknown[] }).avatars || [];
+      contentDuration += 3 + Math.ceil(avatars.length * 0.2);
+    } else if (blockType === 'social-stats') {
+      // Social stats display is typically 3-4 seconds
+      contentDuration += 4;
+    } else if (blockType === 'cta') {
+      // CTA button with pulse animation - 3-5 seconds
+      contentDuration += 4;
+    } else if (blockType === 'gradient-text') {
+      // Gradient text with animation
+      const gradientBlock = block as { animationSpeed?: number };
+      contentDuration += gradientBlock.animationSpeed || 3;
+    } else if (blockType === 'animated-bg') {
+      // Animated background is typically a visual effect - 4-6 seconds
+      contentDuration += 5;
+    } else if (blockType === 'countdown') {
+      // Countdown typically shows for 5-10 seconds
+      contentDuration += 6;
     } else {
       contentDuration += 3; // default 3 seconds per block
     }
@@ -329,6 +519,17 @@ async function generateVideoPlan(videoMeta: z.infer<typeof VideoMetaSchema>, con
     'image': 'image-scene',
     'whatsapp-chat': 'whatsapp-chat-scene',
     'motivational-image': 'motivational-image-scene',
+    // New block types
+    'counter': 'counter-scene',
+    'progress-bar': 'progress-bar-scene',
+    'qr-code': 'qr-code-scene',
+    'video': 'video-scene',
+    'avatar-grid': 'avatar-grid-scene',
+    'social-stats': 'social-stats-scene',
+    'cta': 'cta-scene',
+    'gradient-text': 'gradient-text-scene',
+    'animated-bg': 'animated-bg-scene',
+    'countdown': 'countdown-scene',
   };
   
   // Create decisions for each block
@@ -379,6 +580,40 @@ async function generateVideoPlan(videoMeta: z.infer<typeof VideoMetaSchema>, con
     } else if (blockType === 'list') {
       const items = (block as { items?: unknown[] }).items || [];
       duration = 3 + Math.ceil(items.length * 0.5);
+    } else if (blockType === 'counter') {
+      // Counter duration is based on the duration field or defaults to 3 seconds
+      const counterBlock = block as { duration?: number };
+      duration = counterBlock.duration || 3;
+    } else if (blockType === 'progress-bar') {
+      // Progress bar animation takes about 2-4 seconds
+      duration = 3;
+    } else if (blockType === 'qr-code') {
+      // QR code display is typically 3-5 seconds
+      duration = 4;
+    } else if (blockType === 'video') {
+      // Video block - default to 5 seconds unless it's a loop
+      const videoBlock = block as { loop?: boolean };
+      duration = videoBlock.loop ? 10 : 5;
+    } else if (blockType === 'avatar-grid') {
+      // Avatar grid depends on number of avatars
+      const avatars = (block as { avatars?: unknown[] }).avatars || [];
+      duration = 3 + Math.ceil(avatars.length * 0.2);
+    } else if (blockType === 'social-stats') {
+      // Social stats display is typically 3-4 seconds
+      duration = 4;
+    } else if (blockType === 'cta') {
+      // CTA button with pulse animation - 3-5 seconds
+      duration = 4;
+    } else if (blockType === 'gradient-text') {
+      // Gradient text with animation
+      const gradientBlock = block as { animationSpeed?: number };
+      duration = gradientBlock.animationSpeed || 3;
+    } else if (blockType === 'animated-bg') {
+      // Animated background is typically a visual effect - 4-6 seconds
+      duration = 5;
+    } else if (blockType === 'countdown') {
+      // Countdown typically shows for 5-10 seconds
+      duration = 6;
     }
     
     return {

@@ -17,6 +17,56 @@ export const IntroOutroSchema = z.object({
 export type IntroOutroConfig = z.infer<typeof IntroOutroSchema>;
 
 /**
+ * Block customization schema - common styling options for all blocks
+ */
+export const BlockCustomizationSchema = z.object({
+  // Position/Alignment settings
+  verticalAlign: z.enum(['top', 'center', 'bottom']).default('center'),
+  horizontalAlign: z.enum(['left', 'center', 'right']).default('center'),
+  
+  // Animation settings
+  enterAnimation: z.enum(['fade', 'slide-up', 'slide-down', 'slide-left', 'slide-right', 'zoom', 'bounce', 'rotate', 'flip', 'none']).default('fade'),
+  exitAnimation: z.enum(['fade', 'slide-up', 'slide-down', 'slide-left', 'slide-right', 'zoom', 'bounce', 'rotate', 'flip', 'none']).default('fade'),
+  animationDuration: z.number().min(0.1).max(2).default(0.5),
+  
+  // Background settings
+  backgroundColor: z.string().optional(),
+  backgroundImage: z.string().optional(),
+  backgroundBlur: z.number().min(0).max(20).default(0),
+  
+  // Border settings
+  borderColor: z.string().optional(),
+  borderWidth: z.number().min(0).max(10).default(0),
+  borderRadius: z.number().min(0).max(100).default(0),
+  shadowEnabled: z.boolean().default(false),
+  shadowColor: z.string().default('rgba(0,0,0,0.5)'),
+  shadowBlur: z.number().min(0).max(50).default(20),
+  
+  // Spacing settings
+  padding: z.number().min(0).max(100).optional(),
+  margin: z.number().min(0).max(50).default(0),
+});
+
+export type BlockCustomization = z.infer<typeof BlockCustomizationSchema>;
+
+/**
+ * Audio Track schema for multi-track audio support
+ */
+export const AudioTrackSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().max(100).default('Audio Track'),
+  src: z.string().min(1), // URL or file path to audio file
+  volume: z.number().min(0).max(1).default(0.7), // Volume level 0-1
+  startTime: z.number().min(0).default(0), // When audio starts in the video timeline (seconds)
+  fadeIn: z.number().min(0).max(10).default(0), // Fade in duration in seconds
+  fadeOut: z.number().min(0).max(10).default(0), // Fade out duration in seconds
+  loop: z.boolean().default(true), // Whether to loop the audio
+  muted: z.boolean().default(false), // Whether the track is muted
+});
+
+export type AudioTrack = z.infer<typeof AudioTrackSchema>;
+
+/**
  * Video metadata schema
  */
 export const VideoMetaSchema = z.object({
@@ -25,6 +75,7 @@ export const VideoMetaSchema = z.object({
   fps: z.number().int().min(24).max(60).default(30),
   intro: IntroOutroSchema.optional(),
   outro: IntroOutroSchema.optional(),
+  audioTracks: z.array(AudioTrackSchema).optional().default([]),
 });
 
 export type VideoMeta = z.infer<typeof VideoMetaSchema>;
@@ -37,7 +88,7 @@ export const StatBlockSchema = z.object({
   heading: z.string().min(1).max(100),
   value: z.string().min(1).max(50),
   subtext: z.string().optional(),
-});
+}).merge(BlockCustomizationSchema);
 
 export type StatBlock = z.infer<typeof StatBlockSchema>;
 
@@ -59,7 +110,7 @@ export const ComparisonBlockSchema = z.object({
   type: z.literal('comparison'),
   title: z.string().min(1).max(100).optional(),
   items: z.array(ComparisonItemSchema).min(2).max(6),
-});
+}).merge(BlockCustomizationSchema);
 
 export type ComparisonBlock = z.infer<typeof ComparisonBlockSchema>;
 
@@ -70,7 +121,7 @@ export const TextBlockSchema = z.object({
   type: z.literal('text'),
   content: z.string().min(1).max(500),
   emphasis: z.enum(['low', 'medium', 'high']).optional(),
-});
+}).merge(BlockCustomizationSchema);
 
 export type TextBlock = z.infer<typeof TextBlockSchema>;
 
@@ -82,7 +133,7 @@ export const ImageBlockSchema = z.object({
   src: z.string().url(),
   alt: z.string().max(200).optional(),
   caption: z.string().max(100).optional(),
-});
+}).merge(BlockCustomizationSchema);
 
 export type ImageBlock = z.infer<typeof ImageBlockSchema>;
 
@@ -93,7 +144,7 @@ export const QuoteBlockSchema = z.object({
   type: z.literal('quote'),
   text: z.string().min(1).max(300),
   author: z.string().max(100).optional(),
-});
+}).merge(BlockCustomizationSchema);
 
 export type QuoteBlock = z.infer<typeof QuoteBlockSchema>;
 
@@ -105,7 +156,7 @@ export const ListBlockSchema = z.object({
   title: z.string().min(1).max(100).optional(),
   items: z.array(z.string().min(1).max(200)).min(1).max(10),
   style: z.enum(['bullet', 'numbered', 'checkmarks']).optional().default('bullet'),
-});
+}).merge(BlockCustomizationSchema);
 
 export type ListBlock = z.infer<typeof ListBlockSchema>;
 
@@ -127,7 +178,7 @@ export const TimelineBlockSchema = z.object({
   type: z.literal('timeline'),
   title: z.string().min(1).max(100).optional(),
   events: z.array(TimelineEventSchema).min(2).max(8),
-});
+}).merge(BlockCustomizationSchema);
 
 export type TimelineBlock = z.infer<typeof TimelineBlockSchema>;
 
@@ -139,7 +190,7 @@ export const CalloutBlockSchema = z.object({
   title: z.string().min(1).max(100),
   content: z.string().min(1).max(300),
   variant: z.enum(['success', 'warning', 'info', 'default']).optional().default('default'),
-});
+}).merge(BlockCustomizationSchema);
 
 export type CalloutBlock = z.infer<typeof CalloutBlockSchema>;
 
@@ -161,7 +212,7 @@ export const IconListBlockSchema = z.object({
   type: z.literal('icon-list'),
   title: z.string().min(1).max(100).optional(),
   items: z.array(IconItemSchema).min(1).max(6),
-});
+}).merge(BlockCustomizationSchema);
 
 export type IconListBlock = z.infer<typeof IconListBlockSchema>;
 
@@ -174,7 +225,7 @@ export const LineChartBlockSchema = z.object({
   data: z.array(z.number()).min(2).max(24),
   labels: z.array(z.string().max(20)).min(2).max(24).optional(),
   lineColor: z.string().optional(),
-});
+}).merge(BlockCustomizationSchema);
 
 export type LineChartBlock = z.infer<typeof LineChartBlockSchema>;
 
@@ -196,7 +247,7 @@ export const PieChartBlockSchema = z.object({
   type: z.literal('pie-chart'),
   title: z.string().min(1).max(100).optional(),
   segments: z.array(PieSegmentSchema).min(2).max(8),
-});
+}).merge(BlockCustomizationSchema);
 
 export type PieChartBlock = z.infer<typeof PieChartBlockSchema>;
 
@@ -208,7 +259,7 @@ export const CodeBlockSchema = z.object({
   code: z.string().min(1).max(2000),
   language: z.string().max(50).optional().default('javascript'),
   title: z.string().max(100).optional(),
-});
+}).merge(BlockCustomizationSchema);
 
 export type CodeBlock = z.infer<typeof CodeBlockSchema>;
 
@@ -222,7 +273,7 @@ export const TestimonialBlockSchema = z.object({
   role: z.string().max(100).optional(),
   company: z.string().max(100).optional(),
   avatar: z.string().url().optional(),
-});
+}).merge(BlockCustomizationSchema);
 
 export type TestimonialBlock = z.infer<typeof TestimonialBlockSchema>;
 
@@ -264,7 +315,7 @@ export const WhatsAppChatBlockSchema = z.object({
   messages: z.array(WhatsAppMessageSchema).min(1).max(50), // Up to 50 messages supported
   showTypingIndicator: z.boolean().optional().default(true), // Show typing before first message
   lastSeen: z.string().max(50).optional(), // e.g., "last seen today at 10:30 AM"
-});
+}).merge(BlockCustomizationSchema);
 
 export type WhatsAppChatBlock = z.infer<typeof WhatsAppChatBlockSchema>;
 
@@ -393,7 +444,7 @@ export const MotivationalImageBlockSchema = z.object({
   audioSrc: z.string().optional(), // URL to mp3 audio file
   audioVolume: z.number().min(0).max(1).default(0.7), // Volume level (0-1)
   duration: z.number().min(1).max(120).optional(), // Optional duration override in seconds
-});
+}).merge(BlockCustomizationSchema);
 
 export type MotivationalImageBlock = z.infer<typeof MotivationalImageBlockSchema>;
 
@@ -415,7 +466,7 @@ export const CounterBlockSchema = z.object({
   decimals: z.number().min(0).max(5).default(0),
   color: z.string().default('#3B82F6'),
   animationStyle: z.enum(['linear', 'easeOut', 'easeInOut', 'bounce']).default('easeOut'),
-});
+}).merge(BlockCustomizationSchema);
 
 export type CounterBlock = z.infer<typeof CounterBlockSchema>;
 
@@ -432,7 +483,7 @@ export const ProgressBarBlockSchema = z.object({
   showPercentage: z.boolean().default(true),
   animated: z.boolean().default(true),
   stripes: z.boolean().default(false),
-});
+}).merge(BlockCustomizationSchema);
 
 export type ProgressBarBlock = z.infer<typeof ProgressBarBlockSchema>;
 
@@ -447,7 +498,7 @@ export const QRCodeBlockSchema = z.object({
   size: z.enum(['small', 'medium', 'large']).default('medium'),
   fgColor: z.string().default('#000000'),
   bgColor: z.string().default('#FFFFFF'),
-});
+}).merge(BlockCustomizationSchema);
 
 export type QRCodeBlock = z.infer<typeof QRCodeBlockSchema>;
 
@@ -463,7 +514,7 @@ export const VideoBlockSchema = z.object({
   muted: z.boolean().default(true),
   controls: z.boolean().default(false),
   caption: z.string().max(200).optional(),
-});
+}).merge(BlockCustomizationSchema);
 
 export type VideoBlock = z.infer<typeof VideoBlockSchema>;
 
@@ -481,7 +532,7 @@ export const AvatarGridBlockSchema = z.object({
   })).min(1).max(12),
   layout: z.enum(['grid', 'carousel', 'stacked']).default('grid'),
   columns: z.number().min(2).max(6).default(3),
-});
+}).merge(BlockCustomizationSchema);
 
 export type AvatarGridBlock = z.infer<typeof AvatarGridBlockSchema>;
 
@@ -498,7 +549,7 @@ export const SocialStatsBlockSchema = z.object({
   verified: z.boolean().default(false),
   showGrowth: z.boolean().default(true),
   growthPercentage: z.number().optional(),
-});
+}).merge(BlockCustomizationSchema);
 
 export type SocialStatsBlock = z.infer<typeof SocialStatsBlockSchema>;
 
@@ -514,7 +565,7 @@ export const CTABlockSchema = z.object({
   size: z.enum(['small', 'medium', 'large']).default('large'),
   icon: z.string().optional(),
   pulse: z.boolean().default(true),
-});
+}).merge(BlockCustomizationSchema);
 
 export type CTABlock = z.infer<typeof CTABlockSchema>;
 
@@ -530,7 +581,7 @@ export const GradientTextBlockSchema = z.object({
   animationSpeed: z.number().min(1).max(10).default(3),
   fontSize: z.enum(['small', 'medium', 'large', 'xlarge', 'xxlarge']).default('xlarge'),
   fontWeight: z.enum(['normal', 'bold', 'black']).default('bold'),
-});
+}).merge(BlockCustomizationSchema);
 
 export type GradientTextBlock = z.infer<typeof GradientTextBlockSchema>;
 
@@ -546,7 +597,7 @@ export const AnimatedBackgroundBlockSchema = z.object({
   intensity: z.number().min(0.1).max(1).default(0.5),
   overlay: z.boolean().default(false),
   overlayOpacity: z.number().min(0).max(1).default(0.3),
-});
+}).merge(BlockCustomizationSchema);
 
 export type AnimatedBackgroundBlock = z.infer<typeof AnimatedBackgroundBlockSchema>;
 
@@ -564,7 +615,7 @@ export const CountdownBlockSchema = z.object({
   style: z.enum(['modern', 'classic', 'minimal', 'flip']).default('modern'),
   color: z.string().default('#FFFFFF'),
   showLabels: z.boolean().default(true),
-});
+}).merge(BlockCustomizationSchema);
 
 export type CountdownBlock = z.infer<typeof CountdownBlockSchema>;
 

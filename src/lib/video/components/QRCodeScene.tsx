@@ -1,17 +1,9 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, interpolate, spring } from 'remotion';
+import { useCurrentFrame, interpolate, spring } from 'remotion';
+import { BaseScene, extractCustomization } from './BaseScene';
 import { getTheme } from '../utils/theme';
 import type { MotionProfileType } from '../utils/animations';
-
-interface QRCodeBlock {
-  type: 'qr-code';
-  data: string;
-  title?: string;
-  subtitle?: string;
-  size?: 'small' | 'medium' | 'large';
-  fgColor?: string;
-  bgColor?: string;
-}
+import type { QRCodeBlock, AnimationPhase } from '../schemas';
 
 interface QRCodeSceneProps {
   data: QRCodeBlock;
@@ -54,12 +46,15 @@ function generateQRPattern(data: string, modules: number = 25): boolean[][] {
   return pattern;
 }
 
-export function QRCodeScene({ data, theme, animation }: QRCodeSceneProps) {
+export function QRCodeScene({ data, theme, motionProfile, animation }: QRCodeSceneProps) {
   const frame = useCurrentFrame();
   const colors = getTheme(theme);
   const fps = 30;
   
-  const { qrData, title, subtitle, size = 'medium', fgColor = '#000000', bgColor = '#FFFFFF' } = data;
+  const { data: qrData, title, subtitle, size = 'medium', fgColor = '#000000', bgColor = '#FFFFFF' } = data;
+  
+  // Extract customizations
+  const customization = extractCustomization(data);
   
   const sizes = { small: 180, medium: 240, large: 320 };
   const qrSize = sizes[size] || 240;
@@ -83,14 +78,7 @@ export function QRCodeScene({ data, theme, animation }: QRCodeSceneProps) {
   });
   
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: colors.background,
-        justifyContent: 'center',
-        alignItems: 'center',
-        opacity,
-      }}
-    >
+    <BaseScene theme={theme} customization={customization} animation={animation} opacity={opacity}>
       <div
         style={{
           display: 'flex',
@@ -106,7 +94,7 @@ export function QRCodeScene({ data, theme, animation }: QRCodeSceneProps) {
             style={{
               fontSize: 36,
               fontFamily: 'system-ui, sans-serif',
-              color: colors.text,
+              color: colors.foreground,
               fontWeight: 700,
               textAlign: 'center',
             }}
@@ -152,7 +140,7 @@ export function QRCodeScene({ data, theme, animation }: QRCodeSceneProps) {
             style={{
               fontSize: 24,
               fontFamily: 'system-ui, sans-serif',
-              color: colors.textSecondary,
+              color: colors.muted,
               textAlign: 'center',
             }}
           >
@@ -160,6 +148,6 @@ export function QRCodeScene({ data, theme, animation }: QRCodeSceneProps) {
           </div>
         )}
       </div>
-    </AbsoluteFill>
+    </BaseScene>
   );
 }
