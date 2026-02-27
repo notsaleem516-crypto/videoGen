@@ -2,13 +2,88 @@
 
 import { useEditorStore } from '@/store/editor-store';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, RotateCcw, Download, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { Play, Pause, RotateCcw, Download, Loader2, Video } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Player } from '@remotion/player';
+import { DynamicVideo, getCompositionConfig } from '@/lib/video/compositions/DynamicVideo';
+import { type VideoPlan, type AIDecision, COMPONENT_IDS } from '@/lib/video/schemas';
+
+// Generate a simple plan from content blocks
+function generatePlanFromBlocks(videoInput: { contentBlocks: Array<{ type: string; duration?: number }> }): VideoPlan {
+  const typeToComponentId: Record<string, string> = {
+    'stat': COMPONENT_IDS.STAT,
+    'comparison': COMPONENT_IDS.COMPARISON,
+    'text': COMPONENT_IDS.TEXT,
+    'image': COMPONENT_IDS.IMAGE,
+    'quote': COMPONENT_IDS.QUOTE,
+    'list': COMPONENT_IDS.LIST,
+    'timeline': COMPONENT_IDS.TIMELINE,
+    'callout': COMPONENT_IDS.CALLOUT,
+    'icon-list': COMPONENT_IDS.ICON_LIST,
+    'line-chart': COMPONENT_IDS.LINE_CHART,
+    'pie-chart': COMPONENT_IDS.PIE_CHART,
+    'code': COMPONENT_IDS.CODE,
+    'testimonial': COMPONENT_IDS.TESTIMONIAL,
+    'whatsapp-chat': COMPONENT_IDS.WHATSAPP_CHAT,
+    'motivational-image': COMPONENT_IDS.MOTIVATIONAL_IMAGE,
+  };
+
+  const decisions: AIDecision[] = videoInput.contentBlocks.map((block) => {
+    const duration = block.duration || getDefaultDuration(block.type);
+    return {
+      componentId: typeToComponentId[block.type] || COMPONENT_IDS.TEXT,
+      motionProfile: 'dynamic' as const,
+      duration,
+      animation: {
+        enter: 0.4,
+        hold: duration - 0.6,
+        exit: 0.2,
+      },
+    };
+  });
+
+  const totalDuration = decisions.reduce((sum, d) => sum + d.duration, 0);
+
+  return {
+    decisions,
+    totalDuration,
+    suggestedTransitions: decisions.map(() => 'fade' as const),
+  };
+}
+
+function getDefaultDuration(type: string): number {
+  const durations: Record<string, number> = {
+    'stat': 3,
+    'comparison': 4,
+    'text': 3,
+    'image': 4,
+    'quote': 4,
+    'list': 5,
+    'timeline': 6,
+    'callout': 3,
+    'icon-list': 5,
+    'line-chart': 5,
+    'pie-chart': 5,
+    'code': 6,
+    'testimonial': 5,
+    'whatsapp-chat': 8,
+    'motivational-image': 6,
+  };
+  return durations[type] || 4;
+}
 
 export function VideoPreview() {
-  const { videoInput, isPlaying, setIsPlaying, currentTime, setCurrentTime, exportVideo } = useEditorStore();
+  const { videoInput, exportVideo } = useEditorStore();
   const [isExporting, setIsExporting] = useState(false);
-  const [previewError, setPreviewError] = useState<string | null>(null);
+
+  // Generate plan from blocks
+  const plan = useMemo(() => generatePlanFromBlocks(videoInput), [videoInput]);
+
+  // Get composition config
+  const config = useMemo(() => {
+    if (videoInput.contentBlocks.length === 0) return null;
+    return getCompositionConfig(videoInput, plan);
+  }, [videoInput, plan]);
 
   const handleExport = async () => {
     if (videoInput.contentBlocks.length === 0) {
@@ -37,63 +112,36 @@ export function VideoPreview() {
     }
   };
 
-  // Calculate aspect ratio for preview
-  const getAspectRatioStyle = () => {
+  // Get preview dimensions based on aspect ratio
+  const getPreviewDimensions = () => {
     const ratio = videoInput.videoMeta.aspectRatio;
     switch (ratio) {
       case '9:16':
-        return { width: '180px', height: '320px' };
+        return { width: 270, height: 480 };
       case '16:9':
-        return { width: '320px', height: '180px' };
+        return { width: 480, height: 270 };
       case '1:1':
-        return { width: '240px', height: '240px' };
+        return { width: 360, height: 360 };
       case '4:5':
-        return { width: '240px', height: '300px' };
+        return { width: 360, height: 450 };
       default:
-        return { width: '180px', height: '320px' };
+        return { width: 270, height: 480 };
     }
   };
 
-  // Get theme colors
-  const getThemeColors = () => {
-    const theme = videoInput.videoMeta.theme;
-    switch (theme) {
-      case 'dark_modern':
-        return { bg: 'bg-gray-900', text: 'text-white' };
-      case 'light_minimal':
-        return { bg: 'bg-white', text: 'text-gray-900' };
-      case 'bold_vibrant':
-        return { bg: 'bg-gradient-to-br from-purple-900 to-pink-900', text: 'text-white' };
-      case 'corporate':
-        return { bg: 'bg-slate-800', text: 'text-white' };
-      default:
-        return { bg: 'bg-gray-900', text: 'text-white' };
-    }
-  };
-
-  const themeColors = getThemeColors();
+  const previewDims = getPreviewDimensions();
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-950">
+    <div className="flex-1 flex flex-col bg-gray-950 min-h-0">
       {/* Toolbar */}
-      <div className="h-12 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-4">
+      <div className="h-12 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-4 flex-shrink-0">
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-gray-300 hover:text-white"
-            onClick={() => setIsPlaying(!isPlaying)}
-          >
-            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-gray-300 hover:text-white"
-            onClick={() => setCurrentTime(0)}
-          >
-            <RotateCcw className="w-4 h-4" />
-          </Button>
+          <span className="text-sm text-white font-medium">Preview</span>
+          {config && (
+            <span className="text-xs text-gray-400">
+              {previewDims.width}x{previewDims.height} • {plan.totalDuration.toFixed(1)}s
+            </span>
+          )}
         </div>
         
         <div className="flex items-center gap-2">
@@ -114,7 +162,7 @@ export function VideoPreview() {
             ) : (
               <>
                 <Download className="w-4 h-4 mr-2" />
-                Export
+                Export MP4
               </>
             )}
           </Button>
@@ -122,86 +170,40 @@ export function VideoPreview() {
       </div>
       
       {/* Preview Area */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div 
-          className={`relative rounded-lg overflow-hidden shadow-2xl ${themeColors.bg}`}
-          style={getAspectRatioStyle()}
-        >
-          {/* Preview content based on blocks */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            {videoInput.contentBlocks.length === 0 ? (
-              <div className="text-center p-4">
-                <p className="text-gray-500 text-sm">No blocks added</p>
-                <p className="text-gray-600 text-xs mt-1">Add blocks from the library</p>
-              </div>
-            ) : (
-              <div className="w-full h-full p-4 flex items-center justify-center">
-                {/* Simple block preview - shows first block */}
-                <div className={`text-center ${themeColors.text}`}>
-                  <p className="text-sm font-medium">
-                    {getBlockPreview(videoInput.contentBlocks[0])}
-                  </p>
-                  {videoInput.contentBlocks.length > 1 && (
-                    <p className="text-xs text-gray-500 mt-2">
-                      +{videoInput.contentBlocks.length - 1} more blocks
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
+      <div className="flex-1 flex items-center justify-center p-4 overflow-hidden min-h-0">
+        {videoInput.contentBlocks.length === 0 ? (
+          <div className="text-center">
+            <Video className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+            <p className="text-gray-400">No blocks added yet</p>
+            <p className="text-gray-500 text-sm mt-1">Click blocks in the library to add them</p>
           </div>
-          
-          {/* Aspect ratio indicator */}
-          <div className="absolute bottom-2 right-2 bg-black/50 px-2 py-1 rounded text-xs text-white">
-            {videoInput.videoMeta.aspectRatio}
+        ) : config ? (
+          <div className="rounded-lg overflow-hidden shadow-2xl border border-gray-800">
+            <Player
+              component={DynamicVideo}
+              inputProps={{ input: videoInput, plan }}
+              durationInFrames={config.durationInFrames}
+              compositionWidth={config.width}
+              compositionHeight={config.height}
+              fps={config.fps}
+              style={{
+                width: previewDims.width,
+                height: previewDims.height,
+              }}
+              controls
+              loop
+              autoPlay
+            />
           </div>
-        </div>
+        ) : null}
       </div>
       
       {/* Info Bar */}
-      <div className="h-8 bg-gray-900 border-t border-gray-800 flex items-center justify-center">
+      <div className="h-8 bg-gray-900 border-t border-gray-800 flex items-center justify-center flex-shrink-0">
         <p className="text-xs text-gray-500">
-          Theme: {videoInput.videoMeta.theme} • FPS: {videoInput.videoMeta.fps}
+          Theme: {videoInput.videoMeta.theme} • FPS: {videoInput.videoMeta.fps} • {videoInput.videoMeta.aspectRatio}
         </p>
       </div>
     </div>
   );
-}
-
-// Helper to get preview text for a block
-function getBlockPreview(block: { type: string; [key: string]: unknown }): string {
-  switch (block.type) {
-    case 'stat':
-      return `${(block as { value?: string }).value || 'N/A'} - ${(block as { heading?: string }).heading || 'Stat'}`;
-    case 'text':
-      return (block as { content?: string }).content?.slice(0, 30) || 'Text block';
-    case 'quote':
-      return `"${(block as { text?: string }).text?.slice(0, 25) || 'Quote'}..."`;
-    case 'image':
-      return '📷 Image';
-    case 'list':
-      return `📋 ${(block as { items?: unknown[] }).items?.length || 0} items`;
-    case 'timeline':
-      return `📅 ${(block as { events?: unknown[] }).events?.length || 0} events`;
-    case 'comparison':
-      return `📊 ${(block as { items?: unknown[] }).items?.length || 0} items`;
-    case 'callout':
-      return `⚠️ ${(block as { title?: string }).title || 'Callout'}`;
-    case 'code':
-      return `💻 ${(block as { language?: string }).language || 'Code'}`;
-    case 'testimonial':
-      return `💬 ${(block as { author?: string }).author || 'Testimonial'}`;
-    case 'whatsapp-chat':
-      return `📱 ${(block as { messages?: unknown[] }).messages?.length || 0} messages`;
-    case 'motivational-image':
-      return (block as { text?: string }).text?.slice(0, 30) || 'Motivational';
-    case 'line-chart':
-      return `📈 Line Chart`;
-    case 'pie-chart':
-      return `🥧 Pie Chart`;
-    case 'icon-list':
-      return `🎯 ${(block as { items?: unknown[] }).items?.length || 0} icons`;
-    default:
-      return block.type;
-  }
 }
