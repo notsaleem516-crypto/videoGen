@@ -7,15 +7,9 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from 'remo
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Text, Box, Plane, ContactShadows, Billboard, Stars, Float, Cone, Cylinder, Sphere, Torus, MeshDistortMaterial, MeshWobbleMaterial } from '@react-three/drei';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { TowerChart3DBlock, AnimationPhase } from '../schemas';
 import type { MotionProfileType } from '../utils/animations';
-
-// ============================================================================
-// GLTF LOADER - For loading custom 3D models
-// ============================================================================
-
-// Add GLTFLoader to THREE namespace
-THREE.GLTFLoader = THREE.GLTFLoader || require('three/examples/jsm/loaders/GLTFLoader').GLTFLoader;
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -3365,7 +3359,7 @@ function CustomModel({ modelPath, position, scale, rotation }: {
     }
     
     // Use the GLTF loader directly with error handling
-    const loader = new THREE.GLTFLoader();
+    const loader = new GLTFLoader();
     
     loader.load(
       modelPath,
