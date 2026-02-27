@@ -3,7 +3,7 @@
 // ============================================================================
 
 import React, { useRef, useMemo, useEffect, useState, Suspense } from 'react';
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring, useValue } from 'remotion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Text, Box, Plane, ContactShadows, Billboard, Stars, useGLTF, Float } from '@react-three/drei';
 import * as THREE from 'three';
@@ -52,186 +52,6 @@ function lerpCSSColor(color1: string, color2: string, t: number): string {
 // 2D FALLBACK COMPONENT (Works in Remotion Player)
 // ============================================================================
 
-interface Tower2DProps {
-  item: {
-    rank: number;
-    name: string;
-    value: number;
-    valueFormatted?: string;
-    subtitle?: string;
-    color?: string;
-    image?: string;
-  };
-  index: number;
-  totalItems: number;
-  minValue: number;
-  maxValue: number;
-  baseHeight: number;
-  maxHeight: number;
-  gradientStart: string;
-  gradientEnd: string;
-  useGradientByRank: boolean;
-  frame: number;
-  fps: number;
-  videoHeight: number;
-}
-
-function Tower2D({
-  item,
-  index,
-  totalItems,
-  minValue,
-  maxValue,
-  baseHeight,
-  maxHeight,
-  gradientStart,
-  gradientEnd,
-  useGradientByRank,
-  frame,
-  fps,
-  videoHeight,
-}: Tower2DProps) {
-  const normalizedValue = (item.value - minValue) / (maxValue - minValue || 1);
-  const heightPercent = baseHeight + normalizedValue * (maxHeight - baseHeight);
-  
-  const color = useGradientByRank
-    ? lerpCSSColor(gradientEnd, gradientStart, (totalItems - item.rank) / Math.max(totalItems - 1, 1))
-    : (item.color || gradientStart);
-  
-  // Staggered reveal animation
-  const revealStart = 15 + index * 8;
-  const revealProgress = interpolate(frame, [revealStart, revealStart + 15], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  
-  // Height animation
-  const heightAnimated = interpolate(revealProgress, [0, 1], [0, heightPercent]);
-  
-  // Position - horizontal layout
-  const spacing = 100 / (totalItems + 1);
-  const leftPos = spacing * (index + 1);
-  
-  const heightPx = (heightAnimated / 100) * videoHeight * 0.5;
-  
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        bottom: 80,
-        left: `${leftPos}%`,
-        transform: 'translateX(-50%)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        opacity: revealProgress,
-      }}
-    >
-      {/* Tower */}
-      <div
-        style={{
-          width: 50,
-          height: heightPx,
-          background: `linear-gradient(180deg, ${color} 0%, ${color}88 100%)`,
-          borderRadius: '8px 8px 4px 4px',
-          boxShadow: `0 0 30px ${color}44, inset 0 0 20px ${color}22`,
-          position: 'relative',
-          transition: 'height 0.3s ease-out',
-        }}
-      >
-        {/* Glow effect */}
-        <div
-          style={{
-            position: 'absolute',
-            top: -10,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: 30,
-            height: 10,
-            background: `radial-gradient(ellipse, ${color}88 0%, transparent 70%)`,
-          }}
-        />
-        
-        {/* Image */}
-        {item.image && (
-          <div
-            style={{
-              position: 'absolute',
-              top: -45,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 40,
-              height: 40,
-              borderRadius: '8px',
-              overflow: 'hidden',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
-            }}
-          >
-            <img
-              src={item.image}
-              alt={item.name}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
-            />
-          </div>
-        )}
-      </div>
-      
-      {/* Label */}
-      <div
-        style={{
-          marginTop: 8,
-          textAlign: 'center',
-          maxWidth: 80,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 14,
-            fontWeight: 'bold',
-            color: '#FFD700',
-            textShadow: '0 2px 8px rgba(0,0,0,0.8)',
-          }}
-        >
-          #{item.rank}
-        </div>
-        <div
-          style={{
-            fontSize: 11,
-            fontWeight: 600,
-            color: '#FFFFFF',
-            textShadow: '0 2px 4px rgba(0,0,0,0.8)',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {item.name}
-        </div>
-        <div
-          style={{
-            fontSize: 10,
-            color: '#00FFAA',
-            textShadow: '0 1px 4px rgba(0,0,0,0.8)',
-          }}
-        >
-          {item.valueFormatted || formatValue(item.value)}
-        </div>
-        {item.subtitle && (
-          <div
-            style={{
-              fontSize: 9,
-              color: '#888',
-            }}
-          >
-            {item.subtitle}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 function TowerChart2DFallback({ data, frame, fps, width, height }: {
   data: TowerChart3DBlock;
   frame: number;
@@ -268,6 +88,10 @@ function TowerChart2DFallback({ data, frame, fps, width, height }: {
   const titleOpacity = interpolate(frame, [0, 20], [0, 1], { extrapolateRight: 'clamp' });
   const titleY = interpolate(frame, [0, 20], [-30, 0], { extrapolateRight: 'clamp' });
   
+  // Total items
+  const totalItems = sortedItems.length;
+  const spacing = 100 / (totalItems + 1);
+  
   return (
     <AbsoluteFill style={{ backgroundColor }}>
       {/* Background gradient */}
@@ -276,6 +100,17 @@ function TowerChart2DFallback({ data, frame, fps, width, height }: {
           position: 'absolute',
           inset: 0,
           background: `radial-gradient(ellipse at 50% 100%, ${gradientStart}22 0%, transparent 60%)`,
+        }}
+      />
+      
+      {/* Stars/particles background */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          opacity: 0.3,
+          backgroundImage: 'radial-gradient(circle at 50% 50%, white 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
         }}
       />
       
@@ -328,24 +163,197 @@ function TowerChart2DFallback({ data, frame, fps, width, height }: {
       </div>
       
       {/* Towers */}
-      {sortedItems.map((item, index) => (
-        <Tower2D
-          key={`tower-${item.rank}`}
-          item={item}
-          index={index}
-          totalItems={sortedItems.length}
-          minValue={minValue}
-          maxValue={maxValue}
-          baseHeight={baseHeight}
-          maxHeight={maxHeight}
-          gradientStart={gradientStart}
-          gradientEnd={gradientEnd}
-          useGradientByRank={useGradientByRank}
-          frame={frame}
-          fps={fps}
-          videoHeight={height}
-        />
-      ))}
+      {sortedItems.map((item, index) => {
+        const normalizedValue = (item.value - minValue) / (maxValue - minValue || 1);
+        const targetHeight = baseHeight + normalizedValue * (maxHeight - baseHeight);
+        
+        const color = useGradientByRank
+          ? lerpCSSColor(gradientEnd, gradientStart, (totalItems - item.rank) / Math.max(totalItems - 1, 1))
+          : (item.color || gradientStart);
+        
+        // Staggered reveal animation - NO CSS transitions, pure Remotion interpolation
+        const revealStart = 20 + index * 10;
+        const revealProgress = interpolate(frame, [revealStart, revealStart + 20], [0, 1], {
+          extrapolateLeft: 'clamp',
+          extrapolateRight: 'clamp',
+        });
+        
+        // Smooth height animation using easeOut
+        const easeProgress = 1 - Math.pow(1 - revealProgress, 3); // easeOutCubic
+        const heightAnimated = easeProgress * targetHeight;
+        
+        // Position
+        const leftPos = spacing * (index + 1);
+        const heightPx = (heightAnimated / 100) * height * 0.45;
+        
+        // Scale effect for emphasis
+        const scale = interpolate(revealProgress, [0, 0.5, 1], [0.8, 1.02, 1], {
+          extrapolateLeft: 'clamp',
+          extrapolateRight: 'clamp',
+        });
+        
+        return (
+          <div
+            key={`tower-${item.rank}`}
+            style={{
+              position: 'absolute',
+              bottom: 80,
+              left: `${leftPos}%`,
+              transform: `translateX(-50%) scale(${scale})`,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              opacity: interpolate(revealProgress, [0, 0.3], [0, 1], { extrapolateRight: 'clamp' }),
+            }}
+          >
+            {/* Tower */}
+            <div
+              style={{
+                width: Math.min(55, width / (totalItems + 2)),
+                height: heightPx,
+                background: `linear-gradient(180deg, ${color} 0%, ${color}99 50%, ${color}66 100%)`,
+                borderRadius: '6px 6px 3px 3px',
+                boxShadow: `0 0 25px ${color}55, 0 4px 15px rgba(0,0,0,0.3)`,
+                position: 'relative',
+              }}
+            >
+              {/* Top glow */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: -8,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '80%',
+                  height: 16,
+                  background: `radial-gradient(ellipse, ${color}aa 0%, transparent 70%)`,
+                }}
+              />
+              
+              {/* Shimmer effect */}
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)`,
+                  borderRadius: 'inherit',
+                }}
+              />
+              
+              {/* Image */}
+              {item.image && revealProgress > 0.5 && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: -40,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: 35,
+                    height: 35,
+                    borderRadius: '6px',
+                    overflow: 'hidden',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                    border: '2px solid rgba(255,255,255,0.2)',
+                  }}
+                >
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                </div>
+              )}
+            </div>
+            
+            {/* Label */}
+            <div
+              style={{
+                marginTop: 6,
+                textAlign: 'center',
+                maxWidth: Math.min(70, width / totalItems),
+              }}
+            >
+              <div
+                style={{
+                  fontSize: Math.min(13, width * 0.02),
+                  fontWeight: 'bold',
+                  color: '#FFD700',
+                  textShadow: '0 2px 8px rgba(0,0,0,0.8)',
+                }}
+              >
+                #{item.rank}
+              </div>
+              <div
+                style={{
+                  fontSize: Math.min(10, width * 0.016),
+                  fontWeight: 600,
+                  color: '#FFFFFF',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  marginTop: 2,
+                }}
+              >
+                {item.name}
+              </div>
+              <div
+                style={{
+                  fontSize: Math.min(9, width * 0.014),
+                  color: '#00FFAA',
+                  textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+                  marginTop: 1,
+                }}
+              >
+                {item.valueFormatted || formatValue(item.value)}
+              </div>
+              {item.subtitle && (
+                <div
+                  style={{
+                    fontSize: Math.min(8, width * 0.012),
+                    color: '#888',
+                  }}
+                >
+                  {item.subtitle}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+      
+      {/* Progress indicator */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 25,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          gap: 5,
+          opacity: titleOpacity * 0.7,
+        }}
+      >
+        {sortedItems.slice(0, Math.min(10, totalItems)).map((item, i) => {
+          const dotReveal = interpolate(frame, [20 + i * 10, 40 + i * 10], [0, 1], {
+            extrapolateLeft: 'clamp',
+            extrapolateRight: 'clamp',
+          });
+          return (
+            <div
+              key={i}
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                backgroundColor: dotReveal > 0.5 ? gradientStart : '#333',
+                boxShadow: dotReveal > 0.5 ? `0 0 8px ${gradientStart}` : 'none',
+              }}
+            />
+          );
+        })}
+      </div>
     </AbsoluteFill>
   );
 }
@@ -354,36 +362,18 @@ function TowerChart2DFallback({ data, frame, fps, width, height }: {
 // 3D COMPONENTS (For actual rendering)
 // ============================================================================
 
-/**
- * Animated Stars Background
- */
 function StarField() {
   const starsRef = useRef<THREE.Points>(null);
   
   useFrame((state) => {
     if (starsRef.current) {
       starsRef.current.rotation.y = state.clock.elapsedTime * 0.01;
-      starsRef.current.rotation.x = state.clock.elapsedTime * 0.005;
     }
   });
   
-  return (
-    <Stars
-      ref={starsRef}
-      radius={100}
-      depth={50}
-      count={3000}
-      factor={4}
-      saturation={0.5}
-      fade
-      speed={0.5}
-    />
-  );
+  return <Stars ref={starsRef} radius={100} depth={50} count={3000} factor={4} saturation={0.5} fade speed={0.5} />;
 }
 
-/**
- * Gradient Background Planes
- */
 function GradientBackground({ color1, color2 }: { color1: string; color2: string }) {
   return (
     <group>
@@ -391,23 +381,12 @@ function GradientBackground({ color1, color2 }: { color1: string; color2: string
         <planeGeometry args={[500, 200]} />
         <meshBasicMaterial color={color1} transparent opacity={0.8} />
       </mesh>
-      <mesh position={[-100, 25, 0]} rotation={[0, Math.PI / 2, 0]}>
-        <planeGeometry args={[300, 100]} />
-        <meshBasicMaterial color={color2} transparent opacity={0.3} />
-      </mesh>
-      <mesh position={[100, 25, 0]} rotation={[0, -Math.PI / 2, 0]}>
-        <planeGeometry args={[300, 100]} />
-        <meshBasicMaterial color={color2} transparent opacity={0.3} />
-      </mesh>
     </group>
   );
 }
 
-/**
- * Floating Particles
- */
 function FloatingParticles() {
-  const count = 100;
+  const count = 80;
   const positions = useMemo(() => {
     const pos = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
@@ -425,9 +404,7 @@ function FloatingParticles() {
       const posArray = pointsRef.current.geometry.attributes.position.array as Float32Array;
       for (let i = 0; i < count; i++) {
         posArray[i * 3 + 1] += 0.02;
-        if (posArray[i * 3 + 1] > 50) {
-          posArray[i * 3 + 1] = 0;
-        }
+        if (posArray[i * 3 + 1] > 50) posArray[i * 3 + 1] = 0;
       }
       pointsRef.current.geometry.attributes.position.needsUpdate = true;
     }
@@ -436,26 +413,14 @@ function FloatingParticles() {
   return (
     <points ref={pointsRef}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={count}
-          array={positions}
-          itemSize={3}
-        />
+        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
       </bufferGeometry>
-      <pointsMaterial size={0.3} color="#ffffff" transparent opacity={0.6} sizeAttenuation />
+      <pointsMaterial size={0.3} color="#ffffff" transparent opacity={0.5} sizeAttenuation />
     </points>
   );
 }
 
-// Custom Model
-interface CustomModelProps {
-  modelPath: string;
-  position?: [number, number, number];
-  scale?: number;
-}
-
-function CustomModel({ modelPath, position = [0, 0, 0], scale = 1 }: CustomModelProps) {
+function CustomModel({ modelPath, position = [0, 0, 0], scale = 1 }: { modelPath: string; position?: [number, number, number]; scale?: number }) {
   const { scene } = useGLTF(modelPath);
   const modelRef = useRef<THREE.Group>(null);
   
@@ -479,8 +444,7 @@ function CustomModel({ modelPath, position = [0, 0, 0], scale = 1 }: CustomModel
   return <primitive ref={modelRef} object={scene} position={position} scale={scale} />;
 }
 
-// 3D Tower
-interface TowerProps {
+function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, rank, name, value, subtitle, image, showLabel, isHighlighted, visible }: {
   position: [number, number, number];
   height: number;
   color: string;
@@ -495,39 +459,14 @@ interface TowerProps {
   showLabel: boolean;
   isHighlighted: boolean;
   visible: boolean;
-}
-
-function Tower({ 
-  position, 
-  height, 
-  color, 
-  width = 3, 
-  depth = 3, 
-  opacity = 1,
-  rank,
-  name,
-  value,
-  subtitle,
-  image,
-  showLabel,
-  isHighlighted,
-  visible
-}: TowerProps) {
+}) {
   const groupRef = useRef<THREE.Group>(null);
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
   
   useEffect(() => {
     if (image) {
       const loader = new THREE.TextureLoader();
-      loader.load(
-        image,
-        (tex) => {
-          tex.colorSpace = THREE.SRGBColorSpace;
-          setTexture(tex);
-        },
-        undefined,
-        () => setTexture(null)
-      );
+      loader.load(image, (tex) => { tex.colorSpace = THREE.SRGBColorSpace; setTexture(tex); }, undefined, () => setTexture(null));
     }
   }, [image]);
   
@@ -539,40 +478,17 @@ function Tower({
         <planeGeometry args={[width + 1, depth + 1]} />
         <meshBasicMaterial color={color} transparent opacity={0.3 * opacity} />
       </mesh>
-      
       <Box args={[width, height, depth]} position={[0, height / 2, 0]} castShadow receiveShadow>
-        <meshStandardMaterial 
-          color={color} 
-          metalness={0.4} 
-          roughness={0.3}
-          transparent={opacity < 1}
-          opacity={opacity}
-          emissive={color}
-          emissiveIntensity={isHighlighted ? 0.3 : 0.1}
-        />
+        <meshStandardMaterial color={color} metalness={0.4} roughness={0.3} transparent={opacity < 1} opacity={opacity} emissive={color} emissiveIntensity={isHighlighted ? 0.3 : 0.1} />
       </Box>
-      
       <Box args={[width + 0.2, 0.3, depth + 0.2]} position={[0, height + 0.15, 0]}>
-        <meshStandardMaterial 
-          color="#ffffff"
-          metalness={0.8} 
-          roughness={0.1}
-          emissive={color}
-          emissiveIntensity={isHighlighted ? 0.6 : 0.3}
-          transparent={opacity < 1}
-          opacity={opacity}
-        />
+        <meshStandardMaterial color="#ffffff" metalness={0.8} roughness={0.1} emissive={color} emissiveIntensity={isHighlighted ? 0.6 : 0.3} transparent={opacity < 1} opacity={opacity} />
       </Box>
-      
       {image && texture && (
         <Billboard position={[0, height + 2.5, 0]} follow={true}>
-          <mesh>
-            <planeGeometry args={[2.5, 2.5]} />
-            <meshBasicMaterial map={texture} transparent opacity={opacity} side={THREE.DoubleSide} />
-          </mesh>
+          <mesh><planeGeometry args={[2.5, 2.5]} /><meshBasicMaterial map={texture} transparent opacity={opacity} side={THREE.DoubleSide} /></mesh>
         </Billboard>
       )}
-      
       {showLabel && (
         <Billboard position={[0, height + (image && texture ? 4.5 : 2.5), 0]} follow={true}>
           <Text position={[-width/2 - 1, 1, 0]} fontSize={0.8} color="#FFD700" anchorX="center" anchorY="middle" fontWeight="bold" outlineWidth={0.05} outlineColor="#000000">#{rank}</Text>
@@ -596,15 +512,7 @@ function Ground({ color }: { color: string }) {
   );
 }
 
-interface CameraControllerProps {
-  towers: { position: [number, number, number]; height: number }[];
-  currentIndex: number;
-  progress: number;
-  distance: number;
-  angle: number;
-}
-
-function CameraController({ towers, currentIndex, progress, distance, angle }: CameraControllerProps) {
+function CameraController({ towers, currentIndex, progress, distance, angle }: { towers: { position: [number, number, number]; height: number }[]; currentIndex: number; progress: number; distance: number; angle: number }) {
   const { camera } = useThree();
   const smoothPos = useRef(new THREE.Vector3());
   const smoothLook = useRef(new THREE.Vector3());
@@ -638,33 +546,8 @@ function CameraController({ towers, currentIndex, progress, distance, angle }: C
   return null;
 }
 
-interface TowerChartSceneProps {
-  data: TowerChart3DBlock;
-  frame: number;
-  fps: number;
-}
-
-function TowerChartScene({ data, frame, fps }: TowerChartSceneProps) {
-  const {
-    items = [],
-    towerSpacing = 6,
-    baseHeight = 3,
-    maxHeight = 25,
-    gradientStart = '#3B82F6',
-    gradientEnd = '#8B5CF6',
-    useGradientByRank = true,
-    showLabels3D = true,
-    cameraDistance = 30,
-    cameraPauseDuration = 0.5,
-    cameraMoveSpeed = 0.6,
-    cameraAngle = 30,
-    backgroundColor = '#0a0a1a',
-    groundColor = '#0f0f2a',
-    showGround = true,
-    ambientIntensity = 0.6,
-    itemRevealDelay = 0.08,
-    customModelPath,
-  } = data;
+function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame: number; fps: number }) {
+  const { items = [], towerSpacing = 6, baseHeight = 3, maxHeight = 25, gradientStart = '#3B82F6', gradientEnd = '#8B5CF6', useGradientByRank = true, showLabels3D = true, cameraDistance = 30, cameraPauseDuration = 0.5, cameraMoveSpeed = 0.6, cameraAngle = 30, backgroundColor = '#0a0a1a', groundColor = '#0f0f2a', showGround = true, ambientIntensity = 0.6, itemRevealDelay = 0.08, customModelPath } = data;
   
   const sortedItems = useMemo(() => [...items].sort((a, b) => a.rank - b.rank), [items]);
   const { minValue, maxValue } = useMemo(() => {
@@ -678,16 +561,8 @@ function TowerChartScene({ data, frame, fps }: TowerChartSceneProps) {
       const heightRange = maxHeight - baseHeight;
       const normalizedValue = (item.value - minValue) / (maxValue - minValue || 1);
       const height = baseHeight + normalizedValue * heightRange;
-      const color = useGradientByRank
-        ? lerpColor(gradientEnd, gradientStart, (items.length - item.rank) / Math.max(items.length - 1, 1))
-        : (item.color || gradientStart);
-      return {
-        ...item,
-        height,
-        color,
-        position: [0, 0, index * towerSpacing] as [number, number, number],
-        valueFormatted: item.valueFormatted || formatValue(item.value),
-      };
+      const color = useGradientByRank ? lerpColor(gradientEnd, gradientStart, (items.length - item.rank) / Math.max(items.length - 1, 1)) : (item.color || gradientStart);
+      return { ...item, height, color, position: [0, 0, index * towerSpacing] as [number, number, number], valueFormatted: item.valueFormatted || formatValue(item.value) };
     });
   }, [sortedItems, minValue, maxValue, baseHeight, maxHeight, gradientStart, gradientEnd, useGradientByRank, towerSpacing, items.length]);
   
@@ -695,17 +570,15 @@ function TowerChartScene({ data, frame, fps }: TowerChartSceneProps) {
   const totalItems = items.length;
   const pauseFrames = cameraPauseDuration * fps;
   const moveFrames = cameraMoveSpeed * fps;
-  const framesPerItem = pauseFrames + moveFrames;
-  const totalAnimFrames = totalItems * framesPerItem;
+  const totalAnimFrames = totalItems * (pauseFrames + moveFrames);
   const animFrame = Math.max(0, frame - introDuration);
   const animProgress = Math.min(animFrame / totalAnimFrames, 1);
   const currentIndex = Math.min(Math.floor(animProgress * totalItems), totalItems - 1);
   const itemProgress = (animProgress * totalItems) % 1;
   const introOpacity = Math.min(1, frame / introDuration);
   const revealProgress = Math.min(1, frame / (introDuration + totalItems * itemRevealDelay * fps * 0.5));
-  const visibleRange = 4;
   const visibleStart = Math.max(0, currentIndex - 1);
-  const visibleEnd = Math.min(towers.length - 1, currentIndex + visibleRange);
+  const visibleEnd = Math.min(towers.length - 1, currentIndex + 4);
   
   return (
     <>
@@ -721,23 +594,13 @@ function TowerChartScene({ data, frame, fps }: TowerChartSceneProps) {
       <hemisphereLight args={['#6666ff', '#222233', 0.5]} />
       {showGround && <Ground color={groundColor} />}
       <ContactShadows position={[0, 0.02, 0]} opacity={0.4} scale={150} blur={2} far={60} />
-      {customModelPath && (
-        <Suspense fallback={null}>
-          <Float speed={1} rotationIntensity={0.2} floatIntensity={0.5}>
-            <CustomModel modelPath={customModelPath} position={[0, 30, -50]} scale={2} />
-          </Float>
-        </Suspense>
-      )}
-      {towers.length > 0 && (
-        <CameraController towers={towers.map(t => ({ position: t.position, height: t.height }))} currentIndex={currentIndex} progress={itemProgress} distance={cameraDistance} angle={cameraAngle} />
-      )}
+      {customModelPath && <Suspense fallback={null}><Float speed={1} rotationIntensity={0.2} floatIntensity={0.5}><CustomModel modelPath={customModelPath} position={[0, 30, -50]} scale={2} /></Float></Suspense>}
+      {towers.length > 0 && <CameraController towers={towers.map(t => ({ position: t.position, height: t.height }))} currentIndex={currentIndex} progress={itemProgress} distance={cameraDistance} angle={cameraAngle} />}
       {towers.map((tower, index) => {
         const inVisibleRange = index >= visibleStart && index <= visibleEnd;
         const itemReveal = Math.max(0, Math.min(1, (revealProgress * totalItems * 1.2) - index * 0.1));
         const isHighlighted = index === currentIndex || index === currentIndex + 1;
-        return (
-          <Tower key={`tower-${tower.rank}`} position={tower.position} height={tower.height} color={tower.color} opacity={itemReveal * introOpacity} rank={tower.rank} name={tower.name} value={tower.valueFormatted} subtitle={tower.subtitle} image={tower.image} showLabel={showLabels3D && itemReveal > 0.2 && inVisibleRange} isHighlighted={isHighlighted} visible={inVisibleRange || itemReveal > 0} />
-        );
+        return <Tower key={`tower-${tower.rank}`} position={tower.position} height={tower.height} color={tower.color} opacity={itemReveal * introOpacity} rank={tower.rank} name={tower.name} value={tower.valueFormatted} subtitle={tower.subtitle} image={tower.image} showLabel={showLabels3D && itemReveal > 0.2 && inVisibleRange} isHighlighted={isHighlighted} visible={inVisibleRange || itemReveal > 0} />;
       })}
     </>
   );
@@ -754,28 +617,21 @@ export interface TowerChart3DSceneProps {
   animation?: AnimationPhase;
 }
 
-// Check if we're in a browser context that supports WebGL
 function supportsWebGL(): boolean {
   try {
     const canvas = document.createElement('canvas');
     return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
-  } catch {
-    return false;
-  }
+  } catch { return false; }
 }
 
-export function TowerChart3DScene({
-  data,
-  motionProfile = 'dynamic',
-}: TowerChart3DSceneProps): React.ReactElement {
+export function TowerChart3DScene({ data, motionProfile = 'dynamic' }: TowerChart3DSceneProps): React.ReactElement {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const [use3D, setUse3D] = useState(false);
   
   useEffect(() => {
-    // Only use 3D if WebGL is available and we're not in Remotion Player preview
     const hasWebGL = supportsWebGL();
-    const isRemotionPlayer = typeof window !== 'undefined' && window.location.search.includes('composition');
+    const isRemotionPlayer = typeof window !== 'undefined' && (window.location.search.includes('composition') || window.location.pathname.includes('preview'));
     setUse3D(hasWebGL && !isRemotionPlayer);
   }, []);
   
@@ -783,32 +639,22 @@ export function TowerChart3DScene({
   const titleOpacity = interpolate(frame, [0, 30], [0, 1], { extrapolateRight: 'clamp' });
   const titleY = interpolate(frame, [0, 30], [-30, 0], { extrapolateRight: 'clamp' });
   
-  // Use 2D fallback for better compatibility
+  // Always use 2D fallback for Remotion Player
   if (!use3D) {
     return <TowerChart2DFallback data={data} frame={frame} fps={fps} width={width} height={height} />;
   }
   
   return (
     <AbsoluteFill style={{ backgroundColor }}>
-      <Canvas
-        shadows
-        camera={{ position: [30, 15, -20], fov: 50, near: 0.1, far: 500 }}
-        style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
-        gl={{ antialias: true, alpha: false, preserveDrawingBuffer: true }}
-        dpr={[1, 2]}
-      >
+      <Canvas shadows camera={{ position: [30, 15, -20], fov: 50, near: 0.1, far: 500 }} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }} gl={{ antialias: true, alpha: false, preserveDrawingBuffer: true }} dpr={[1, 2]}>
         <TowerChartScene data={data} frame={frame} fps={fps} />
       </Canvas>
-      
       <div style={{ position: 'absolute', top: 40, left: 0, right: 0, textAlign: 'center', opacity: titleOpacity, transform: `translateY(${titleY}px)`, pointerEvents: 'none', zIndex: 10 }}>
-        <h1 style={{ fontSize: Math.min(52, width * 0.08), fontWeight: 900, color: '#FFFFFF', textShadow: '0 4px 30px rgba(0,0,0,0.8), 0 0 40px rgba(100,100,255,0.3)', margin: 0, letterSpacing: '-0.5px' }}>{title}</h1>
-        {subtitle && <p style={{ fontSize: Math.min(24, width * 0.04), color: '#94A3B8', marginTop: 10, textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>{subtitle}</p>}
+        <h1 style={{ fontSize: Math.min(52, width * 0.08), fontWeight: 900, color: '#FFFFFF', textShadow: '0 4px 30px rgba(0,0,0,0.8)', margin: 0 }}>{title}</h1>
+        {subtitle && <p style={{ fontSize: Math.min(24, width * 0.04), color: '#94A3B8', marginTop: 10 }}>{subtitle}</p>}
       </div>
-      
       <div style={{ position: 'absolute', bottom: 25, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6, opacity: titleOpacity * 0.8, zIndex: 10 }}>
-        {items.slice(0, Math.min(10, items.length)).map((_, i) => (
-          <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: frame > 45 + i * 20 ? '#6366F1' : '#333', boxShadow: frame > 45 + i * 20 ? '0 0 10px #6366F1' : 'none' }} />
-        ))}
+        {items.slice(0, Math.min(10, items.length)).map((_, i) => <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: frame > 45 + i * 20 ? '#6366F1' : '#333' }} />)}
       </div>
     </AbsoluteFill>
   );
