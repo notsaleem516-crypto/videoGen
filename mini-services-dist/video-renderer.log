@@ -1,0 +1,162 @@
+🎬 Video Renderer Service starting...
+📁 Working directory: /home/z/my-project/mini-services-dist
+📁 Checking paths:
+   /home/z/my-project/mini-services-dist/bundle - EXISTS
+   /app/mini-services-dist/video-renderer/bundle - not found
+   /home/z/out/bundle - not found
+   /home/z/bundle - not found
+   /home/z/my-project/out/bundle - not found
+   /out/bundle - not found
+   /app/out/bundle - not found
+   /app/next-service-dist/out/bundle - not found
+📁 Using bundle path: /home/z/my-project/mini-services-dist/bundle
+📁 Bundle exists: true
+🚀 Video Renderer Service running on port 3031
+📡 Endpoints:
+   GET  /health      - Health check
+   POST /render      - Render with pre-calculated props
+   POST /render-full - Full render from raw input
+🎥 Full render requested...
+  Content blocks: 1
+  Duration: 8.1s
+  Resolution: 1080x1920
+  Props: {
+  "input": {
+    "videoMeta": {
+      "aspectRatio": "9:16",
+      "theme": "dark_modern",
+      "fps": 30,
+      "intro": {
+        "title": "Test",
+        "duration": 1
+      },
+      "outro": {
+        "title": "Done",
+        "duration": 1
+      }
+    },
+    "contentBlocks": [
+      {
+        "type": "tower-chart-3d",
+        "title": "Top 3",
+        "items": [
+          {
+            "rank": 1,
+            "name": "First",
+            "value": 100,
+            "valueFormatted": "100"
+          },
+          {
+            "rank": 2,
+            "name": "Second",
+            "value": 80,
+            "valueFormatted": "80"
+          },
+          {
+            "rank": 3,
+            "name": "Third",
+            "value": 60,
+            "valueFormatted": "60"
+          }
+        ],
+        "towerStyle": "boxes",
+        "towerSpacing": 5,
+        "baseHeight": 2,
+        "maxHeight": 25,
+        "gradientStart": "#3B82F6",
+        "gradientEnd": "#8B5CF6",
+        "useGradientByRank": true,
+        "showValueLabels": true,
+        "showRankNumbers": true,
+        "cameraDistance": 20,
+        "cameraPauseDuration": 0.4,
+        "cameraMoveSpeed": 0.8,
+        "cameraAngle": 30,
+        "animationDirection": "top-to-bottom",
+        "groundColor": "#151525",
+        "showGround": false,
+        "ambientIntensity": 0.6,
+        "showLabels3D": true,
+        "backgroundPreset": "none",
+        "introAnimation": "fade",
+        "itemRevealDelay": 0.05,
+        "customModelScale": 2,
+        "customModelRotation": 0
+      }
+    ]
+  },
+  "plan": {
+    "decisions": [
+      {
+        "blockIndex": 0,
+        "componentId": "tower-chart-3d-scene",
+        "duration": 6.1000000000000005,
+        "motionProfile": "dynamic",
+        "animation": {
+          "enter": 0.4,
+          "hold": 5.300000000000001,
+          "exit": 0.4
+        }
+      }
+    ],
+    "globalStyle": {
+      "theme": "dark_modern"
+    }
+  },
+  "title": "Video",
+  "subtitle": ""
+}
+Downloading Chrome Headless Shell https://www.remotion.dev/chrome-headless-shell
+Customize this behavior by adding a onBrowserDownload function to getCompositions().
+Downloading from: https://remotion.media/chromium-headless-shell-linux-x64-144.0.7559.20.zip?clearcache
+Downloading Chrome Headless Shell - 9.5 Mb/86.6 Mb
+Downloading Chrome Headless Shell - 19.1 Mb/86.6 Mb
+Downloading Chrome Headless Shell - 28.7 Mb/86.6 Mb
+Downloading Chrome Headless Shell - 38.3 Mb/86.6 Mb
+Downloading Chrome Headless Shell - 47.8 Mb/86.6 Mb
+Downloading Chrome Headless Shell - 57.4 Mb/86.6 Mb
+Downloading Chrome Headless Shell - 66.9 Mb/86.6 Mb
+Downloading Chrome Headless Shell - 76.5 Mb/86.6 Mb
+Downloading Chrome Headless Shell - 86 Mb/86.6 Mb
+Downloading Chrome Headless Shell - 86.6 Mb/86.6 Mb
+Detected differing memory amounts:
+Memory reported by CGroup: 2381.44 MB
+Memory reported by /proc/meminfo: 5209.57 MB
+Memory reported by Node: 1495.80 MB
+You might have inadvertenly set the --memory flag of `docker run` to a value that is higher than the global Docker memory limit.
+Using the lower amount of memory for calculation.
+Detected differing memory amounts:
+Memory reported by CGroup: 2316.80 MB
+Memory reported by /proc/meminfo: 5142.84 MB
+Memory reported by Node: 1425.98 MB
+You might have inadvertenly set the --memory flag of `docker run` to a value that is higher than the global Docker memory limit.
+Using the lower amount of memory for calculation.
+Detected differing memory amounts:
+Memory reported by CGroup: 2339.18 MB
+Memory reported by /proc/meminfo: 5163.58 MB
+Memory reported by Node: 1446.80 MB
+You might have inadvertenly set the --memory flag of `docker run` to a value that is higher than the global Docker memory limit.
+Using the lower amount of memory for calculation.
+Detected differing memory amounts:
+Memory reported by CGroup: 2331.77 MB
+Memory reported by /proc/meminfo: 5156.73 MB
+Memory reported by Node: 1442.79 MB
+You might have inadvertenly set the --memory flag of `docker run` to a value that is higher than the global Docker memory limit.
+Using the lower amount of memory for calculation.
+Detected differing memory amounts:
+Memory reported by CGroup: 2220.69 MB
+Memory reported by /proc/meminfo: 5047.09 MB
+Memory reported by Node: 1329.91 MB
+You might have inadvertenly set the --memory flag of `docker run` to a value that is higher than the global Docker memory limit.
+Using the lower amount of memory for calculation.
+Detected differing memory amounts:
+Memory reported by CGroup: 2220.32 MB
+Memory reported by /proc/meminfo: 5046.84 MB
+Memory reported by Node: 1329.66 MB
+You might have inadvertenly set the --memory flag of `docker run` to a value that is higher than the global Docker memory limit.
+Using the lower amount of memory for calculation.
+[Tab 0, node_modules/three/build/three.core.js:2000] THREE.THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
+[Tab 1, node_modules/three/build/three.core.js:2000] THREE.THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
+[Tab 1, node_modules/three/build/three.core.js:1934] THREE.WebGLRenderer: Context Lost.
+[Tab 0, node_modules/three/build/three.core.js:1934] THREE.WebGLRenderer: Context Lost.
+✅ Video rendered in 90.2s (1204511 bytes)
