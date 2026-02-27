@@ -48,6 +48,69 @@ const QUALITY_SETTINGS: Record<string, { crf: number }> = {
   high: { crf: 18 },
 };
 
+
+const OPENGL_RENDERERS = new Set(['swangle', 'angle', 'egl', 'swiftshader', 'vulkan', 'angle-egl'] as const);
+
+type OpenGlRenderer = 'swangle' | 'angle' | 'egl' | 'swiftshader' | 'vulkan' | 'angle-egl';
+type HardwareAccelerationMode = 'disable' | 'if-possible' | 'required';
+
+function getOpenGlRenderer(): OpenGlRenderer | null {
+  const value = process.env.RENDER_OPENGL_RENDERER;
+  if (!value) return 'angle-egl';
+  return OPENGL_RENDERERS.has(value as OpenGlRenderer) ? (value as OpenGlRenderer) : 'angle-egl';
+}
+
+function getHardwareAccelerationMode(): HardwareAccelerationMode {
+  const value = process.env.RENDER_HARDWARE_ACCELERATION;
+  if (value === 'disable' || value === 'if-possible' || value === 'required') {
+    return value;
+  }
+
+  return 'if-possible';
+}
+
+function getRenderConcurrency(): number {
+  const cpuCount = Math.max(1, os.cpus().length);
+  const envValue = Number(process.env.RENDER_CONCURRENCY);
+  if (Number.isFinite(envValue) && envValue > 0) {
+    return Math.max(1, Math.floor(envValue));
+  }
+
+  return Math.max(1, Math.floor(cpuCount * 0.8));
+}
+
+function getOffthreadVideoThreads(): number {
+  const cpuCount = Math.max(1, os.cpus().length);
+  const envValue = Number(process.env.RENDER_OFFTHREAD_THREADS);
+  if (Number.isFinite(envValue) && envValue > 0) {
+    return Math.max(1, Math.floor(envValue));
+  }
+
+  return Math.max(2, Math.floor(cpuCount / 2));
+}
+
+function getRenderMediaPerformanceOptions(quality: string) {
+  const x264PresetMap: Record<string, 'veryfast' | 'medium' | 'slow'> = {
+    low: 'veryfast',
+    medium: 'medium',
+    high: 'slow',
+  };
+
+  return {
+    // GPU + browser path
+    hardwareAcceleration: getHardwareAccelerationMode(),
+    chromeMode: 'chrome-for-testing' as const,
+    chromiumOptions: {
+      enableMultiProcessOnLinux: true,
+      gl: getOpenGlRenderer(),
+    },
+    // CPU tuning for frame generation
+    concurrency: getRenderConcurrency(),
+    offthreadVideoThreads: getOffthreadVideoThreads(),
+    // Encoding quality/speed tuning
+    x264Preset: x264PresetMap[quality] || 'medium',
+  };
+}
 const MAX_VIDEO_DURATION_SECONDS = 120;
 const MAX_RENDER_TIMEOUT_MS = 15 * 60 * 1000;
 
@@ -905,6 +968,8 @@ serve({
         // Render the video with H264 settings for maximum compatibility
         const renderTimeoutMs = getRenderTimeoutMs(compositionConfig.durationInFrames, compositionConfig.fps);
 
+        const renderPerformanceOptions = getRenderMediaPerformanceOptions(quality);
+
         await renderMediaWithTimeout({
           serveUrl: BUNDLE_PATH,
           composition: {
@@ -922,6 +987,7 @@ serve({
           logLevel: 'warn',
           // Ensure audio track exists even if silent (required for some players)
           enforceAudioTrack: true,
+          ...renderPerformanceOptions,
         }, renderTimeoutMs);
         
         // Read the video file
@@ -1040,6 +1106,8 @@ serve({
         // Render the video with H264 settings for maximum compatibility
         const renderTimeoutMs = getRenderTimeoutMs(compositionConfig.durationInFrames, compositionConfig.fps);
 
+        const renderPerformanceOptions = getRenderMediaPerformanceOptions(quality);
+
         await renderMediaWithTimeout({
           serveUrl: BUNDLE_PATH,
           composition: {
@@ -1057,6 +1125,7 @@ serve({
           logLevel: 'warn',
           // Ensure audio track exists even if silent (required for some players)
           enforceAudioTrack: true,
+          ...renderPerformanceOptions,
         }, renderTimeoutMs);
         
         // Read the video file
