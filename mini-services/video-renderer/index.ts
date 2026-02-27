@@ -48,6 +48,15 @@ const QUALITY_SETTINGS: Record<string, { crf: number }> = {
   high: { crf: 18 },
 };
 
+const isRemoteBundle = (serveUrl: string) => /^https?:\/\//.test(serveUrl);
+
+const resolveServeUrl = (bundleUrl?: unknown): string => {
+  if (typeof bundleUrl === 'string' && bundleUrl.trim().length > 0) {
+    return bundleUrl.trim();
+  }
+  return BUNDLE_PATH;
+};
+
 // ============================================================================
 // SCHEMAS (copied to avoid React context issues)
 // ============================================================================
@@ -708,7 +717,7 @@ serve({
       
       try {
         const body = await req.json();
-        const { compositionConfig, props, quality = 'medium' } = body;
+        const { compositionConfig, props, quality = 'medium', bundleUrl } = body;
         
         // Validate required fields
         if (!compositionConfig || !props) {
@@ -718,13 +727,15 @@ serve({
           );
         }
         
-        // Check bundle
-        if (!fs.existsSync(BUNDLE_PATH)) {
+        const serveUrl = resolveServeUrl(bundleUrl);
+
+        // Check local bundle only when using local serve URL
+        if (!isRemoteBundle(serveUrl) && !fs.existsSync(serveUrl)) {
           return Response.json(
-            { 
+            {
               error: 'Remotion bundle not found',
-              bundlePath: BUNDLE_PATH,
-              setupInstruction: 'Run: bun run video:bundle'
+              bundlePath: serveUrl,
+              setupInstruction: 'Run: bun run video:bundle or pass bundleUrl from plugin-server'
             },
             { status: 500, headers: corsHeaders }
           );
@@ -733,6 +744,7 @@ serve({
         console.log('🎥 Rendering video...');
         console.log('  Composition:', compositionConfig);
         console.log('  Quality:', quality);
+        console.log('  Bundle source:', serveUrl);
         
         // Create output path
         const tempDir = os.tmpdir();
@@ -743,7 +755,7 @@ serve({
         const { crf } = QUALITY_SETTINGS[quality] || QUALITY_SETTINGS.medium;
         
         // Get compositions from bundle with inputProps
-        const compositions = await getCompositions(BUNDLE_PATH, {
+        const compositions = await getCompositions(serveUrl, {
           inputProps: props,
         });
         const composition = compositions.find(c => c.id === 'DynamicVideo');
@@ -757,7 +769,7 @@ serve({
         
         // Render the video
         await renderMedia({
-          serveUrl: BUNDLE_PATH,
+          serveUrl,
           composition: {
             id: composition.id,
             durationInFrames: compositionConfig.durationInFrames,
@@ -830,14 +842,15 @@ serve({
         const title = body.title || 'Video';
         const subtitle = body.subtitle || '';
         const quality = body.quality || 'medium';
-        
-        // Check bundle
-        if (!fs.existsSync(BUNDLE_PATH)) {
+        const serveUrl = resolveServeUrl(body.bundleUrl);
+
+        // Check local bundle only when using local serve URL
+        if (!isRemoteBundle(serveUrl) && !fs.existsSync(serveUrl)) {
           return Response.json(
-            { 
+            {
               error: 'Remotion bundle not found',
-              bundlePath: BUNDLE_PATH,
-              setupInstruction: 'Run: bun run video:bundle'
+              bundlePath: serveUrl,
+              setupInstruction: 'Run: bun run video:bundle or pass bundleUrl from plugin-server'
             },
             { status: 500, headers: corsHeaders }
           );
@@ -861,6 +874,7 @@ serve({
         console.log('  Content blocks:', input.contentBlocks.length);
         console.log('  Duration:', `${(compositionConfig.durationInFrames / compositionConfig.fps).toFixed(1)}s`);
         console.log('  Resolution:', `${compositionConfig.width}x${compositionConfig.height}`);
+        console.log('  Bundle source:', serveUrl);
         console.log('  Props:', JSON.stringify(props, null, 2));
         
         // Create output path
@@ -872,7 +886,7 @@ serve({
         const { crf } = QUALITY_SETTINGS[quality] || QUALITY_SETTINGS.medium;
         
         // Get compositions from bundle with inputProps
-        const compositions = await getCompositions(BUNDLE_PATH, {
+        const compositions = await getCompositions(serveUrl, {
           inputProps: props,
         });
         const composition = compositions.find(c => c.id === 'DynamicVideo');
@@ -886,7 +900,7 @@ serve({
         
         // Render the video
         await renderMedia({
-          serveUrl: BUNDLE_PATH,
+          serveUrl,
           composition: {
             id: composition.id,
             durationInFrames: compositionConfig.durationInFrames,

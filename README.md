@@ -129,6 +129,54 @@ This scaffold includes a comprehensive set of modern web development tools:
 - **Type Safety**: End-to-end TypeScript with Zod validation
 - **Essential Hooks**: 100+ useful React hooks with ReactUse for common patterns
 
+
+## 🔌 Plugin Server Architecture (Store → Plugin Server → Video Renderer)
+
+This repo now supports a plugin-server flow where Remotion bundles can be distributed independently from the renderer:
+
+1. **Plugin Store**: source of plugin bundles (cloud/db/marketplace).
+2. **Plugin Server** (`mini-services/plugin-server`): ingests bundles and exposes a versioned URL.
+3. **Video Renderer** (`mini-services/video-renderer`): accepts `bundleUrl` and renders from remote or local bundle.
+4. **Video API** (`/api/video/render`): can accept `pluginId` (+ optional `pluginVersion`) and auto-resolve `bundleUrl` via plugin server.
+
+### Start services locally
+
+```bash
+# terminal 1
+bun run mini-services/plugin-server/index.ts
+
+# terminal 2
+bun run mini-services/video-renderer/index.ts
+
+# terminal 3
+bun run dev
+```
+
+### Publish a plugin bundle
+
+```bash
+curl -X POST http://127.0.0.1:3040/plugins/publish \
+  -H 'content-type: application/json' \
+  -d '{
+    "pluginId":"marketplace.default",
+    "version":"v1",
+    "sourceBundlePath":"mini-services/video-renderer/bundle"
+  }'
+```
+
+### Render using pluginId
+
+```bash
+curl -X POST http://127.0.0.1:3000/api/video/render \
+  -H 'content-type: application/json' \
+  -d '{
+    "pluginId":"marketplace.default",
+    "pluginVersion":"v1",
+    "videoMeta":{"aspectRatio":"9:16","theme":"dark_modern","fps":30},
+    "contentBlocks":[{"type":"text","content":"Plugin-powered render"}]
+  }'
+```
+
 ## 🤝 Get Started with Z.ai
 
 1. **Clone this scaffold** to jumpstart your project
