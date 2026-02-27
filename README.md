@@ -164,6 +164,15 @@ curl -X POST http://127.0.0.1:3040/plugins/publish \
   }'
 ```
 
+
+### Publish from UI (new)
+
+1. Open `http://localhost:3000`.
+2. Click **Publish Plugin** in the top toolbar.
+3. Enter `pluginId` and `version`, then click **Publish**.
+   - This triggers `POST /api/plugins/publish`, which builds the bundle (`bun run video:bundle`) and publishes it to plugin-server.
+4. Use the plugin fields near **Render Video** to render with the selected plugin.
+
 ### Render using pluginId
 
 ```bash

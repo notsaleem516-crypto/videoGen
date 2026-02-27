@@ -142,6 +142,19 @@ const publishPlugin = (pluginId: string, version: string, sourceBundlePath: stri
 
 loadFromDisk();
 
+
+const getPluginSummary = () => {
+  return [...pluginIndex.entries()].map(([pluginId, records]) => ({
+    pluginId,
+    latestVersion: records[0]?.version ?? null,
+    versions: records.map((record) => ({
+      version: record.version,
+      hash: record.hash,
+      publishedAt: record.publishedAt,
+    })),
+  }));
+};
+
 serve({
   port: PORT,
   async fetch(req) {
@@ -153,6 +166,12 @@ serve({
 
     if (url.pathname === '/health') {
       return Response.json({ status: 'ok', service: 'plugin-server', plugins: pluginIndex.size, storeRoot: STORE_ROOT }, { headers: CORS_HEADERS });
+    }
+
+    if (url.pathname === '/plugins' && req.method === 'GET') {
+      return Response.json({
+        plugins: getPluginSummary(),
+      }, { headers: CORS_HEADERS });
     }
 
     if (url.pathname === '/plugins/publish' && req.method === 'POST') {
@@ -240,6 +259,7 @@ serve({
       endpoints: [
         'GET /health',
         'POST /plugins/publish',
+        'GET /plugins',
         'GET /plugins/:pluginId',
         'GET /plugins/:pluginId/:version',
         'GET /bundles/:pluginId/:version',

@@ -13,6 +13,7 @@ Lightweight service that acts as a distribution layer between a plugin store and
 
 - `GET /health`
 - `POST /plugins/publish`
+- `GET /plugins`
 - `GET /plugins/:pluginId`
 - `GET /plugins/:pluginId/:version`
 - `GET /bundles/:pluginId/:version`
