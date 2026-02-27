@@ -20,16 +20,16 @@
   "defaults": {
     "location": "San Francisco",
     "temperature": 72,
-    "unit": "F"
-    "condition": "partly-cloudy"
-    "humidity": 65
-    "windSpeed": 12
-    "highTemp": 78
-    "lowTemp": 58
-    "showForecast": true
-    "showDetails": true
-    "cardStyle": "glass"
-    "accentColor": "#38BDF8"
+    "unit": "F",
+    "condition": "partly-cloudy",
+    "humidity": 65,
+    "windSpeed": 12,
+    "highTemp": 78,
+    "lowTemp": 58,
+    "showForecast": true,
+    "showDetails": true,
+    "cardStyle": "glass",
+    "accentColor": "#38BDF8",
     "animateIcon": true
   }
 }

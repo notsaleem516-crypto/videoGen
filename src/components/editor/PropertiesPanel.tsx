@@ -17,11 +17,11 @@ import {
 } from '@/components/ui/select';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Trash2, Copy, Settings, Plus, X, Sparkles, ChevronDown,
+  Trash2, Copy, Settings, Plus, X, Sparkles, ChevronDown, ChevronUp,
   BarChart3, Type, Image, Quote, List, Clock, AlertCircle, 
   Grid3X3, LineChart, PieChart, Code, MessageSquare, Heart, MessageCircle,
   Timer, QrCode, Video, Users, Share2, MousePointer, Palette, Waves, Hourglass,
-  Layers, Box, Move, Zap, TrendingUp
+  Layers, Box, Move, Zap, TrendingUp, CloudSun
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -34,6 +34,8 @@ const BLOCK_ICONS: Record<string, React.ComponentType<{ className?: string }>> =
   counter: Clock, 'progress-bar': BarChart3, 'qr-code': Image, video: Image,
   'avatar-grid': Users, 'social-stats': Share2, cta: MousePointer,
   'gradient-text': Palette, 'animated-bg': Waves, countdown: Hourglass,
+  'weather-block': CloudSun,
+  'tower-chart-3d': Box,
 };
 
 const BLOCK_GRADIENTS: Record<string, string> = {
@@ -51,6 +53,8 @@ const BLOCK_GRADIENTS: Record<string, string> = {
   'avatar-grid': 'from-orange-500 to-amber-500', 'social-stats': 'from-blue-500 to-indigo-500',
   cta: 'from-emerald-500 to-teal-500', 'gradient-text': 'from-violet-500 to-fuchsia-500',
   'animated-bg': 'from-indigo-500 to-purple-500', countdown: 'from-rose-500 to-orange-500',
+  'weather-block': 'from-sky-400 to-cyan-500',
+  'tower-chart-3d': 'from-violet-600 to-indigo-500',
 };
 
 // Color Picker Component
@@ -483,6 +487,8 @@ export function PropertiesPanel() {
           {blockType === 'gradient-text' && <GradientTextEditor block={selectedBlock} index={selectedBlockIndex} />}
           {blockType === 'animated-bg' && <AnimatedBgEditor block={selectedBlock} index={selectedBlockIndex} />}
           {blockType === 'countdown' && <CountdownEditor block={selectedBlock} index={selectedBlockIndex} />}
+          {blockType === 'weather-block' && <WeatherEditor block={selectedBlock} index={selectedBlockIndex} />}
+          {blockType === 'tower-chart-3d' && <TowerChart3DEditor block={selectedBlock} index={selectedBlockIndex} />}
           
           {/* Common Settings for all blocks */}
           <CommonSettings block={selectedBlock} index={selectedBlockIndex} />
@@ -1701,5 +1707,198 @@ function CountdownEditor({ block, index }: EditorProps) {
         <div className="flex items-center gap-2"><Switch checked={(block.showLabels as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { showLabels: v })} /><Label className="text-xs text-gray-400">Show Labels</Label></div>
       </div>
     </CollapsibleSection>
+  );
+}
+
+function WeatherEditor({ block, index }: EditorProps) {
+  const { updateBlock } = useEditorStore();
+  
+  return (
+    <>
+      <CollapsibleSection title="Location & Temperature" icon={CloudSun} defaultOpen={true}>
+        <div className="space-y-3">
+          <div><Label className="text-xs text-gray-400">Location</Label><Input value={(block.location as string) || 'San Francisco'} onChange={(e) => updateBlock(index, { location: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" /></div>
+          <div className="grid grid-cols-2 gap-2">
+            <div><Label className="text-xs text-gray-400">Temperature</Label><Input value={(block.temperature as number) || 72} onChange={(e) => updateBlock(index, { temperature: parseFloat(e.target.value) || 0 })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" type="number" /></div>
+            <div><Label className="text-xs text-gray-400">Unit</Label>
+              <Select value={(block.unit as string) || 'F'} onValueChange={(v) => updateBlock(index, { unit: v })}>
+                <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-10"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="F">°F</SelectItem>
+                  <SelectItem value="C">°C</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div><Label className="text-xs text-gray-400">Condition</Label>
+            <Select value={(block.condition as string) || 'partly-cloudy'} onValueChange={(v) => updateBlock(index, { condition: v })}>
+              <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-10"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="sunny">☀️ Sunny</SelectItem>
+                <SelectItem value="partly-cloudy">⛅ Partly Cloudy</SelectItem>
+                <SelectItem value="cloudy">☁️ Cloudy</SelectItem>
+                <SelectItem value="rainy">🌧️ Rainy</SelectItem>
+                <SelectItem value="stormy">⛈️ Stormy</SelectItem>
+                <SelectItem value="snowy">❄️ Snowy</SelectItem>
+                <SelectItem value="windy">💨 Windy</SelectItem>
+                <SelectItem value="foggy">🌫️ Foggy</SelectItem>
+                <SelectItem value="night-clear">🌙 Night Clear</SelectItem>
+                <SelectItem value="night-cloudy">☁️ Night Cloudy</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div><Label className="text-xs text-gray-400">Description</Label><Input value={(block.description as string) || ''} onChange={(e) => updateBlock(index, { description: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" placeholder="Partly cloudy" /></div>
+        </div>
+      </CollapsibleSection>
+      <CollapsibleSection title="Details" icon={Palette} defaultOpen={false}>
+        <div className="space-y-3">
+          <SliderInput label="Humidity" value={(block.humidity as number) || 65} onChange={(v) => updateBlock(index, { humidity: v })} min={0} max={100} step={1} unit="%" />
+          <SliderInput label="Wind Speed" value={(block.windSpeed as number) || 12} onChange={(v) => updateBlock(index, { windSpeed: v })} min={0} max={100} step={1} unit=" mph" />
+          <div className="grid grid-cols-2 gap-2">
+            <div><Label className="text-xs text-gray-400">High Temp</Label><Input value={(block.highTemp as number) || 78} onChange={(e) => updateBlock(index, { highTemp: parseFloat(e.target.value) || 0 })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" type="number" /></div>
+            <div><Label className="text-xs text-gray-400">Low Temp</Label><Input value={(block.lowTemp as number) || 58} onChange={(e) => updateBlock(index, { lowTemp: parseFloat(e.target.value) || 0 })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" type="number" /></div>
+          </div>
+          <div className="flex items-center gap-2"><Switch checked={(block.showForecast as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { showForecast: v })} /><Label className="text-xs text-gray-400">Show High/Low</Label></div>
+          <div className="flex items-center gap-2"><Switch checked={(block.showDetails as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { showDetails: v })} /><Label className="text-xs text-gray-400">Show Humidity & Wind</Label></div>
+        </div>
+      </CollapsibleSection>
+      <CollapsibleSection title="Style" icon={Palette} defaultOpen={false}>
+        <div className="space-y-3">
+          <ColorPicker value={(block.accentColor as string) || '#38BDF8'} onChange={(v) => updateBlock(index, { accentColor: v })} label="Accent Color" />
+          <div><Label className="text-xs text-gray-400">Card Style</Label>
+            <Select value={(block.cardStyle as string) || 'glass'} onValueChange={(v) => updateBlock(index, { cardStyle: v })}>
+              <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-10"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="glass">Glass Effect</SelectItem>
+                <SelectItem value="solid">Solid</SelectItem>
+                <SelectItem value="minimal">Minimal</SelectItem>
+                <SelectItem value="gradient">Gradient</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-2"><Switch checked={(block.animateIcon as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { animateIcon: v })} /><Label className="text-xs text-gray-400">Animate Icon</Label></div>
+        </div>
+      </CollapsibleSection>
+    </>
+  );
+}
+
+function TowerChart3DEditor({ block, index }: EditorProps) {
+  const { updateBlock } = useEditorStore();
+  const items = (block.items as Array<{ rank: number; name: string; value: number; valueFormatted?: string; subtitle?: string; color?: string; image?: string }>) || [];
+  
+  const updateItem = (itemIndex: number, field: string, value: unknown) => {
+    const newItems = [...items];
+    newItems[itemIndex] = { ...newItems[itemIndex], [field]: value };
+    updateBlock(index, { items: newItems });
+  };
+  
+  const addItem = () => {
+    const newRank = items.length + 1;
+    updateBlock(index, { items: [...items, { rank: newRank, name: `Item ${newRank}`, value: 1000 * newRank, valueFormatted: `${newRank}K`, subtitle: 'Category' }] });
+  };
+  
+  const removeItem = (itemIndex: number) => {
+    const newItems = items.filter((_, i) => i !== itemIndex).map((item, i) => ({ ...item, rank: i + 1 }));
+    updateBlock(index, { items: newItems });
+  };
+  
+  const moveItem = (itemIndex: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? itemIndex - 1 : itemIndex + 1;
+    if (newIndex < 0 || newIndex >= items.length) return;
+    const newItems = [...items];
+    [newItems[itemIndex], newItems[newIndex]] = [newItems[newIndex], newItems[itemIndex]];
+    const reordered = newItems.map((item, i) => ({ ...item, rank: i + 1 }));
+    updateBlock(index, { items: reordered });
+  };
+  
+  return (
+    <>
+      <CollapsibleSection title="Title" icon={Type} defaultOpen={true}>
+        <div className="space-y-3">
+          <div><Label className="text-xs text-gray-400">Title</Label><Input value={(block.title as string) || ''} onChange={(e) => updateBlock(index, { title: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" placeholder="Top Rankings" /></div>
+          <div><Label className="text-xs text-gray-400">Subtitle</Label><Input value={(block.subtitle as string) || ''} onChange={(e) => updateBlock(index, { subtitle: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" placeholder="Optional description" /></div>
+        </div>
+      </CollapsibleSection>
+      
+      <CollapsibleSection title={`Items (${items.length})`} icon={BarChart3} defaultOpen={true}>
+        <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1">
+          {items.map((item, i) => (
+            <div key={i} className="bg-gray-800/50 rounded-lg p-3 space-y-2 border border-gray-700/30">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-gray-400">#{item.rank}</span>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => moveItem(i, 'up')} disabled={i === 0}><ChevronUp className="w-3 h-3" /></Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => moveItem(i, 'down')} disabled={i === items.length - 1}><ChevronDown className="w-3 h-3" /></Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-red-400" onClick={() => removeItem(i)}><Trash2 className="w-3 h-3" /></Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Input value={item.name} onChange={(e) => updateItem(i, 'name', e.target.value)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" placeholder="Name" />
+                <Input value={item.value.toString()} onChange={(e) => updateItem(i, 'value', parseFloat(e.target.value) || 0)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" type="number" placeholder="Value" />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Input value={item.valueFormatted || ''} onChange={(e) => updateItem(i, 'valueFormatted', e.target.value)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" placeholder="$1.5M" />
+                <Input value={item.subtitle || ''} onChange={(e) => updateItem(i, 'subtitle', e.target.value)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" placeholder="Category" />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex gap-1">
+                  <input type="color" value={item.color || '#3B82F6'} onChange={(e) => updateItem(i, 'color', e.target.value)} className="w-8 h-8 rounded p-0.5 bg-transparent border-0" />
+                  <Input value={item.color || ''} onChange={(e) => updateItem(i, 'color', e.target.value || undefined)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs flex-1" placeholder="Color" />
+                </div>
+                <Input value={item.image || ''} onChange={(e) => updateItem(i, 'image', e.target.value || undefined)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" placeholder="Image URL" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <Button variant="outline" size="sm" className="w-full h-8 text-xs mt-3 bg-gray-800 border-gray-700" onClick={addItem}>
+          <Plus className="w-3 h-3 mr-1" /> Add Item
+        </Button>
+      </CollapsibleSection>
+      
+      <CollapsibleSection title="Colors" icon={Palette} defaultOpen={false}>
+        <div className="space-y-3">
+          <ColorPicker value={(block.gradientStart as string) || '#6366F1'} onChange={(v) => updateBlock(index, { gradientStart: v })} label="Gradient Start" />
+          <ColorPicker value={(block.gradientEnd as string) || '#EC4899'} onChange={(v) => updateBlock(index, { gradientEnd: v })} label="Gradient End" />
+          <div className="flex items-center gap-2"><Switch checked={(block.useGradientByRank as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { useGradientByRank: v })} /><Label className="text-xs text-gray-400">Use Gradient by Rank</Label></div>
+        </div>
+      </CollapsibleSection>
+      
+      <CollapsibleSection title="Camera" icon={Move} defaultOpen={false}>
+        <div className="space-y-3">
+          <SliderInput label="Camera Distance" value={(block.cameraDistance as number) || 25} onChange={(v) => updateBlock(index, { cameraDistance: v })} min={15} max={50} step={5} unit="" />
+          <SliderInput label="Camera Angle" value={(block.cameraAngle as number) || 25} onChange={(v) => updateBlock(index, { cameraAngle: v })} min={0} max={60} step={5} unit="°" />
+          <SliderInput label="Pause Duration" value={(block.cameraPauseDuration as number) || 0.5} onChange={(v) => updateBlock(index, { cameraPauseDuration: v })} min={0.2} max={2} step={0.1} unit="s" />
+          <SliderInput label="Move Speed" value={(block.cameraMoveSpeed as number) || 0.6} onChange={(v) => updateBlock(index, { cameraMoveSpeed: v })} min={0.3} max={2} step={0.1} unit="s" />
+        </div>
+      </CollapsibleSection>
+      
+      <CollapsibleSection title="Scene" icon={Layers} defaultOpen={false}>
+        <div className="space-y-3">
+          <ColorPicker value={(block.backgroundColor as string) || '#0d0d1a'} onChange={(v) => updateBlock(index, { backgroundColor: v })} label="Background" />
+          <ColorPicker value={(block.groundColor as string) || '#1a1a2e'} onChange={(v) => updateBlock(index, { groundColor: v })} label="Ground" />
+          <SliderInput label="Tower Spacing" value={(block.towerSpacing as number) || 5} onChange={(v) => updateBlock(index, { towerSpacing: v })} min={3} max={10} step={1} unit="" />
+          <SliderInput label="Base Height" value={(block.baseHeight as number) || 2} onChange={(v) => updateBlock(index, { baseHeight: v })} min={1} max={5} step={1} unit="" />
+          <SliderInput label="Max Height" value={(block.maxHeight as number) || 25} onChange={(v) => updateBlock(index, { maxHeight: v })} min={10} max={50} step={5} unit="" />
+          <div className="flex items-center gap-2"><Switch checked={(block.showGround as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { showGround: v })} /><Label className="text-xs text-gray-400">Show Ground</Label></div>
+          <div className="flex items-center gap-2"><Switch checked={(block.showLabels3D as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { showLabels3D: v })} /><Label className="text-xs text-gray-400">Show Labels</Label></div>
+        </div>
+      </CollapsibleSection>
+      
+      <CollapsibleSection title="Custom 3D Model" icon={Box} defaultOpen={false}>
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs text-gray-400">Model Path (GLB file)</Label>
+            <Input 
+              value={(block.customModelPath as string) || ''} 
+              onChange={(e) => updateBlock(index, { customModelPath: e.target.value || undefined })} 
+              className="bg-gray-800/50 border-gray-700/50 text-white h-9 text-xs mt-1" 
+              placeholder="/models/your-model.glb" 
+            />
+            <p className="text-[10px] text-gray-500 mt-1">Upload GLB files to /public/models/ folder</p>
+          </div>
+        </div>
+      </CollapsibleSection>
+    </>
   );
 }

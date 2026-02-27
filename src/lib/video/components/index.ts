@@ -23,6 +23,14 @@ export type { TextSceneProps, QuoteSceneProps, HighlightTextSceneProps } from '.
 export { WhatsAppChatScene } from './WhatsAppChatScene';
 export type { WhatsAppChatSceneProps } from './WhatsAppChatScene';
 
+export { WeatherScene } from './WeatherScene';
+export type { WeatherSceneProps } from './WeatherScene';
+
+export { TowerChart3DScene } from './TowerChart3DScene';
+export type { TowerChart3DSceneProps } from './TowerChart3DScene';
+
+export { TowerChart3DEditor } from './TowerChart3DEditor';
+
 // Component registry for dynamic lookup
 import { COMPONENT_IDS } from '../schemas';
 import type { ComponentId, ContentBlock } from '../schemas';

@@ -5,6 +5,7 @@
   "category": "visual",
   "icon": "cloud-sun",
   "color": "#38BDF8",
+  "description": "Display weather information with animated icons and temperature",
   "remotion": {
     "defaultDuration": 4,
     "fps": 30

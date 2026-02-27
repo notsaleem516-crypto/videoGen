@@ -33,6 +33,8 @@ import { CTAScene } from '../components/CTAScene';
 import { GradientTextScene } from '../components/GradientTextScene';
 import { AnimatedBgScene } from '../components/AnimatedBgScene';
 import { CountdownScene } from '../components/CountdownScene';
+import { WeatherScene } from '../components/WeatherScene';
+import { TowerChart3DScene } from '../components/TowerChart3DScene';
 import {
   type VideoInput,
   type AIDecision,
@@ -63,6 +65,8 @@ import {
   type GradientTextBlock,
   type AnimatedBackgroundBlock,
   type CountdownBlock,
+  type WeatherBlock,
+  type TowerChart3DBlock,
   COMPONENT_IDS,
 } from '../schemas';
 import { getTheme } from '../utils/theme';
@@ -423,6 +427,26 @@ function SceneRenderer({
         />
       );
       
+    case COMPONENT_IDS.WEATHER:
+      return (
+        <WeatherScene
+          data={block as WeatherBlock}
+          theme={theme}
+          motionProfile={motionProfile}
+          animation={animation}
+        />
+      );
+      
+    case COMPONENT_IDS.TOWER_CHART_3D:
+      return (
+        <TowerChart3DScene
+          data={block as TowerChart3DBlock}
+          theme={theme}
+          motionProfile={motionProfile}
+          animation={animation}
+        />
+      );
+      
     default:
       // Fallback: render based on block type directly
       return renderByBlockType(block, theme, motionProfile, animation);
@@ -488,6 +512,10 @@ function renderByBlockType(
       return <AnimatedBgScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
     case 'countdown':
       return <CountdownScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
+    case 'weather-block':
+      return <WeatherScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
+    case 'tower-chart-3d':
+      return <TowerChart3DScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
     default:
       return (
         <TextScene

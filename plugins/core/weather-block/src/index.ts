@@ -5,9 +5,9 @@ export { default as schema } from '../schema.json';
 
 import type { PluginDefinition } from '../../../shared/plugin-types';
 import Scene from './Scene';
-import Editor from './Editor'
-import manifest from '../plugin.json'
-import schema from '../schema.json'
+import Editor from './Editor';
+import manifest from '../plugin.json';
+import schema from '../schema.json';
 
 export const plugin: PluginDefinition = {
   id: manifest.id,
@@ -21,11 +21,11 @@ export const plugin: PluginDefinition = {
   scene: Scene,
   editor: Editor,
   
-  schema: schema
+  schema: schema,
   defaults: schema.defaults || {},
   
-  remotion: manifest.remotion
-  features: manifest.features
+  remotion: manifest.remotion,
+  features: manifest.features,
 };
 
 export default plugin;

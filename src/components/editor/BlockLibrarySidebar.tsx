@@ -9,7 +9,7 @@ import {
   Grid3X3, LineChart, PieChart, Code, MessageSquare, Heart,
   MessageCircle, Sparkles, Zap, PlusCircle, Timer, QrCode,
   Video, Users, Share2, MousePointer, Palette, Waves, ChevronDown,
-  Hourglass
+  Hourglass, CloudSun, Box
 } from 'lucide-react';
 
 const BLOCK_CATEGORIES = [
@@ -35,6 +35,7 @@ const BLOCK_CATEGORIES = [
       { type: 'pie-chart', label: 'Pie Chart', icon: PieChart, gradient: 'from-amber-500 to-yellow-500', description: 'Data breakdown' },
       { type: 'counter', label: 'Counter', icon: Timer, gradient: 'from-cyan-500 to-blue-500', description: 'Animated counter' },
       { type: 'progress-bar', label: 'Progress', icon: BarChart3, gradient: 'from-green-500 to-emerald-500', description: 'Progress bar' },
+      { type: 'tower-chart-3d', label: '3D Tower', icon: Box, gradient: 'from-violet-600 to-indigo-500', description: '3D ranking tower' },
     ],
   },
   {
@@ -46,6 +47,7 @@ const BLOCK_CATEGORIES = [
       { type: 'motivational-image', label: 'Poster', icon: Heart, gradient: 'from-rose-500 to-pink-500', description: 'Image + text' },
       { type: 'qr-code', label: 'QR Code', icon: QrCode, gradient: 'from-slate-500 to-gray-600', description: 'QR code' },
       { type: 'animated-bg', label: 'Background', icon: Waves, gradient: 'from-indigo-500 to-purple-500', description: 'Animated bg' },
+      { type: 'weather-block', label: 'Weather', icon: CloudSun, gradient: 'from-sky-400 to-cyan-500', description: 'Weather widget' },
     ],
   },
   {

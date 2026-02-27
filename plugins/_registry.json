@@ -20,7 +20,7 @@
       "category": "content",
       "icon": "type",
       "color": "#6366F1",
-      "description": "Simple text block with customizable styling"
+      "description": "Simple text block with customizable styling",
       "version": "1.0.0",
       "status": "stable"
     },
@@ -31,8 +31,8 @@
       "category": "interactive",
       "icon": "mouse-pointer-click",
       "color": "#F59E0B",
-      "description": "Call-to-action button with pulse animation"
-      "version": "1.0.0"
+      "description": "Call-to-action button with pulse animation",
+      "version": "1.0.0",
       "status": "stable"
     },
     {
@@ -42,7 +42,7 @@
       "category": "data",
       "icon": "trending-up",
       "color": "#10B981",
-      "description": "Display statistics with trend indicators"
+      "description": "Display statistics with trend indicators",
       "version": "1.0.0",
       "status": "stable"
     },
@@ -60,12 +60,12 @@
   ],
   "categories": {
     "content": ["text-block"],
-    "data": ["counter-block", "stat-block"]
-    "visual": ["weather-block"]
-    "interactive": ["cta-block"]
-    "social": []
-    "media": []
-    "layout": []
+    "data": ["counter-block", "stat-block"],
+    "visual": ["weather-block"],
+    "interactive": ["cta-block"],
+    "social": [],
+    "media": [],
+    "layout": [],
     "other": []
   }
 }

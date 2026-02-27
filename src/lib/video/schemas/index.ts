@@ -620,6 +620,97 @@ export const CountdownBlockSchema = z.object({
 export type CountdownBlock = z.infer<typeof CountdownBlockSchema>;
 
 /**
+ * Weather Block Schema - Weather widget with animated icons
+ */
+export const WeatherBlockSchema = z.object({
+  type: z.literal('weather-block'),
+  location: z.string().max(100).default('San Francisco'),
+  temperature: z.number().default(72),
+  unit: z.enum(['F', 'C']).default('F'),
+  condition: z.enum(['sunny', 'partly-cloudy', 'cloudy', 'rainy', 'stormy', 'snowy', 'windy', 'foggy', 'night-clear', 'night-cloudy']).default('partly-cloudy'),
+  description: z.string().max(100).optional(),
+  humidity: z.number().min(0).max(100).default(65),
+  windSpeed: z.number().min(0).default(12),
+  highTemp: z.number().optional(),
+  lowTemp: z.number().optional(),
+  showForecast: z.boolean().default(true),
+  showDetails: z.boolean().default(true),
+  cardStyle: z.enum(['glass', 'solid', 'minimal', 'gradient']).default('glass'),
+  accentColor: z.string().default('#38BDF8'),
+  animateIcon: z.boolean().default(true),
+}).merge(BlockCustomizationSchema);
+
+export type WeatherBlock = z.infer<typeof WeatherBlockSchema>;
+
+// ============================================================================
+// 3D TOWER CHART BLOCK SCHEMA - 3D Ranking visualization with Three.js
+// ============================================================================
+
+/**
+ * Tower item schema for 3D tower chart
+ */
+export const TowerItemSchema = z.object({
+  rank: z.number().int().min(1),
+  name: z.string().max(100),
+  value: z.number().min(0),
+  valueFormatted: z.string().max(50).optional(), // e.g., "155M", "$2.5B"
+  color: z.string().optional(),
+  image: z.string().optional(), // Optional image URL for the item
+  subtitle: z.string().max(100).optional(), // e.g., "2009", "Nintendo"
+});
+
+export type TowerItem = z.infer<typeof TowerItemSchema>;
+
+/**
+ * 3D Tower Chart Block Schema - Ranking tower visualization
+ */
+export const TowerChart3DBlockSchema = z.object({
+  type: z.literal('tower-chart-3d'),
+  
+  // Title and description
+  title: z.string().max(100).default('Top Rankings'),
+  subtitle: z.string().max(200).optional(),
+  
+  // Data - array of items to display (required, no presets)
+  items: z.array(TowerItemSchema).min(1).max(50),
+  
+  // Visual settings
+  towerStyle: z.enum(['boxes', 'cylinders', 'hexagons']).default('boxes'),
+  towerSpacing: z.number().min(2).max(10).default(5), // Spacing between towers
+  baseHeight: z.number().min(1).max(5).default(2), // Minimum height for smallest value
+  maxHeight: z.number().min(10).max(50).default(25), // Maximum height for largest value
+  
+  // Colors
+  gradientStart: z.string().default('#3B82F6'),
+  gradientEnd: z.string().default('#8B5CF6'),
+  useGradientByRank: z.boolean().default(true), // Color by rank position
+  showValueLabels: z.boolean().default(true),
+  showRankNumbers: z.boolean().default(true),
+  
+  // Camera animation
+  cameraDistance: z.number().min(10).max(50).default(20),
+  cameraPauseDuration: z.number().min(0.2).max(2).default(0.4), // Pause at each rank (seconds)
+  cameraMoveSpeed: z.number().min(0.3).max(3).default(0.8), // Speed between ranks (seconds)
+  cameraAngle: z.number().min(0).max(90).default(30), // Viewing angle (degrees)
+  
+  // Scene settings
+  backgroundColor: z.string().default('#0a0a1a'),
+  groundColor: z.string().default('#151525'),
+  showGround: z.boolean().default(true),
+  ambientIntensity: z.number().min(0.3).max(2).default(0.6),
+  showLabels3D: z.boolean().default(true),
+  
+  // Animation
+  introAnimation: z.enum(['fade', 'zoom', 'slide-up', 'none']).default('fade'),
+  itemRevealDelay: z.number().min(0).max(0.5).default(0.05), // Delay between item reveals
+  
+  // Custom 3D Model (optional GLB file path)
+  customModelPath: z.string().optional(), // Path to custom GLB model in /models folder
+}).merge(BlockCustomizationSchema);
+
+export type TowerChart3DBlock = z.infer<typeof TowerChart3DBlockSchema>;
+
+/**
  * Union type for all content blocks
  */
 export const ContentBlockSchema = z.discriminatedUnion('type', [
@@ -649,6 +740,8 @@ export const ContentBlockSchema = z.discriminatedUnion('type', [
   GradientTextBlockSchema,
   AnimatedBackgroundBlockSchema,
   CountdownBlockSchema,
+  WeatherBlockSchema,
+  TowerChart3DBlockSchema,
 ]);
 
 export type ContentBlock = z.infer<typeof ContentBlockSchema>;
@@ -757,6 +850,8 @@ export const COMPONENT_IDS = {
   GRADIENT_TEXT: 'gradient-text-scene',
   ANIMATED_BG: 'animated-bg-scene',
   COUNTDOWN: 'countdown-scene',
+  WEATHER: 'weather-scene',
+  TOWER_CHART_3D: 'tower-chart-3d-scene',
 } as const;
 
 export type ComponentId = typeof COMPONENT_IDS[keyof typeof COMPONENT_IDS];
@@ -791,5 +886,7 @@ export const TYPE_TO_COMPONENT_MAP: Record<string, ComponentId[]> = {
   'gradient-text': [COMPONENT_IDS.GRADIENT_TEXT],
   'animated-bg': [COMPONENT_IDS.ANIMATED_BG],
   countdown: [COMPONENT_IDS.COUNTDOWN],
+  'weather-block': [COMPONENT_IDS.WEATHER],
+  'tower-chart-3d': [COMPONENT_IDS.TOWER_CHART_3D],
 };
 
