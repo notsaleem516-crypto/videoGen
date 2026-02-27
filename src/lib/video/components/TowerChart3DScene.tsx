@@ -1814,6 +1814,1146 @@ function TronGridBackground() {
   );
 }
 
+// ============================================================================
+// IMMERSIVE ENVIRONMENT PRESETS - Environment appears FIRST, towers rise WITHIN
+// ============================================================================
+
+/** Football Stadium - Full stadium with field, towers rise on the field */
+function FootballStadiumBackground() {
+  const crowdRefs = useRef<THREE.InstancedMesh>(null);
+  
+  return (
+    <group>
+      {/* Main field - green grass */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+        <planeGeometry args={[80, 150]} />
+        <meshStandardMaterial color="#2d5a27" metalness={0.1} roughness={0.9} />
+      </mesh>
+      
+      {/* Field lines */}
+      {/* Center circle */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
+        <ringGeometry args={[9, 9.3, 64]} />
+        <meshBasicMaterial color="#ffffff" />
+      </mesh>
+      {/* Center line */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
+        <planeGeometry args={[80, 0.3]} />
+        <meshBasicMaterial color="#ffffff" />
+      </mesh>
+      {/* Penalty areas */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, -60]}>
+        <planeGeometry args={[40, 0.3]} />
+        <meshBasicMaterial color="#ffffff" />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, -60]}>
+        <planeGeometry args={[0.3, 30]} />
+        <meshBasicMaterial color="#ffffff" />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 60]}>
+        <planeGeometry args={[40, 0.3]} />
+        <meshBasicMaterial color="#ffffff" />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 60]}>
+        <planeGeometry args={[0.3, 30]} />
+        <meshBasicMaterial color="#ffffff" />
+      </mesh>
+      
+      {/* Stadium stands */}
+      {/* Left stand */}
+      <Box args={[10, 20, 150]} position={[-50, 10, 0]}>
+        <meshStandardMaterial color="#4a4a5a" metalness={0.3} roughness={0.7} />
+      </Box>
+      {/* Right stand */}
+      <Box args={[10, 20, 150]} position={[50, 10, 0]}>
+        <meshStandardMaterial color="#4a4a5a" metalness={0.3} roughness={0.7} />
+      </Box>
+      {/* End stands */}
+      <Box args={[80, 15, 8]} position={[0, 7.5, -80]}>
+        <meshStandardMaterial color="#3a3a4a" metalness={0.3} roughness={0.7} />
+      </Box>
+      <Box args={[80, 15, 8]} position={[0, 7.5, 80]}>
+        <meshStandardMaterial color="#3a3a4a" metalness={0.3} roughness={0.7} />
+      </Box>
+      
+      {/* Stadium lights */}
+      {[-45, -15, 15, 45].map((x, i) => (
+        <group key={i} position={[x, 0, -85]}>
+          <Cylinder args={[0.5, 0.5, 35, 8]} position={[0, 17.5, 0]}>
+            <meshStandardMaterial color="#888888" metalness={0.8} roughness={0.3} />
+          </Cylinder>
+          <Box args={[4, 2, 2]} position={[0, 36, 0]}>
+            <meshStandardMaterial color="#666666" metalness={0.5} roughness={0.5} />
+          </Box>
+          <pointLight position={[0, 35, 0]} intensity={0.5} color="#ffffcc" distance={80} />
+        </group>
+      ))}
+      {[-45, -15, 15, 45].map((x, i) => (
+        <group key={`light-${i}`} position={[x, 0, 85]}>
+          <Cylinder args={[0.5, 0.5, 35, 8]} position={[0, 17.5, 0]}>
+            <meshStandardMaterial color="#888888" metalness={0.8} roughness={0.3} />
+          </Cylinder>
+          <Box args={[4, 2, 2]} position={[0, 36, 0]}>
+            <meshStandardMaterial color="#666666" metalness={0.5} roughness={0.5} />
+          </Box>
+          <pointLight position={[0, 35, 0]} intensity={0.5} color="#ffffcc" distance={80} />
+        </group>
+      ))}
+      
+      {/* Goal posts */}
+      <group position={[0, 0, -70]}>
+        <Cylinder args={[0.2, 0.2, 5, 8]} position={[-4, 2.5, 0]}>
+          <meshStandardMaterial color="#ffffff" metalness={0.5} roughness={0.3} />
+        </Cylinder>
+        <Cylinder args={[0.2, 0.2, 5, 8]} position={[4, 2.5, 0]}>
+          <meshStandardMaterial color="#ffffff" metalness={0.5} roughness={0.3} />
+        </Cylinder>
+        <Cylinder args={[0.2, 0.2, 8.5, 8]} position={[0, 5, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <meshStandardMaterial color="#ffffff" metalness={0.5} roughness={0.3} />
+        </Cylinder>
+      </group>
+      <group position={[0, 0, 70]}>
+        <Cylinder args={[0.2, 0.2, 5, 8]} position={[-4, 2.5, 0]}>
+          <meshStandardMaterial color="#ffffff" metalness={0.5} roughness={0.3} />
+        </Cylinder>
+        <Cylinder args={[0.2, 0.2, 5, 8]} position={[4, 2.5, 0]}>
+          <meshStandardMaterial color="#ffffff" metalness={0.5} roughness={0.3} />
+        </Cylinder>
+        <Cylinder args={[0.2, 0.2, 8.5, 8]} position={[0, 5, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <meshStandardMaterial color="#ffffff" metalness={0.5} roughness={0.3} />
+        </Cylinder>
+      </group>
+      
+      {/* Night sky */}
+      <mesh position={[0, 50, -100]}>
+        <planeGeometry args={[300, 100]} />
+        <meshBasicMaterial color="#0a0a1a" transparent opacity={0.8} />
+      </mesh>
+    </group>
+  );
+}
+
+/** Race Track - F1 style circuit with grandstands */
+function RaceTrackBackground() {
+  return (
+    <group>
+      {/* Main track surface */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+        <planeGeometry args={[120, 200]} />
+        <meshStandardMaterial color="#2a2a2a" metalness={0.2} roughness={0.8} />
+      </mesh>
+      
+      {/* Track markings - straight sections */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
+        <planeGeometry args={[40, 180]} />
+        <meshStandardMaterial color="#333333" metalness={0.1} roughness={0.9} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-30, 0.01, 0]}>
+        <planeGeometry args={[0.3, 180]} />
+        <meshBasicMaterial color="#ffffff" />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[30, 0.01, 0]}>
+        <planeGeometry args={[0.3, 180]} />
+        <meshBasicMaterial color="#ffffff" />
+      </mesh>
+      {/* Center line - dashed */}
+      {Array.from({ length: 18 }).map((_, i) => (
+        <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, -85 + i * 10]}>
+          <planeGeometry args={[0.2, 5]} />
+          <meshBasicMaterial color="#ffffff" />
+        </mesh>
+      ))}
+      
+      {/* Start/finish line */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, -80]}>
+        <planeGeometry args={[60, 3]} />
+        <meshBasicMaterial color="#ffffff" />
+      </mesh>
+      
+      {/* Pit lane */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-55, 0, 0]}>
+        <planeGeometry args={[15, 150]} />
+        <meshStandardMaterial color="#1a1a1a" metalness={0.2} roughness={0.9} />
+      </mesh>
+      
+      {/* Pit garages */}
+      {Array.from({ length: 10 }).map((_, i) => (
+        <Box key={i} args={[10, 8, 6]} position={[-55, 4, -70 + i * 15]}>
+          <meshStandardMaterial color="#3a3a4a" metalness={0.3} roughness={0.7} />
+        </Box>
+      ))}
+      
+      {/* Grandstands */}
+      <Box args={[15, 25, 100]} position={[70, 12.5, 0]}>
+        <meshStandardMaterial color="#5a5a6a" metalness={0.2} roughness={0.8} />
+      </Box>
+      
+      {/* Sponsor boards */}
+      {[-60, -30, 0, 30, 60].map((x, i) => (
+        <group key={i} position={[x, 0, 95]}>
+          <Box args={[20, 5, 1]} position={[0, 2.5, 0]}>
+            <meshStandardMaterial color="#1a1a2a" metalness={0.3} roughness={0.7} />
+          </Box>
+          <mesh position={[0, 2.5, 0.6]}>
+            <planeGeometry args={[18, 4]} />
+            <meshBasicMaterial color={['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'][i]} transparent opacity={0.5} />
+          </mesh>
+        </group>
+      ))}
+      
+      {/* Track lights */}
+      {[-50, 0, 50].map((x, i) => (
+        <group key={i} position={[x, 0, -100]}>
+          <Cylinder args={[0.3, 0.3, 25, 8]} position={[0, 12.5, 0]}>
+            <meshStandardMaterial color="#888888" metalness={0.7} roughness={0.3} />
+          </Cylinder>
+          <pointLight position={[0, 25, 0]} intensity={0.3} color="#ffffff" distance={60} />
+        </group>
+      ))}
+      
+      {/* Barriers */}
+      {Array.from({ length: 20 }).map((_, i) => (
+        <Box key={`barrier-${i}`} args={[2, 1, 8]} position={[62, 0.5, -90 + i * 10]}>
+          <meshStandardMaterial color={i % 2 === 0 ? '#ff0000' : '#ffffff'} metalness={0.3} roughness={0.7} />
+        </Box>
+      ))}
+    </group>
+  );
+}
+
+/** Concert Stage - Music festival with stage and crowd */
+function ConcertStageBackground() {
+  const lightRefs = useRef<THREE.SpotLight[]>([]);
+  
+  useFrame((state) => {
+    const time = state.clock.elapsedTime;
+    lightRefs.current.forEach((light, i) => {
+      if (light) {
+        light.color.setHSL((time * 0.1 + i * 0.2) % 1, 1, 0.5);
+      }
+    });
+  });
+  
+  return (
+    <group>
+      {/* Main stage floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.5, 0]}>
+        <planeGeometry args={[60, 30]} />
+        <meshStandardMaterial color="#1a1a1a" metalness={0.3} roughness={0.7} />
+      </mesh>
+      
+      {/* Stage platform - raised */}
+      <Box args={[50, 1, 25]} position={[0, 0.5, -10]}>
+        <meshStandardMaterial color="#2a2a2a" metalness={0.2} roughness={0.8} />
+      </Box>
+      
+      {/* Back wall with LED screen look */}
+      <Box args={[50, 20, 1]} position={[0, 10, -23]}>
+        <meshStandardMaterial color="#0a0a1a" metalness={0.5} roughness={0.5} emissive="#1a1a3a" emissiveIntensity={0.3} />
+      </Box>
+      
+      {/* Stage lighting rig */}
+      <Box args={[55, 1, 3]} position={[0, 25, -15]}>
+        <meshStandardMaterial color="#333333" metalness={0.6} roughness={0.4} />
+      </Box>
+      
+      {/* Spotlights */}
+      {[-20, -10, 0, 10, 20].map((x, i) => (
+        <group key={i} position={[x, 25, -15]}>
+          <Cylinder args={[0.3, 0.5, 2, 8]} position={[0, 0, 0]} rotation={[Math.PI, 0, 0]}>
+            <meshStandardMaterial color="#444444" metalness={0.7} roughness={0.3} />
+          </Cylinder>
+          <spotLight
+            ref={(el) => { if (el) lightRefs.current[i] = el; }}
+            position={[0, 0, 0]}
+            angle={0.4}
+            penumbra={0.5}
+            intensity={2}
+            distance={40}
+            castShadow
+          />
+        </group>
+      ))}
+      
+      {/* Speaker stacks */}
+      <group position={[-30, 0, 5]}>
+        <Box args={[4, 8, 3]} position={[0, 4, 0]}>
+          <meshStandardMaterial color="#1a1a1a" metalness={0.3} roughness={0.7} />
+        </Box>
+        <Box args={[3, 5, 2]} position={[0, 10.5, 0]}>
+          <meshStandardMaterial color="#1a1a1a" metalness={0.3} roughness={0.7} />
+        </Box>
+      </group>
+      <group position={[30, 0, 5]}>
+        <Box args={[4, 8, 3]} position={[0, 4, 0]}>
+          <meshStandardMaterial color="#1a1a1a" metalness={0.3} roughness={0.7} />
+        </Box>
+        <Box args={[3, 5, 2]} position={[0, 10.5, 0]}>
+          <meshStandardMaterial color="#1a1a1a" metalness={0.3} roughness={0.7} />
+        </Box>
+      </group>
+      
+      {/* Crowd area - dark floor extending out */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 50]}>
+        <planeGeometry args={[100, 100]} />
+        <meshStandardMaterial color="#0a0a0a" metalness={0.1} roughness={0.9} />
+      </mesh>
+      
+      {/* Crowd barrier */}
+      <Box args={[60, 1.2, 1]} position={[0, 0.6, 15]}>
+        <meshStandardMaterial color="#444444" metalness={0.5} roughness={0.5} />
+      </Box>
+      
+      {/* Fog/haze effect */}
+      <mesh position={[0, 5, 0]}>
+        <planeGeometry args={[100, 50]} />
+        <meshBasicMaterial color="#2a2a4a" transparent opacity={0.1} />
+      </mesh>
+    </group>
+  );
+}
+
+/** Castle Grounds - Medieval castle with courtyard */
+function CastleGroundsBackground() {
+  return (
+    <group>
+      {/* Courtyard floor - cobblestone */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+        <planeGeometry args={[100, 150]} />
+        <meshStandardMaterial color="#4a4a4a" metalness={0.1} roughness={0.9} />
+      </mesh>
+      
+      {/* Castle walls */}
+      <Box args={[100, 25, 5]} position={[0, 12.5, -75]}>
+        <meshStandardMaterial color="#6a6a6a" metalness={0.1} roughness={0.9} />
+      </Box>
+      {/* Side walls */}
+      <Box args={[5, 25, 150]} position={[-50, 12.5, 0]}>
+        <meshStandardMaterial color="#5a5a5a" metalness={0.1} roughness={0.9} />
+      </Box>
+      <Box args={[5, 25, 150]} position={[50, 12.5, 0]}>
+        <meshStandardMaterial color="#5a5a5a" metalness={0.1} roughness={0.9} />
+      </Box>
+      
+      {/* Towers at corners */}
+      {[-50, 50].map((x, i) => (
+        <group key={i}>
+          <Cylinder args={[6, 7, 35, 8]} position={[x, 17.5, -70]}>
+            <meshStandardMaterial color="#5a5a5a" metalness={0.1} roughness={0.9} />
+          </Cylinder>
+          {/* Cone roof */}
+          <Cone args={[8, 10, 8]} position={[x, 40, -70]}>
+            <meshStandardMaterial color="#8B4513" metalness={0.1} roughness={0.8} />
+          </Cone>
+        </group>
+      ))}
+      {[-50, 50].map((x, i) => (
+        <group key={`back-${i}`}>
+          <Cylinder args={[6, 7, 35, 8]} position={[x, 17.5, 70]}>
+            <meshStandardMaterial color="#5a5a5a" metalness={0.1} roughness={0.9} />
+          </Cylinder>
+          <Cone args={[8, 10, 8]} position={[x, 40, 70]}>
+            <meshStandardMaterial color="#8B4513" metalness={0.1} roughness={0.8} />
+          </Cone>
+        </group>
+      ))}
+      
+      {/* Gate house */}
+      <Box args={[20, 20, 8]} position={[0, 10, 75]}>
+        <meshStandardMaterial color="#5a5a5a" metalness={0.1} roughness={0.9} />
+      </Box>
+      {/* Gate opening */}
+      <Box args={[8, 12, 10]} position={[0, 6, 76]}>
+        <meshStandardMaterial color="#1a1a1a" metalness={0.0} roughness={1} />
+      </Box>
+      
+      {/* Battlements on main wall */}
+      {Array.from({ length: 10 }).map((_, i) => (
+        <Box key={i} args={[6, 4, 3]} position={[-45 + i * 10, 27, -72]}>
+          <meshStandardMaterial color="#6a6a6a" metalness={0.1} roughness={0.9} />
+        </Box>
+      ))}
+      
+      {/* Keep in center */}
+      <Box args={[25, 40, 25]} position={[0, 20, -50]}>
+        <meshStandardMaterial color="#6a6a6a" metalness={0.1} roughness={0.9} />
+      </Box>
+      <Cone args={[15, 12, 4]} position={[0, 46, -50]}>
+        <meshStandardMaterial color="#8B4513" metalness={0.1} roughness={0.8} />
+      </Cone>
+      
+      {/* Flags */}
+      {[-50, 50].map((x, i) => (
+        <group key={`flag-${i}`}>
+          <Cylinder args={[0.2, 0.2, 8, 8]} position={[x, 49, -70]}>
+            <meshStandardMaterial color="#4a4a4a" metalness={0.5} roughness={0.5} />
+          </Cylinder>
+          <Box args={[3, 2, 0.1]} position={[x + 1.5, 52, -70]}>
+            <meshBasicMaterial color="#cc0000" />
+          </Box>
+        </group>
+      ))}
+      
+      {/* Torches with fire light */}
+      {[-30, 0, 30].map((x, i) => (
+        <group key={`torch-${i}`}>
+          <Cylinder args={[0.3, 0.3, 3, 8]} position={[x, 1.5, 0]}>
+            <meshStandardMaterial color="#4a3a2a" metalness={0.3} roughness={0.7} />
+          </Cylinder>
+          <Sphere args={[0.4, 8, 8]} position={[x, 3.5, 0]}>
+            <meshBasicMaterial color="#ff6600" transparent opacity={0.8} />
+          </Sphere>
+          <pointLight position={[x, 4, 0]} intensity={0.5} color="#ff9933" distance={15} />
+        </group>
+      ))}
+      
+      {/* Moat */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 90]}>
+        <ringGeometry args={[55, 65, 4]} />
+        <meshStandardMaterial color="#2a4a6a" metalness={0.5} roughness={0.3} />
+      </mesh>
+    </group>
+  );
+}
+
+/** Airport Runway - Planes and terminal */
+function AirportRunwayBackground() {
+  const planeRefs = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (planeRefs.current) {
+      planeRefs.current.position.z = -100 + Math.sin(state.clock.elapsedTime * 0.1) * 50;
+    }
+  });
+  
+  return (
+    <group>
+      {/* Main runway */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+        <planeGeometry args={[40, 300]} />
+        <meshStandardMaterial color="#2a2a2a" metalness={0.1} roughness={0.9} />
+      </mesh>
+      
+      {/* Runway markings */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
+        <planeGeometry args={[2, 250]} />
+        <meshBasicMaterial color="#ffffff" />
+      </mesh>
+      {/* Threshold markings */}
+      {[-12, -8, -4, 4, 8, 12].map((x, i) => (
+        <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} position={[x, 0.01, -140]}>
+          <planeGeometry args={[2, 30]} />
+          <meshBasicMaterial color="#ffffff" />
+        </mesh>
+      ))}
+      {[-12, -8, -4, 4, 8, 12].map((x, i) => (
+        <mesh key={`end-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[x, 0.01, 140]}>
+          <planeGeometry args={[2, 30]} />
+          <meshBasicMaterial color="#ffffff" />
+        </mesh>
+      ))}
+      
+      {/* Taxiway */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[50, 0, 0]}>
+        <planeGeometry args={[20, 200]} />
+        <meshStandardMaterial color="#1a1a1a" metalness={0.1} roughness={0.9} />
+      </mesh>
+      
+      {/* Terminal building */}
+      <Box args={[80, 20, 40]} position={[100, 10, 0]}>
+        <meshStandardMaterial color="#4a5a6a" metalness={0.3} roughness={0.7} />
+      </Box>
+      {/* Terminal windows */}
+      <mesh position={[141, 10, 0]} rotation={[0, Math.PI / 2, 0]}>
+        <planeGeometry args={[35, 15]} />
+        <meshStandardMaterial color="#2a3a4a" metalness={0.8} roughness={0.2} transparent opacity={0.6} />
+      </mesh>
+      
+      {/* Control tower */}
+      <Cylinder args={[5, 6, 30, 8]} position={[70, 15, -30]}>
+        <meshStandardMaterial color="#5a6a7a" metalness={0.2} roughness={0.8} />
+      </Cylinder>
+      {/* Tower cab */}
+      <Cylinder args={[8, 6, 6, 8]} position={[70, 33, -30]}>
+        <meshStandardMaterial color="#3a4a5a" metalness={0.3} roughness={0.7} />
+      </Cylinder>
+      <mesh position={[70, 36, -30]}>
+        <cylinderGeometry args={[7, 7, 4, 8]} />
+        <meshStandardMaterial color="#2a3a4a" metalness={0.5} roughness={0.5} transparent opacity={0.5} />
+      </mesh>
+      
+      {/* Hangar */}
+      <Box args={[50, 15, 30]} position={[-70, 7.5, 0]}>
+        <meshStandardMaterial color="#5a5a5a" metalness={0.3} roughness={0.7} />
+      </Box>
+      
+      {/* Airplane (simplified) */}
+      <group ref={planeRefs} position={[0, 5, -100]}>
+        {/* Fuselage */}
+        <Cylinder args={[3, 3, 40, 12]} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+          <meshStandardMaterial color="#f0f0f0" metalness={0.5} roughness={0.3} />
+        </Cylinder>
+        {/* Wings */}
+        <Box args={[35, 0.5, 8]} position={[0, 0, 5]}>
+          <meshStandardMaterial color="#e0e0e0" metalness={0.5} roughness={0.3} />
+        </Box>
+        {/* Tail */}
+        <Box args={[10, 6, 0.5]} position={[0, 3, -20]}>
+          <meshStandardMaterial color="#e0e0e0" metalness={0.5} roughness={0.3} />
+        </Box>
+        <Box args={[0.5, 5, 4]} position={[0, 5, -18]}>
+          <meshStandardMaterial color="#e0e0e0" metalness={0.5} roughness={0.3} />
+        </Box>
+      </group>
+      
+      {/* Runway lights */}
+      {Array.from({ length: 30 }).map((_, i) => (
+        <Sphere key={i} args={[0.2, 8, 8]} position={[-18, 0.2, -140 + i * 10]}>
+          <meshBasicMaterial color="#00ff00" />
+        </Sphere>
+      ))}
+      {Array.from({ length: 30 }).map((_, i) => (
+        <Sphere key={`r-${i}`} args={[0.2, 8, 8]} position={[18, 0.2, -140 + i * 10]}>
+          <meshBasicMaterial color="#00ff00" />
+        </Sphere>
+      ))}
+      
+      {/* Approach lights */}
+      {Array.from({ length: 10 }).map((_, i) => (
+        <Sphere key={`approach-${i}`} args={[0.3, 8, 8]} position={[0, 0.5, -160 - i * 10]}>
+          <meshBasicMaterial color="#ff0000" />
+        </Sphere>
+      ))}
+    </group>
+  );
+}
+
+/** Theme Park - Amusement park with rides */
+function ThemeParkBackground() {
+  const ferrisRef = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (ferrisRef.current) {
+      ferrisRef.current.rotation.z = state.clock.elapsedTime * 0.1;
+    }
+  });
+  
+  return (
+    <group>
+      {/* Park ground */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+        <planeGeometry args={[200, 200]} />
+        <meshStandardMaterial color="#3a7a3a" metalness={0.1} roughness={0.9} />
+      </mesh>
+      
+      {/* Paths */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
+        <planeGeometry args={[10, 150]} />
+        <meshStandardMaterial color="#8a7a6a" metalness={0.1} roughness={0.8} />
+      </mesh>
+      
+      {/* Ferris wheel */}
+      <group position={[-40, 0, -40]}>
+        {/* Support structure */}
+        <Box args={[2, 40, 2]} position={[-8, 20, 0]}>
+          <meshStandardMaterial color="#cc0000" metalness={0.5} roughness={0.5} />
+        </Box>
+        <Box args={[2, 40, 2]} position={[8, 20, 0]}>
+          <meshStandardMaterial color="#cc0000" metalness={0.5} roughness={0.5} />
+        </Box>
+        {/* Wheel */}
+        <group ref={ferrisRef} position={[0, 35, 0]}>
+          <Torus args={[15, 0.5, 8, 32]}>
+            <meshStandardMaterial color="#ff6600" metalness={0.6} roughness={0.4} />
+          </Torus>
+          {/* Spokes */}
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Box key={i} args={[0.3, 30, 0.3]} position={[
+              Math.cos(i * Math.PI / 4) * 7.5,
+              Math.sin(i * Math.PI / 4) * 7.5,
+              0
+            ]} rotation={[0, 0, i * Math.PI / 4]}>
+              <meshStandardMaterial color="#ffcc00" metalness={0.5} roughness={0.5} />
+            </Box>
+          ))}
+          {/* Cabins */}
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Box key={`cabin-${i}`} args={[3, 4, 3]} position={[
+              Math.cos(i * Math.PI / 4) * 15,
+              Math.sin(i * Math.PI / 4) * 15,
+              0
+            ]}>
+              <meshStandardMaterial color={['#ff0000', '#00ff00', '#0000ff', '#ffff00'][i % 4]} metalness={0.3} roughness={0.7} />
+            </Box>
+          ))}
+        </group>
+      </group>
+      
+      {/* Roller coaster track (simplified) */}
+      <group position={[40, 0, -30]}>
+        {/* Support pillars */}
+        {Array.from({ length: 10 }).map((_, i) => (
+          <Cylinder key={i} args={[0.5, 0.5, 15 + i * 2, 8]} position={[-30 + i * 7, (15 + i * 2) / 2, 0]}>
+            <meshStandardMaterial color="#4a4a4a" metalness={0.6} roughness={0.4} />
+          </Cylinder>
+        ))}
+        {/* Track rails */}
+        <mesh position={[0, 20, 0]}>
+          <tubeGeometry args={[
+            new THREE.CatmullRomCurve3([
+              new THREE.Vector3(-35, 5, 0),
+              new THREE.Vector3(-20, 15, 0),
+              new THREE.Vector3(-5, 25, 0),
+              new THREE.Vector3(10, 30, 0),
+              new THREE.Vector3(25, 20, 0),
+              new THREE.Vector3(35, 15, 0),
+            ]),
+            64, 0.3, 8, false
+          ]} />
+          <meshStandardMaterial color="#ff0000" metalness={0.6} roughness={0.4} />
+        </mesh>
+      </group>
+      
+      {/* Carousel */}
+      <group position={[0, 0, 40]}>
+        <Cylinder args={[8, 8, 1, 16]} position={[0, 0.5, 0]}>
+          <meshStandardMaterial color="#ffcc00" metalness={0.3} roughness={0.7} />
+        </Cylinder>
+        {/* Poles */}
+        {Array.from({ length: 8 }).map((_, i) => (
+          <Cylinder key={i} args={[0.2, 0.2, 6, 8]} position={[Math.cos(i * Math.PI / 4) * 5, 3.5, Math.sin(i * Math.PI / 4) * 5]}>
+            <meshStandardMaterial color="#ffcc00" metalness={0.5} roughness={0.5} />
+          </Cylinder>
+        ))}
+        {/* Roof */}
+        <Cone args={[10, 4, 16]} position={[0, 8, 0]}>
+          <meshStandardMaterial color="#ff6600" metalness={0.2} roughness={0.8} />
+        </Cone>
+      </group>
+      
+      {/* Entrance gate */}
+      <Box args={[30, 15, 3]} position={[0, 7.5, 90]}>
+        <meshStandardMaterial color="#ff00ff" metalness={0.3} roughness={0.7} />
+      </Box>
+      <Box args={[8, 15, 3]} position={[-15, 7.5, 90]}>
+        <meshStandardMaterial color="#00ffff" metalness={0.3} roughness={0.7} />
+      </Box>
+      <Box args={[8, 15, 3]} position={[15, 7.5, 90]}>
+        <meshStandardMaterial color="#00ffff" metalness={0.3} roughness={0.7} />
+      </Box>
+      
+      {/* Balloons */}
+      {Array.from({ length: 20 }).map((_, i) => (
+        <Float key={i} speed={1 + Math.random()} floatIntensity={0.5}>
+          <Sphere args={[0.8, 8, 8]} position={[
+            (Math.random() - 0.5) * 100,
+            10 + Math.random() * 20,
+            (Math.random() - 0.5) * 100
+          ]}>
+            <meshStandardMaterial color={['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'][i % 5]} metalness={0.2} roughness={0.8} />
+          </Sphere>
+        </Float>
+      ))}
+      
+      {/* Night sky with stars */}
+      <mesh position={[0, 60, -100]}>
+        <planeGeometry args={[300, 150]} />
+        <meshBasicMaterial color="#0a0a2a" />
+      </mesh>
+    </group>
+  );
+}
+
+/** Ancient Ruins - Temple/pillars environment */
+function AncientRuinsBackground() {
+  return (
+    <group>
+      {/* Ancient stone floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+        <planeGeometry args={[150, 150]} />
+        <meshStandardMaterial color="#8a7a6a" metalness={0.1} roughness={0.9} />
+      </mesh>
+      
+      {/* Stone tiles pattern */}
+      {Array.from({ length: 100 }).map((_, i) => (
+        <mesh
+          key={i}
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[
+            (i % 10) * 14 - 63 + Math.random() * 2,
+            0.02,
+            Math.floor(i / 10) * 14 - 63 + Math.random() * 2
+          ]}
+        >
+          <planeGeometry args={[12 + Math.random() * 2, 12 + Math.random() * 2]} />
+          <meshStandardMaterial 
+            color={`hsl(30, ${20 + Math.random() * 10}%, ${45 + Math.random() * 15}%)`}
+            metalness={0.1}
+            roughness={0.9}
+          />
+        </mesh>
+      ))}
+      
+      {/* Standing pillars */}
+      {[-40, -20, 20, 40].map((x, i) => (
+        <group key={i}>
+          <Cylinder args={[2.5, 2.8, 25, 12]} position={[x, 12.5, -50]}>
+            <meshStandardMaterial color="#7a6a5a" metalness={0.1} roughness={0.9} />
+          </Cylinder>
+          {/* Capital */}
+          <Box args={[6, 2, 6]} position={[x, 26, -50]}>
+            <meshStandardMaterial color="#6a5a4a" metalness={0.1} roughness={0.9} />
+          </Cylinder>
+        </group>
+      ))}
+      
+      {/* Broken pillars */}
+      <Cylinder args={[2.5, 2.8, 8, 12]} position={[-30, 4, -30]} rotation={[0.3, 0, 0.2]}>
+        <meshStandardMaterial color="#6a5a4a" metalness={0.1} roughness={0.9} />
+      </Cylinder>
+      <Cylinder args={[2.5, 2.8, 5, 12]} position={[30, 2.5, -20]} rotation={[0.5, 0, -0.3]}>
+        <meshStandardMaterial color="#5a4a3a" metalness={0.1} roughness={0.9} />
+      </Cylinder>
+      
+      {/* Fallen pillar sections */}
+      <Cylinder args={[2.5, 2.5, 10, 12]} position={[-20, 2.5, 20]} rotation={[Math.PI / 2, 0.2, 0]}>
+        <meshStandardMaterial color="#5a4a3a" metalness={0.1} roughness={0.9} />
+      </Cylinder>
+      
+      {/* Temple entrance */}
+      <Box args={[40, 30, 5]} position={[0, 15, -70]}>
+        <meshStandardMaterial color="#6a5a4a" metalness={0.1} roughness={0.9} />
+      </Box>
+      {/* Doorway */}
+      <Box args={[15, 22, 6]} position={[0, 11, -68]}>
+        <meshStandardMaterial color="#1a1a1a" />
+      </Box>
+      
+      {/* Steps */}
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Box key={i} args={[50, 1, 3]} position={[0, i * 0.5, -72 + i * 3]}>
+          <meshStandardMaterial color="#7a6a5a" metalness={0.1} roughness={0.9} />
+        </Box>
+      ))}
+      
+      {/* Overgrown vegetation */}
+      {Array.from({ length: 30 }).map((_, i) => (
+        <Cylinder
+          key={i}
+          args={[0.1, 0.15, 2 + Math.random() * 3, 4]}
+          position={[
+            (Math.random() - 0.5) * 120,
+            1 + Math.random(),
+            (Math.random() - 0.5) * 100
+          ]}
+        >
+          <meshStandardMaterial color="#3a6a3a" metalness={0.1} roughness={0.9} />
+        </Cylinder>
+      ))}
+      
+      {/* Ancient altar in center */}
+      <Box args={[6, 2, 6]} position={[0, 1, 0]}>
+        <meshStandardMaterial color="#5a4a3a" metalness={0.1} roughness={0.9} />
+      </Box>
+      
+      {/* Mystical glow */}
+      <pointLight position={[0, 3, 0]} intensity={0.5} color="#ffcc66" distance={20} />
+      
+      {/* Dust particles */}
+      <points>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={100}
+            array={new Float32Array(100 * 3).map(() => (Math.random() - 0.5) * 100)}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <pointsMaterial size={0.3} color="#aa9988" transparent opacity={0.3} />
+      </points>
+      
+      {/* Sky with sunset */}
+      <mesh position={[0, 40, -100]}>
+        <planeGeometry args={[300, 100]} />
+        <meshBasicMaterial color="#cc8844" transparent opacity={0.3} />
+      </mesh>
+    </group>
+  );
+}
+
+/** Zen Garden - Japanese peaceful garden */
+function ZenGardenBackground() {
+  const sandRef = useRef<THREE.Mesh>(null);
+  
+  useFrame((state) => {
+    if (sandRef.current) {
+      const geometry = sandRef.current.geometry;
+      const position = geometry.attributes.position;
+      const time = state.clock.elapsedTime * 0.1;
+      
+      for (let i = 0; i < position.count; i++) {
+        const x = position.getX(i);
+        const y = position.getY(i);
+        const wave = Math.sin(x * 0.1 + time) * 0.1 + Math.sin(y * 0.15 + time * 0.7) * 0.08;
+        position.setZ(i, wave);
+      }
+      position.needsUpdate = true;
+    }
+  });
+  
+  return (
+    <group>
+      {/* Zen sand garden */}
+      <mesh ref={sandRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+        <planeGeometry args={[100, 100, 40, 40]} />
+        <meshStandardMaterial color="#d4c4a8" metalness={0.0} roughness={1} />
+      </mesh>
+      
+      {/* Sand rake patterns (circles) */}
+      {Array.from({ length: 8 }).map((_, i) => (
+        <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
+          <ringGeometry args={[5 + i * 5, 5.1 + i * 5, 64]} />
+          <meshBasicMaterial color="#c4b498" />
+        </mesh>
+      ))}
+      
+      {/* Large rocks */}
+      <mesh position={[-20, 2, -10]}>
+        <icosahedronGeometry args={[4, 0]} />
+        <meshStandardMaterial color="#4a4a4a" metalness={0.1} roughness={0.9} />
+      </mesh>
+      <mesh position={[15, 1.5, 20]}>
+        <icosahedronGeometry args={[3, 0]} />
+        <meshStandardMaterial color="#5a5a5a" metalness={0.1} roughness={0.9} />
+      </mesh>
+      <mesh position={[-5, 1, -25]}>
+        <icosahedronGeometry args={[2, 0]} />
+        <meshStandardMaterial color="#4a4a4a" metalness={0.1} roughness={0.9} />
+      </mesh>
+      
+      {/* Japanese maple tree */}
+      <group position={[30, 0, -20]}>
+        <Cylinder args={[0.5, 0.8, 5, 8]} position={[0, 2.5, 0]}>
+          <meshStandardMaterial color="#4a3a2a" metalness={0.1} roughness={0.9} />
+        </Cylinder>
+        <Sphere args={[4, 8, 8]} position={[0, 7, 0]}>
+          <meshStandardMaterial color="#cc3333" metalness={0.1} roughness={0.8} />
+        </Sphere>
+      </group>
+      
+      {/* Bamboo fence */}
+      {Array.from({ length: 20 }).map((_, i) => (
+        <Cylinder key={i} args={[0.1, 0.1, 3, 8]} position={[-48, 1.5, -45 + i * 5]}>
+          <meshStandardMaterial color="#6a8a4a" metalness={0.1} roughness={0.8} />
+        </Cylinder>
+      ))}
+      {Array.from({ length: 20 }).map((_, i) => (
+        <Cylinder key={`r-${i}`} args={[0.1, 0.1, 3, 8]} position={[48, 1.5, -45 + i * 5]}>
+          <meshStandardMaterial color="#6a8a4a" metalness={0.1} roughness={0.8} />
+        </Cylinder>
+      ))}
+      
+      {/* Stone lantern */}
+      <group position={[-30, 0, 30]}>
+        <Cylinder args={[0.8, 1, 0.5, 6]} position={[0, 0.25, 0]}>
+          <meshStandardMaterial color="#6a6a6a" metalness={0.1} roughness={0.9} />
+        </Cylinder>
+        <Cylinder args={[0.3, 0.3, 2, 6]} position={[0, 1.5, 0]}>
+          <meshStandardMaterial color="#5a5a5a" metalness={0.1} roughness={0.9} />
+        </Cylinder>
+        <Box args={[1.2, 1, 1.2]} position={[0, 3, 0]}>
+          <meshStandardMaterial color="#4a4a4a" metalness={0.1} roughness={0.9} />
+        </Box>
+        <Cone args={[0.8, 1, 4]} position={[0, 4, 0]}>
+          <meshStandardMaterial color="#3a3a3a" metalness={0.1} roughness={0.9} />
+        </Cone>
+        <pointLight position={[0, 2.5, 0]} intensity={0.3} color="#ffcc66" distance={10} />
+      </group>
+      
+      {/* Koi pond */}
+      <Cylinder args={[8, 8, 0.5, 32]} position={[25, -0.2, 10]} rotation={[Math.PI / 2, 0, 0]}>
+        <meshStandardMaterial color="#2a4a6a" metalness={0.5} roughness={0.3} />
+      </Cylinder>
+      {/* Pond edge stones */}
+      {Array.from({ length: 12 }).map((_, i) => (
+        <Sphere key={i} args={[0.5, 6, 6]} position={[
+          25 + Math.cos(i * Math.PI / 6) * 8.5,
+          0.3,
+          10 + Math.sin(i * Math.PI / 6) * 8.5
+        ]}>
+          <meshStandardMaterial color="#5a5a5a" metalness={0.1} roughness={0.9} />
+        </Sphere>
+      ))}
+      
+      {/* Wooden bridge */}
+      <Box args={[6, 0.3, 12]} position={[25, 0.5, -5]} rotation={[0, Math.PI / 4, 0]}>
+        <meshStandardMaterial color="#8a6a4a" metalness={0.1} roughness={0.8} />
+      </Box>
+      
+      {/* Cherry blossom petals falling */}
+      <points>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={50}
+            array={new Float32Array(50 * 3).map((_, i) =>
+              i % 3 === 0 ? (Math.random() - 0.5) * 80 :
+              i % 3 === 1 ? Math.random() * 30 :
+              (Math.random() - 0.5) * 80
+            )}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <pointsMaterial size={0.4} color="#ffaaaa" transparent opacity={0.6} />
+      </points>
+    </group>
+  );
+}
+
+/** Ski Resort - Snowy mountain slopes */
+function SkiResortBackground() {
+  const snowfallRef = useRef<THREE.Points>(null);
+  
+  useFrame(() => {
+    if (snowfallRef.current) {
+      const positions = snowfallRef.current.geometry.attributes.position.array as Float32Array;
+      for (let i = 0; i < positions.length; i += 3) {
+        positions[i + 1] -= 0.05;
+        if (positions[i + 1] < 0) {
+          positions[i + 1] = 60;
+        }
+      }
+      snowfallRef.current.geometry.attributes.position.needsUpdate = true;
+    }
+  });
+  
+  return (
+    <group>
+      {/* Snowy mountain slope */}
+      <mesh rotation={[-Math.PI / 4, 0, 0]} position={[0, 20, -50]}>
+        <planeGeometry args={[200, 200]} />
+        <meshStandardMaterial color="#f0f0f5" metalness={0.1} roughness={0.9} />
+      </mesh>
+      
+      {/* Flat area at base */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 30]}>
+        <planeGeometry args={[150, 80]} />
+        <meshStandardMaterial color="#e8e8f0" metalness={0.1} roughness={0.9} />
+      </mesh>
+      
+      {/* Ski runs (groomed trails) */}
+      <mesh rotation={[-Math.PI / 4, 0, 0]} position={[0, 20.1, -50]}>
+        <planeGeometry args={[20, 150]} />
+        <meshStandardMaterial color="#ffffff" metalness={0.0} roughness={1} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 4, 0.3, 0]} position={[-30, 20.1, -50]}>
+        <planeGeometry args={[15, 120]} />
+        <meshStandardMaterial color="#ffffff" metalness={0.0} roughness={1} />
+      </mesh>
+      
+      {/* Pine trees with snow */}
+      {Array.from({ length: 25 }).map((_, i) => (
+        <group key={i} position={[(Math.random() - 0.5) * 120, 0, (Math.random() - 0.5) * 80]}>
+          <Cylinder args={[0.3, 0.4, 2, 6]} position={[0, 1, 0]}>
+            <meshStandardMaterial color="#4a3a2a" roughness={0.9} />
+          </Cylinder>
+          <Cone args={[2, 6, 6]} position={[0, 5, 0]}>
+            <meshStandardMaterial color="#2a5a3a" roughness={0.8} />
+          </Cone>
+          <Cone args={[1.5, 4, 6]} position={[0, 8, 0]}>
+            <meshStandardMaterial color="#3a6a4a" roughness={0.8} />
+          </Cone>
+          {/* Snow on tree */}
+          <Cone args={[2.2, 1, 6]} position={[0, 9, 0]}>
+            <meshStandardMaterial color="#ffffff" roughness={1} />
+          </Cone>
+        </group>
+      ))}
+      
+      {/* Ski lift cables */}
+      <Cylinder args={[0.05, 0.05, 150, 8]} position={[0, 35, 0]} rotation={[Math.PI / 2 - 0.5, 0, 0]}>
+        <meshStandardMaterial color="#333333" metalness={0.8} roughness={0.3} />
+      </Cylinder>
+      
+      {/* Ski lift towers */}
+      {[-40, 0, 40].map((z, i) => (
+        <group key={i} position={[0, 0, z]}>
+          <Box args={[0.5, 40, 0.5]} position={[0, 20, 0]}>
+            <meshStandardMaterial color="#4a4a4a" metalness={0.6} roughness={0.4} />
+          </Box>
+          <Box args={[3, 0.5, 0.5]} position={[0, 35, 0]}>
+            <meshStandardMaterial color="#4a4a4a" metalness={0.6} roughness={0.4} />
+          </Box>
+        </group>
+      ))}
+      
+      {/* Ski lift chairs */}
+      {[-30, -10, 10, 30].map((z, i) => (
+        <group key={`chair-${i}`} position={[0, 32, z]}>
+          <Box args={[0.1, 3, 0.1]} position={[0, 1.5, 0]}>
+            <meshStandardMaterial color="#333333" metalness={0.5} roughness={0.5} />
+          </Box>
+          <Box args={[2, 0.1, 2]} position={[0, 0, 0]}>
+            <meshStandardMaterial color="#ff6600" metalness={0.3} roughness={0.7} />
+          </Box>
+        </group>
+      ))}
+      
+      {/* Chalet/lodge */}
+      <group position={[50, 0, 40]}>
+        <Box args={[20, 10, 15]} position={[0, 5, 0]}>
+          <meshStandardMaterial color="#6a4a3a" metalness={0.1} roughness={0.9} />
+        </Box>
+        {/* Roof */}
+        <Box args={[22, 1, 17]} position={[0, 11, 0]} rotation={[0.3, 0, 0]}>
+          <meshStandardMaterial color="#4a3a2a" metalness={0.1} roughness={0.9} />
+        </Box>
+        {/* Snow on roof */}
+        <Box args={[24, 0.5, 18]} position={[0, 11.5, 0]} rotation={[0.3, 0, 0]}>
+          <meshStandardMaterial color="#ffffff" roughness={1} />
+        </Box>
+        {/* Windows with warm glow */}
+        <mesh position={[-11, 5, 0]} rotation={[0, Math.PI / 2, 0]}>
+          <planeGeometry args={[4, 5]} />
+          <meshBasicMaterial color="#ffcc66" transparent opacity={0.7} />
+        </mesh>
+        <mesh position={[11, 5, 0]} rotation={[0, Math.PI / 2, 0]}>
+          <planeGeometry args={[4, 5]} />
+          <meshBasicMaterial color="#ffcc66" transparent opacity={0.7} />
+        </mesh>
+        <pointLight position={[0, 5, 8]} intensity={0.5} color="#ffcc66" distance={20} />
+      </group>
+      
+      {/* Falling snow */}
+      <points ref={snowfallRef}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={200}
+            array={new Float32Array(200 * 3).map(() => (Math.random() - 0.5) * 150)}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <pointsMaterial size={0.3} color="#ffffff" transparent opacity={0.8} />
+      </points>
+      
+      {/* Mountain peaks in distance */}
+      {[-60, 0, 60].map((x, i) => (
+        <Cone key={i} args={[30 + i * 10, 50, 4]} position={[x, 25, -120]}>
+          <meshStandardMaterial color="#d0d0d8" metalness={0.1} roughness={0.9} />
+        </Cone>
+      ))}
+    </group>
+  );
+}
+
+/** Vineyard - Rolling hills with grape vines */
+function VineyardBackground() {
+  return (
+    <group>
+      {/* Rolling hills */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+        <planeGeometry args={[200, 200]} />
+        <meshStandardMaterial color="#4a7a3a" metalness={0.1} roughness={0.9} />
+      </mesh>
+      
+      {/* Vine rows */}
+      {Array.from({ length: 15 }).map((row) => (
+        <group key={row} position={[-70 + row * 10, 0, 0]}>
+          {/* Row support posts */}
+          {Array.from({ length: 20 }).map((post) => (
+            <Cylinder
+              key={post}
+              args={[0.1, 0.1, 2.5, 6]}
+              position={[0, 1.25, -90 + post * 10]}
+            >
+              <meshStandardMaterial color="#5a4a3a" roughness={0.9} />
+            </Cylinder>
+          ))}
+          {/* Support wires */}
+          <Cylinder args={[0.02, 0.02, 200, 4]} position={[0, 1, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <meshStandardMaterial color="#666666" metalness={0.8} roughness={0.3} />
+          </Cylinder>
+          <Cylinder args={[0.02, 0.02, 200, 4]} position={[0, 2, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <meshStandardMaterial color="#666666" metalness={0.8} roughness={0.3} />
+          </Cylinder>
+          {/* Grape vines (simplified as green boxes) */}
+          {Array.from({ length: 15 }).map((vine) => (
+            <Box key={vine} args={[0.5, 1.5, 3]} position={[0, 1, -80 + vine * 12]}>
+              <meshStandardMaterial color="#3a6a2a" roughness={0.9} />
+            </Box>
+          ))}
+        </group>
+      ))}
+      
+      {/* Tuscan-style winery building */}
+      <group position={[70, 0, -60]}>
+        <Box args={[30, 15, 20]} position={[0, 7.5, 0]}>
+          <meshStandardMaterial color="#c4a882" metalness={0.1} roughness={0.9} />
+        </Box>
+        {/* Terracotta roof */}
+        <Box args={[34, 1, 24]} position={[0, 15.5, 0]} rotation={[0.1, 0, 0]}>
+          <meshStandardMaterial color="#aa5533" metalness={0.1} roughness={0.8} />
+        </Box>
+        {/* Windows */}
+        {[-8, 8].map((x, i) => (
+          <mesh key={i} position={[x, 6, 10.1]}>
+            <planeGeometry args={[3, 4]} />
+            <meshBasicMaterial color="#3a4a5a" />
+          </mesh>
+        ))}
+        {/* Door */}
+        <mesh position={[0, 4, 10.1]}>
+          <planeGeometry args={[4, 6]} />
+          <meshStandardMaterial color="#5a3a2a" roughness={0.9} />
+        </mesh>
+      </group>
+      
+      {/* Wine barrels */}
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Cylinder key={i} args={[1, 1, 2, 12]} position={[60, 1, -30 + i * 3]} rotation={[Math.PI / 2, 0, 0]}>
+          <meshStandardMaterial color="#6a4a2a" metalness={0.1} roughness={0.8} />
+        </Cylinder>
+      ))}
+      
+      {/* Olive trees */}
+      {[-50, -80, 100, 120].map((x, i) => (
+        <group key={i} position={[x, 0, -40 + (i % 2) * 80]}>
+          <Cylinder args={[0.5, 0.7, 4, 8]} position={[0, 2, 0]}>
+            <meshStandardMaterial color="#5a4a3a" roughness={0.9} />
+          </Cylinder>
+          <Sphere args={[4, 8, 8]} position={[0, 6, 0]}>
+            <meshStandardMaterial color="#5a7a3a" roughness={0.9} />
+          </Sphere>
+        </group>
+      ))}
+      
+      {/* Dirt path */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[40, 0.02, 0]}>
+        <planeGeometry args={[5, 150]} />
+        <meshStandardMaterial color="#8a7a6a" roughness={1} />
+      </mesh>
+      
+      {/* Sun and sky */}
+      <mesh position={[60, 50, -150]}>
+        <circleGeometry args={[20, 32]} />
+        <meshBasicMaterial color="#ffdd66" transparent opacity={0.8} />
+      </mesh>
+      <mesh position={[0, 40, -100]}>
+        <planeGeometry args={[300, 100]} />
+        <meshBasicMaterial color="#87ceeb" transparent opacity={0.3} />
+      </mesh>
+      
+      {/* Distant hills */}
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Cone key={i} args={[40 + i * 10, 20 + i * 5, 4]} position={[-150 + i * 75, 10, -150]}>
+          <meshStandardMaterial color="#3a6a2a" metalness={0.1} roughness={0.9} />
+        </Cone>
+      ))}
+    </group>
+  );
+}
+
 /** Main Background Renderer - Picks the right background based on preset */
 function BackgroundRenderer({ preset, baseColor }: { preset: string; baseColor: string }) {
   switch (preset) {
@@ -1858,6 +2998,27 @@ function BackgroundRenderer({ preset, baseColor }: { preset: string; baseColor: 
       return <AlienPlanetBackground />;
     case 'tron-grid':
       return <TronGridBackground />;
+    // Immersive Environment Presets - Towers appear WITHIN these environments
+    case 'football-stadium':
+      return <FootballStadiumBackground />;
+    case 'race-track':
+      return <RaceTrackBackground />;
+    case 'concert-stage':
+      return <ConcertStageBackground />;
+    case 'castle-grounds':
+      return <CastleGroundsBackground />;
+    case 'airport-runway':
+      return <AirportRunwayBackground />;
+    case 'theme-park':
+      return <ThemeParkBackground />;
+    case 'ancient-ruins':
+      return <AncientRuinsBackground />;
+    case 'zen-garden':
+      return <ZenGardenBackground />;
+    case 'ski-resort':
+      return <SkiResortBackground />;
+    case 'vineyard':
+      return <VineyardBackground />;
     case 'none':
     default:
       return null;

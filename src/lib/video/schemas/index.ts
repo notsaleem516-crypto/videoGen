@@ -727,6 +727,17 @@ export const TowerChart3DBlockSchema = z.object({
     'steampunk-gears',  // Industrial Victorian machinery
     'alien-planet',     // Extraterrestrial landscape
     'tron-grid',        // Iconic Tron-style light grid
+    // Immersive Environment Presets - Towers appear WITHIN these
+    'football-stadium', // Full stadium with field, towers on field
+    'race-track',       // F1 style circuit with grandstands
+    'concert-stage',    // Music festival with stage and lights
+    'castle-grounds',   // Medieval castle with courtyard
+    'airport-runway',   // Planes and terminal
+    'theme-park',       // Amusement park with rides
+    'ancient-ruins',    // Temple/pillars environment
+    'zen-garden',       // Japanese peaceful garden
+    'ski-resort',       // Snowy mountain slopes
+    'vineyard',         // Rolling hills with grape vines
   ]).default('cyber-grid'),
   
   // Animation

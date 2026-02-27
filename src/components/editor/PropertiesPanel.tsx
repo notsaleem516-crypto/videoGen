@@ -1918,6 +1918,17 @@ function TowerChart3DEditor({ block, index }: EditorProps) {
                 <SelectItem value="steampunk-gears" className="text-white text-xs">⚙️ Steampunk Gears</SelectItem>
                 <SelectItem value="alien-planet" className="text-white text-xs">👽 Alien Planet</SelectItem>
                 <SelectItem value="tron-grid" className="text-white text-xs">🔷 Tron Grid</SelectItem>
+                {/* Immersive Environments - Towers appear WITHIN these */}
+                <SelectItem value="football-stadium" className="text-white text-xs">⚽ Football Stadium</SelectItem>
+                <SelectItem value="race-track" className="text-white text-xs">🏎️ Race Track</SelectItem>
+                <SelectItem value="concert-stage" className="text-white text-xs">🎸 Concert Stage</SelectItem>
+                <SelectItem value="castle-grounds" className="text-white text-xs">🏰 Castle Grounds</SelectItem>
+                <SelectItem value="airport-runway" className="text-white text-xs">✈️ Airport Runway</SelectItem>
+                <SelectItem value="theme-park" className="text-white text-xs">🎢 Theme Park</SelectItem>
+                <SelectItem value="ancient-ruins" className="text-white text-xs">🏛️ Ancient Ruins</SelectItem>
+                <SelectItem value="zen-garden" className="text-white text-xs">🎋 Zen Garden</SelectItem>
+                <SelectItem value="ski-resort" className="text-white text-xs">🎿 Ski Resort</SelectItem>
+                <SelectItem value="vineyard" className="text-white text-xs">🍇 Vineyard</SelectItem>
               </SelectContent>
             </Select>
           </div>

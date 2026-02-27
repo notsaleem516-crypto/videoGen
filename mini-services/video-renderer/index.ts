@@ -429,7 +429,10 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
       'city-skyline', 'abstract-waves', 'space-station', 'aurora-borealis',
       'volcanic-inferno', 'crystal-caves', 'desert-dunes', 'neon-tokyo',
       'floating-islands', 'deep-ocean', 'galaxy-nebula', 'matrix-rain',
-      'ice-glacier', 'steampunk-gears', 'alien-planet', 'tron-grid'
+      'ice-glacier', 'steampunk-gears', 'alien-planet', 'tron-grid',
+      'football-stadium', 'race-track', 'concert-stage', 'castle-grounds',
+      'airport-runway', 'theme-park', 'ancient-ruins', 'zen-garden',
+      'ski-resort', 'vineyard'
     ]).default('cyber-grid'),
     introAnimation: z.enum(['fade', 'zoom', 'slide-up', 'none']).default('fade'),
     itemRevealDelay: z.number().min(0).max(0.5).default(0.05),
