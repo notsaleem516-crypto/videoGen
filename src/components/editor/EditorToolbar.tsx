@@ -2,8 +2,9 @@
 
 import { useEditorStore } from '@/store/editor-store';
 import { Button } from '@/components/ui/button';
-import { Undo2, Redo2, Code, FileJson, Upload } from 'lucide-react';
+import { Undo2, Redo2, Code, FileJson, Upload, Video, Sparkles } from 'lucide-react';
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   Dialog,
   DialogContent,
@@ -41,56 +42,69 @@ export function EditorToolbar() {
   };
 
   return (
-    <div className="h-12 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-4">
+    <div className="h-14 bg-gradient-to-r from-gray-900 via-gray-900 to-gray-950 border-b border-gray-800/50 flex items-center justify-between px-5 flex-shrink-0 backdrop-blur-xl">
       {/* Left side - Logo and title */}
       <div className="flex items-center gap-4">
-        <h1 className="text-lg font-bold text-white">
-          🎬 Video Editor
-        </h1>
-        <span className="text-xs text-gray-500">
-          {videoInput.contentBlocks.length} blocks
-        </span>
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex items-center gap-3"
+        >
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 flex items-center justify-center shadow-lg shadow-purple-500/25">
+            <Video className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-base font-bold text-white">Video Editor</h1>
+            <p className="text-[10px] text-gray-500">Dynamic Video Engine</p>
+          </div>
+        </motion.div>
+        
+        <div className="h-6 w-px bg-gray-800" />
+        
+        <div className="flex items-center gap-1">
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-400 hover:text-white disabled:opacity-30 h-8 w-8 p-0"
+              onClick={undo}
+              disabled={!canUndo()}
+              title="Undo (Ctrl+Z)"
+            >
+              <Undo2 className="w-4 h-4" />
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-400 hover:text-white disabled:opacity-30 h-8 w-8 p-0"
+              onClick={redo}
+              disabled={!canRedo()}
+              title="Redo (Ctrl+Y)"
+            >
+              <Redo2 className="w-4 h-4" />
+            </Button>
+          </motion.div>
+        </div>
       </div>
       
-      {/* Center - Undo/Redo */}
-      <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-gray-300 hover:text-white disabled:opacity-50"
-          onClick={undo}
-          disabled={!canUndo()}
-          title="Undo"
-        >
-          <Undo2 className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-gray-300 hover:text-white disabled:opacity-50"
-          onClick={redo}
-          disabled={!canRedo()}
-          title="Redo"
-        >
-          <Redo2 className="w-4 h-4" />
-        </Button>
+      {/* Center - Block count */}
+      <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-800/50 border border-gray-700/50">
+        <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+        <span className="text-xs text-gray-300">{videoInput.contentBlocks.length} blocks</span>
       </div>
       
       {/* Right side - Import/Export */}
       <div className="flex items-center gap-2">
-        {/* Import JSON */}
         <Dialog open={jsonDialogOpen} onOpenChange={setJsonDialogOpen}>
           <DialogTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-gray-300 hover:text-white"
-            >
+            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white h-8">
               <Upload className="w-4 h-4 mr-2" />
               Import
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-gray-900 border-gray-700">
+          <DialogContent className="bg-gray-900 border-gray-700 max-w-xl">
             <DialogHeader>
               <DialogTitle className="text-white">Import JSON Project</DialogTitle>
             </DialogHeader>
@@ -99,54 +113,36 @@ export function EditorToolbar() {
                 value={importJson}
                 onChange={(e) => setImportJson(e.target.value)}
                 placeholder="Paste your JSON here..."
-                className="bg-gray-800 border-gray-700 text-white min-h-[300px] font-mono text-sm"
+                className="bg-gray-800/50 border-gray-700 text-white min-h-[300px] font-mono text-sm"
               />
               <div className="flex gap-2 justify-end">
-                <Button
-                  variant="outline"
-                  onClick={() => setJsonDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleImport}>
-                  Import
-                </Button>
+                <Button variant="outline" onClick={() => setJsonDialogOpen(false)} className="border-gray-700">Cancel</Button>
+                <Button onClick={handleImport} className="bg-purple-600 hover:bg-purple-700">Import</Button>
               </div>
             </div>
           </DialogContent>
         </Dialog>
         
-        {/* View/Edit JSON */}
         <Dialog>
           <DialogTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-gray-300 hover:text-white"
-            >
+            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white h-8">
               <Code className="w-4 h-4 mr-2" />
               JSON
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-gray-900 border-gray-700 max-w-3xl">
+          <DialogContent className="bg-gray-900 border-gray-700 max-w-2xl">
             <DialogHeader>
               <DialogTitle className="text-white">Video JSON</DialogTitle>
             </DialogHeader>
             <Textarea
               value={getVideoJson()}
               readOnly
-              className="bg-gray-800 border-gray-700 text-white min-h-[400px] font-mono text-sm"
+              className="bg-gray-800/50 border-gray-700 text-white min-h-[400px] font-mono text-xs"
             />
           </DialogContent>
         </Dialog>
         
-        {/* Export JSON */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-gray-300 hover:text-white"
-          onClick={handleExportJson}
-        >
+        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white h-8" onClick={handleExportJson}>
           <FileJson className="w-4 h-4 mr-2" />
           Export JSON
         </Button>

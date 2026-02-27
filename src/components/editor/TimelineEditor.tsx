@@ -13,13 +13,13 @@ import {
   DragEndEvent,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   horizontalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   GripVertical, 
   Trash2, 
@@ -38,45 +38,26 @@ import {
   MessageCircle,
   LineChart,
   PieChart,
-  Grid3X3
+  Grid3X3,
+  Sparkles
 } from 'lucide-react';
 
-// Block type icons
 const BLOCK_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  stat: BarChart3,
-  comparison: BarChart3,
-  text: Type,
-  image: Image,
-  quote: Quote,
-  list: List,
-  timeline: ClockIcon,
-  callout: AlertCircle,
-  'icon-list': Grid3X3,
-  'line-chart': LineChart,
-  'pie-chart': PieChart,
-  code: Code,
-  testimonial: MessageSquare,
-  'whatsapp-chat': MessageCircle,
-  'motivational-image': Heart,
+  stat: BarChart3, comparison: BarChart3, text: Type, image: Image, quote: Quote,
+  list: List, timeline: ClockIcon, callout: AlertCircle, 'icon-list': Grid3X3,
+  'line-chart': LineChart, 'pie-chart': PieChart, code: Code, testimonial: MessageSquare,
+  'whatsapp-chat': MessageCircle, 'motivational-image': Heart,
 };
 
-// Block colors
-const BLOCK_COLORS: Record<string, string> = {
-  stat: 'bg-blue-500/20 border-blue-500',
-  comparison: 'bg-purple-500/20 border-purple-500',
-  text: 'bg-gray-500/20 border-gray-500',
-  image: 'bg-green-500/20 border-green-500',
-  quote: 'bg-yellow-500/20 border-yellow-500',
-  list: 'bg-orange-500/20 border-orange-500',
-  timeline: 'bg-cyan-500/20 border-cyan-500',
-  callout: 'bg-red-500/20 border-red-500',
-  'icon-list': 'bg-pink-500/20 border-pink-500',
-  'line-chart': 'bg-emerald-500/20 border-emerald-500',
-  'pie-chart': 'bg-amber-500/20 border-amber-500',
-  code: 'bg-slate-500/20 border-slate-500',
-  testimonial: 'bg-indigo-500/20 border-indigo-500',
-  'whatsapp-chat': 'bg-green-600/20 border-green-600',
-  'motivational-image': 'bg-rose-500/20 border-rose-500',
+const BLOCK_GRADIENTS: Record<string, string> = {
+  stat: 'from-blue-500 to-cyan-500', comparison: 'from-purple-500 to-pink-500',
+  text: 'from-gray-400 to-gray-600', image: 'from-green-500 to-emerald-500',
+  quote: 'from-yellow-500 to-orange-500', list: 'from-orange-500 to-red-500',
+  timeline: 'from-cyan-500 to-blue-500', callout: 'from-red-500 to-pink-500',
+  'icon-list': 'from-pink-500 to-rose-500', 'line-chart': 'from-emerald-500 to-teal-500',
+  'pie-chart': 'from-amber-500 to-yellow-500', code: 'from-slate-500 to-zinc-600',
+  testimonial: 'from-indigo-500 to-purple-500', 'whatsapp-chat': 'from-green-500 to-green-600',
+  'motivational-image': 'from-rose-500 to-pink-500',
 };
 
 interface SortableBlockProps {
@@ -89,211 +70,201 @@ interface SortableBlockProps {
 }
 
 function SortableBlock({ block, index, isSelected, onSelect, onDuplicate, onDelete }: SortableBlockProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: index.toString() });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: index.toString() });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 50 : 1,
   };
 
   const Icon = BLOCK_ICONS[block.type] || BarChart3;
-  const colorClass = BLOCK_COLORS[block.type] || 'bg-gray-500/20 border-gray-500';
+  const gradient = BLOCK_GRADIENTS[block.type] || 'from-gray-500 to-gray-600';
   const duration = (block as { duration?: number }).duration || 3;
 
   return (
-    <div
+    <motion.div
       ref={setNodeRef}
       style={style}
+      layout
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: isDragging ? 0.8 : 1, scale: isDragging ? 1.05 : 1 }}
+      exit={{ opacity: 0, scale: 0.8 }}
       className={`
-        flex items-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-all
-        ${colorClass}
-        ${isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-900' : ''}
-        ${isDragging ? 'shadow-lg' : ''}
+        relative flex-shrink-0 w-44 rounded-xl cursor-pointer transition-all duration-200
+        ${isSelected 
+          ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-900 shadow-lg shadow-purple-500/25' 
+          : 'hover:ring-1 hover:ring-gray-600'
+        }
+        ${isDragging ? 'shadow-2xl' : ''}
       `}
       onClick={onSelect}
     >
-      {/* Drag Handle */}
-      <button
-        {...attributes}
-        {...listeners}
-        className="p-1 hover:bg-white/10 rounded cursor-grab active:cursor-grabbing"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <GripVertical className="w-4 h-4 text-gray-400" />
-      </button>
-      
-      {/* Block Icon */}
-      <div className="w-8 h-8 rounded bg-white/10 flex items-center justify-center">
-        <Icon className="w-4 h-4 text-white" />
+      {/* Block Card */}
+      <div className="p-3 bg-gray-800/80 backdrop-blur border border-gray-700/50 rounded-xl h-full">
+        {/* Header */}
+        <div className="flex items-center gap-2 mb-2">
+          <button
+            {...attributes}
+            {...listeners}
+            className="p-1 hover:bg-white/10 rounded cursor-grab active:cursor-grabbing transition-colors"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <GripVertical className="w-4 h-4 text-gray-500" />
+          </button>
+          
+          <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
+            <Icon className="w-4 h-4 text-white" />
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-white truncate">
+              {getBlockLabel(block)}
+            </p>
+          </div>
+        </div>
+        
+        {/* Duration Bar */}
+        <div className="h-1.5 bg-gray-700/50 rounded-full overflow-hidden mb-2">
+          <div 
+            className={`h-full bg-gradient-to-r ${gradient} rounded-full`}
+            style={{ width: `${Math.min((duration / 15) * 100, 100)}%` }}
+          />
+        </div>
+        
+        {/* Footer */}
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-gray-500 flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            {duration}s
+          </span>
+          
+          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 text-gray-400 hover:text-white hover:bg-white/10"
+              onClick={(e) => { e.stopPropagation(); onDuplicate(); }}
+            >
+              <Copy className="w-3 h-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 text-gray-400 hover:text-red-400 hover:bg-white/10"
+              onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            >
+              <Trash2 className="w-3 h-3" />
+            </Button>
+          </div>
+        </div>
       </div>
-      
-      {/* Block Info */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-white truncate">
-          {getBlockLabel(block)}
-        </p>
-        <p className="text-xs text-gray-400 flex items-center gap-1">
-          <Clock className="w-3 h-3" />
-          {duration}s
-        </p>
-      </div>
-      
-      {/* Actions */}
-      <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 w-6 p-0 text-gray-400 hover:text-white hover:bg-white/10"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDuplicate();
-          }}
-        >
-          <Copy className="w-3 h-3" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 w-6 p-0 text-gray-400 hover:text-red-400 hover:bg-white/10"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-        >
-          <Trash2 className="w-3 h-3" />
-        </Button>
-      </div>
-    </div>
+    </motion.div>
   );
 }
 
 function getBlockLabel(block: { type: string; [key: string]: unknown }): string {
   switch (block.type) {
-    case 'stat':
-      return (block as { heading?: string }).heading || 'Stat';
-    case 'comparison':
-      return (block as { title?: string }).title || 'Comparison';
-    case 'text':
-      return (block as { content?: string }).content?.slice(0, 20) || 'Text';
-    case 'image':
-      return (block as { caption?: string }).caption || 'Image';
-    case 'quote':
-      return (block as { author?: string }).author ? `Quote by ${(block as { author?: string }).author}` : 'Quote';
-    case 'list':
-      return (block as { title?: string }).title || 'List';
-    case 'timeline':
-      return (block as { title?: string }).title || 'Timeline';
-    case 'callout':
-      return (block as { title?: string }).title || 'Callout';
-    case 'icon-list':
-      return (block as { title?: string }).title || 'Icon List';
-    case 'line-chart':
-      return (block as { title?: string }).title || 'Line Chart';
-    case 'pie-chart':
-      return (block as { title?: string }).title || 'Pie Chart';
-    case 'code':
-      return (block as { title?: string }).title || 'Code';
-    case 'testimonial':
-      return (block as { author?: string }).author || 'Testimonial';
-    case 'whatsapp-chat':
-      return `${(block as { messages?: unknown[] }).messages?.length || 0} Messages`;
-    case 'motivational-image':
-      return (block as { text?: string }).text?.slice(0, 20) || 'Motivational';
-    default:
-      return block.type;
+    case 'stat': return (block as { heading?: string }).heading || 'Stat';
+    case 'comparison': return (block as { title?: string }).title || 'Comparison';
+    case 'text': return ((block as { content?: string }).content?.slice(0, 15) || 'Text') + '...';
+    case 'image': return (block as { caption?: string }).caption || 'Image';
+    case 'quote': return (block as { author?: string }).author ? `Quote` : 'Quote';
+    case 'list': return (block as { title?: string }).title || 'List';
+    case 'timeline': return (block as { title?: string }).title || 'Timeline';
+    case 'callout': return (block as { title?: string }).title || 'Callout';
+    case 'icon-list': return (block as { title?: string }).title || 'Features';
+    case 'line-chart': return (block as { title?: string }).title || 'Line Chart';
+    case 'pie-chart': return (block as { title?: string }).title || 'Pie Chart';
+    case 'code': return (block as { title?: string }).title || 'Code';
+    case 'testimonial': return (block as { author?: string }).author || 'Review';
+    case 'whatsapp-chat': return `${(block as { messages?: unknown[] }).messages?.length || 0} Messages`;
+    case 'motivational-image': return ((block as { text?: string }).text?.slice(0, 12) || 'Poster') + '...';
+    default: return block.type;
   }
 }
 
 export function TimelineEditor() {
-  const { 
-    videoInput, 
-    selectedBlockIndex, 
-    selectBlock, 
-    moveBlock, 
-    duplicateBlock, 
-    removeBlock 
-  } = useEditorStore();
+  const { videoInput, selectedBlockIndex, selectBlock, moveBlock, duplicateBlock, removeBlock } = useEditorStore();
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-
     if (over && active.id !== over.id) {
-      const fromIndex = parseInt(active.id as string);
-      const toIndex = parseInt(over.id as string);
-      moveBlock(fromIndex, toIndex);
+      moveBlock(parseInt(active.id as string), parseInt(over.id as string));
     }
   };
 
-  // Calculate total duration
-  const totalDuration = videoInput.contentBlocks.reduce((acc, block) => {
-    return acc + ((block as { duration?: number }).duration || 3);
-  }, 0);
+  const totalDuration = videoInput.contentBlocks.reduce((acc, block) => 
+    acc + ((block as { duration?: number }).duration || 3), 0);
 
   return (
-    <div className="h-64 bg-gray-900 border-t border-gray-800 flex flex-col">
-      {/* Timeline Header */}
-      <div className="h-10 border-b border-gray-800 flex items-center justify-between px-4">
+    <div className="h-72 bg-gradient-to-b from-gray-900 to-gray-950 border-t border-gray-800/50 flex flex-col overflow-hidden flex-shrink-0">
+      {/* Header */}
+      <div className="h-12 border-b border-gray-800/50 flex items-center justify-between px-5 flex-shrink-0 bg-gray-900/50 backdrop-blur">
         <div className="flex items-center gap-4">
-          <h3 className="text-sm font-medium text-white">Timeline</h3>
-          <span className="text-xs text-gray-400">
-            {videoInput.contentBlocks.length} blocks • {totalDuration}s total
-          </span>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
+              <Clock className="w-4 h-4 text-white" />
+            </div>
+            <h3 className="text-sm font-semibold text-white">Timeline</h3>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-gray-800/50 border border-gray-700/50">
+            <span className="text-xs text-gray-400">{videoInput.contentBlocks.length} blocks</span>
+            <span className="text-gray-600">•</span>
+            <span className="text-xs text-gray-400">{totalDuration}s total</span>
+          </div>
         </div>
         
         {/* Time ruler */}
-        <div className="flex items-center gap-4 text-xs text-gray-500">
+        <div className="flex items-center gap-6 text-[10px] text-gray-600 font-mono">
           {[0, 5, 10, 15, 20, 25, 30].map((t) => (
-            <span key={t}>{t}s</span>
+            <span key={t} className="flex flex-col items-center">
+              <span>{t}s</span>
+              <span className="w-px h-2 bg-gray-700 mt-1" />
+            </span>
           ))}
         </div>
       </div>
       
       {/* Timeline Content */}
-      <div className="flex-1 p-4">
+      <div className="flex-1 p-4 overflow-hidden min-h-0">
         {videoInput.contentBlocks.length === 0 ? (
-          <div className="h-full flex items-center justify-center">
-            <p className="text-gray-500 text-sm">
-              Add blocks from the library to start building your video
-            </p>
-          </div>
-        ) : (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="h-full flex flex-col items-center justify-center"
           >
+            <div className="w-16 h-16 rounded-2xl bg-gray-800/50 flex items-center justify-center mb-4 border border-gray-700/50">
+              <Sparkles className="w-6 h-6 text-gray-600" />
+            </div>
+            <p className="text-gray-500 text-sm">Add blocks from the library to start</p>
+          </motion.div>
+        ) : (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext
               items={videoInput.contentBlocks.map((_, i) => i.toString())}
               strategy={horizontalListSortingStrategy}
             >
               <ScrollArea className="h-full">
                 <div className="flex gap-3 pb-2">
-                  {videoInput.contentBlocks.map((block, index) => (
-                    <SortableBlock
-                      key={index}
-                      block={block}
-                      index={index}
-                      isSelected={selectedBlockIndex === index}
-                      onSelect={() => selectBlock(index)}
-                      onDuplicate={() => duplicateBlock(index)}
-                      onDelete={() => removeBlock(index)}
-                    />
-                  ))}
+                  <AnimatePresence>
+                    {videoInput.contentBlocks.map((block, index) => (
+                      <SortableBlock
+                        key={index}
+                        block={block}
+                        index={index}
+                        isSelected={selectedBlockIndex === index}
+                        onSelect={() => selectBlock(index)}
+                        onDuplicate={() => duplicateBlock(index)}
+                        onDelete={() => removeBlock(index)}
+                      />
+                    ))}
+                  </AnimatePresence>
                 </div>
               </ScrollArea>
             </SortableContext>
