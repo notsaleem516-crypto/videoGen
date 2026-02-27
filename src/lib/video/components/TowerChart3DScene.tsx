@@ -2,26 +2,20 @@
 // TOWER CHART 3D SCENE - 3D Ranking visualization with Three.js
 // ============================================================================
 
-import React, { useRef, useMemo, useEffect, useState, Suspense } from 'react';
+import React, { useRef, useMemo, useEffect, useState, Suspense, Component } from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from 'remotion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Text, Box, Plane, ContactShadows, Billboard, Stars, useGLTF, Float, Cone, Cylinder, Sphere, Torus, MeshDistortMaterial, MeshWobbleMaterial } from '@react-three/drei';
+import { Text, Box, Plane, ContactShadows, Billboard, Stars, Float, Cone, Cylinder, Sphere, Torus, MeshDistortMaterial, MeshWobbleMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 import type { TowerChart3DBlock, AnimationPhase } from '../schemas';
 import type { MotionProfileType } from '../utils/animations';
 
 // ============================================================================
-// MODEL PRELOADER - Preload GLB files for better performance
+// GLTF LOADER - For loading custom 3D models
 // ============================================================================
 
-const preloadedModels = new Set<string>();
-
-function preloadModel(path: string) {
-  if (!preloadedModels.has(path) && path) {
-    useGLTF.preload(path);
-    preloadedModels.add(path);
-  }
-}
+// Add GLTFLoader to THREE namespace
+THREE.GLTFLoader = THREE.GLTFLoader || require('three/examples/jsm/loaders/GLTFLoader').GLTFLoader;
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -3281,16 +3275,14 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
       <ContactShadows position={[0, 0.02, 0]} opacity={0.35} scale={180} blur={2} far={80} />
       
       {customModelPath && (
-        <Suspense fallback={null}>
-          <Float speed={0.8} rotationIntensity={0.15} floatIntensity={0.4}>
-            <CustomModel 
-              modelPath={customModelPath} 
-              position={modelPos} 
-              scale={customModelScale} 
-              rotation={customModelRotation}
-            />
-          </Float>
-        </Suspense>
+        <ModelErrorBoundary>
+          <CustomModel 
+            modelPath={customModelPath} 
+            position={modelPos} 
+            scale={customModelScale} 
+            rotation={customModelRotation}
+          />
+        </ModelErrorBoundary>
       )}
       
       {towers.length > 0 && (
@@ -3333,37 +3325,75 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
   );
 }
 
+// Error boundary for custom model loading
+class ModelErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error) {
+    console.warn('Custom model failed to load:', error.message);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null;
+    }
+    return this.props.children;
+  }
+}
+
 function CustomModel({ modelPath, position, scale, rotation }: { 
   modelPath: string; 
   position: [number, number, number]; 
   scale: number;
   rotation: number;
 }) {
-  const gltf = useGLTF(modelPath);
-  const scene = gltf?.scene;
+  const [scene, setScene] = useState<THREE.Group | null>(null);
+  const [error, setError] = useState(false);
   const modelRef = useRef<THREE.Group>(null);
   
   useEffect(() => {
-    if (scene) {
-      // Reset model transforms
-      scene.position.set(0, 0, 0);
-      scene.rotation.set(0, 0, 0);
-      scene.scale.set(1, 1, 1);
-      
-      // Calculate bounding box for proper scaling
-      const box = new THREE.Box3().setFromObject(scene);
-      const size = box.getSize(new THREE.Vector3());
-      const center = box.getCenter(new THREE.Vector3());
-      
-      // Enable shadows on all meshes
-      scene.traverse((child) => {
-        if ((child as THREE.Mesh).isMesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-        }
-      });
+    if (!modelPath) {
+      setError(true);
+      return;
     }
-  }, [scene]);
+    
+    // Use the GLTF loader directly with error handling
+    const loader = new THREE.GLTFLoader();
+    
+    loader.load(
+      modelPath,
+      (gltf) => {
+        if (gltf.scene) {
+          // Reset model transforms
+          gltf.scene.position.set(0, 0, 0);
+          gltf.scene.rotation.set(0, 0, 0);
+          gltf.scene.scale.set(1, 1, 1);
+          
+          // Enable shadows on all meshes
+          gltf.scene.traverse((child) => {
+            if ((child as THREE.Mesh).isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          });
+          
+          setScene(gltf.scene);
+        }
+      },
+      undefined,
+      (err) => {
+        console.warn('Failed to load custom model:', modelPath, err);
+        setError(true);
+      }
+    );
+  }, [modelPath]);
   
   useFrame((state) => {
     if (modelRef.current) {
@@ -3372,7 +3402,7 @@ function CustomModel({ modelPath, position, scale, rotation }: {
     }
   });
   
-  if (!scene) return null;
+  if (error || !scene) return null;
   
   return <primitive ref={modelRef} object={scene.clone()} position={position} scale={scale} />;
 }
@@ -3393,13 +3423,6 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
   const { fps, width, height } = useVideoConfig();
   
   const { title = 'Rankings', subtitle, backgroundColor = '#050510', items = [], gradientStart = '#3B82F6', customModelPath } = data;
-  
-  // Preload model if provided
-  useEffect(() => {
-    if (customModelPath) {
-      preloadModel(customModelPath);
-    }
-  }, [customModelPath]);
   
   const titleOpacity = interpolate(frame, [0, 25], [0, 1], { extrapolateRight: 'clamp' });
   const titleY = interpolate(frame, [0, 25], [-35, 0], { extrapolateRight: 'clamp' });
