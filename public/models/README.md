@@ -1,45 +1,33 @@
-# Custom 3D Models
+# Custom 3D Models for Tower Chart
 
-This folder is for storing custom GLB/GLTF 3D models that can be used in the Tower Chart 3D scene.
+Place your `.glb` or `.gltf` files in this folder.
 
 ## How to Use
 
-1. Upload your GLB file to this folder
-2. In the Tower Chart 3D block settings, set the `customModelPath` to `/models/your-model.glb`
-3. The model will be rendered in the background of your 3D scene
+1. **Upload your GLB file** to this folder (`/public/models/`)
+2. **In the editor**, go to Tower Chart 3D → Custom 3D Model section
+3. **Enter the path** as: `/models/your-file-name.glb`
+
+## Example
+
+If you upload a file called `robot.glb`:
+- File location: `/public/models/robot.glb`
+- Path in editor: `/models/robot.glb`
 
 ## Supported Formats
 
-- GLB (recommended) - Binary glTF format
-- GLTF - Text-based glTF format
-
-## Recommended Model Specs
-
-- **Polygon Count**: Keep under 50k triangles for smooth performance
-- **Textures**: Embedded textures work best with GLB format
-- **Scale**: Models are automatically scaled, but units should be in meters
-- **Materials**: PBR materials supported (metalness, roughness)
+- `.glb` (recommended) - Binary glTF, smaller file size
+- `.gltf` - Text-based glTF
 
 ## Free Model Sources
 
-- [Sketchfab](https://sketchfab.com) - Filter by "Downloadable" and "Free"
+- [Sketchfab](https://sketchfab.com/features/gltf) - Filter by "Downloadable" and "GLTF"
 - [Poly Pizza](https://poly.pizza) - Free low-poly models
-- [Mixamo](https://mixamo.com) - Free animated characters
 - [Quaternius](https://quaternius.com) - Free low-poly assets
 
-## Example Usage
+## Tips
 
-```typescript
-{
-  type: 'tower-chart-3d',
-  title: 'Top Video Games',
-  customModelPath: '/models/gaming-console.glb',
-  items: [...]
-}
-```
-
-## Notes
-
-- Models are loaded asynchronously, so they may take a moment to appear
-- Large models may affect rendering performance
-- The model floats and rotates subtly in the background
+- Keep models under 50k polygons for best performance
+- Models are automatically scaled and positioned
+- The model floats and rotates slowly in the background
+- If model doesn't appear, check the browser console for errors

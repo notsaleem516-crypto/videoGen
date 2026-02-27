@@ -11,6 +11,19 @@ import type { TowerChart3DBlock, AnimationPhase } from '../schemas';
 import type { MotionProfileType } from '../utils/animations';
 
 // ============================================================================
+// MODEL PRELOADER - Preload GLB files for better performance
+// ============================================================================
+
+const preloadedModels = new Set<string>();
+
+function preloadModel(path: string) {
+  if (!preloadedModels.has(path) && path) {
+    useGLTF.preload(path);
+    preloadedModels.add(path);
+  }
+}
+
+// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -372,11 +385,23 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
 }
 
 function CustomModel({ modelPath, position, scale }: { modelPath: string; position: [number, number, number]; scale: number }) {
-  const { scene } = useGLTF(modelPath);
+  const gltf = useGLTF(modelPath);
+  const scene = gltf?.scene;
   const modelRef = useRef<THREE.Group>(null);
   
   useEffect(() => {
     if (scene) {
+      // Reset model transforms
+      scene.position.set(0, 0, 0);
+      scene.rotation.set(0, 0, 0);
+      scene.scale.set(1, 1, 1);
+      
+      // Calculate bounding box for proper scaling
+      const box = new THREE.Box3().setFromObject(scene);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+      
+      // Enable shadows on all meshes
       scene.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
           child.castShadow = true;
@@ -388,11 +413,14 @@ function CustomModel({ modelPath, position, scale }: { modelPath: string; positi
   
   useFrame((state) => {
     if (modelRef.current) {
-      modelRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 0.4) * 0.3;
+      modelRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 0.4) * 0.5;
+      modelRef.current.rotation.y = state.clock.elapsedTime * 0.15;
     }
   });
   
-  return <primitive ref={modelRef} object={scene} position={position} scale={scale} />;
+  if (!scene) return null;
+  
+  return <primitive ref={modelRef} object={scene.clone()} position={position} scale={scale} />;
 }
 
 // ============================================================================
@@ -410,7 +438,14 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   
-  const { title = 'Rankings', subtitle, backgroundColor = '#050510', items = [], gradientStart = '#3B82F6' } = data;
+  const { title = 'Rankings', subtitle, backgroundColor = '#050510', items = [], gradientStart = '#3B82F6', customModelPath } = data;
+  
+  // Preload model if provided
+  useEffect(() => {
+    if (customModelPath) {
+      preloadModel(customModelPath);
+    }
+  }, [customModelPath]);
   
   const titleOpacity = interpolate(frame, [0, 25], [0, 1], { extrapolateRight: 'clamp' });
   const titleY = interpolate(frame, [0, 25], [-35, 0], { extrapolateRight: 'clamp' });
