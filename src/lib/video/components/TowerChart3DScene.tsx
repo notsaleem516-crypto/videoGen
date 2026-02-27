@@ -5,7 +5,7 @@
 import React, { useRef, useMemo, useEffect, useState, Suspense } from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from 'remotion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Text, Box, Plane, ContactShadows, Billboard, Stars, useGLTF, Float } from '@react-three/drei';
+import { Text, Box, Plane, ContactShadows, Billboard, Stars, useGLTF, Float, Cone, Cylinder, Sphere, Torus } from '@react-three/drei';
 import * as THREE from 'three';
 import type { TowerChart3DBlock, AnimationPhase } from '../schemas';
 import type { MotionProfileType } from '../utils/animations';
@@ -101,6 +101,388 @@ function FloatingParticles() {
       <pointsMaterial size={0.4} color="#ffffff" transparent opacity={0.4} sizeAttenuation />
     </points>
   );
+}
+
+// ============================================================================
+// PRESET BACKGROUND COMPONENTS
+// ============================================================================
+
+/** Cyber Grid - Neon grid floor with glow lines */
+function CyberGridBackground({ baseColor }: { baseColor: string }) {
+  const gridRef = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (gridRef.current) {
+      gridRef.current.position.z = (state.clock.elapsedTime * 2) % 10;
+    }
+  });
+  
+  return (
+    <group>
+      {/* Main neon grid floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
+        <planeGeometry args={[300, 300]} />
+        <meshBasicMaterial color="#0a0a2a" transparent opacity={0.95} />
+      </mesh>
+      
+      {/* Animated grid lines */}
+      <group ref={gridRef}>
+        {Array.from({ length: 30 }).map((_, i) => (
+          <mesh key={`line-x-${i}`} position={[-150 + i * 10, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <planeGeometry args={[300, 0.08]} />
+            <meshBasicMaterial color="#3B82F6" transparent opacity={0.3} />
+          </mesh>
+        ))}
+        {Array.from({ length: 30 }).map((_, i) => (
+          <mesh key={`line-z-${i}`} position={[0, 0, -150 + i * 10]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[300, 0.08]} />
+            <meshBasicMaterial color="#8B5CF6" transparent opacity={0.25} />
+          </mesh>
+        ))}
+      </group>
+      
+      {/* Horizon glow */}
+      <mesh position={[0, 20, -120]} rotation={[0, 0, 0]}>
+        <planeGeometry args={[400, 80]} />
+        <meshBasicMaterial color="#3B82F6" transparent opacity={0.15} />
+      </mesh>
+    </group>
+  );
+}
+
+/** Mountain Range - Distant mountain silhouettes */
+function MountainRangeBackground() {
+  const mountains = useMemo(() => {
+    const peaks = [];
+    for (let i = 0; i < 12; i++) {
+      peaks.push({
+        x: -200 + i * 35,
+        z: -100 - Math.random() * 50,
+        height: 20 + Math.random() * 40,
+        width: 30 + Math.random() * 30,
+      });
+    }
+    return peaks;
+  }, []);
+  
+  return (
+    <group>
+      {/* Base ground */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
+        <planeGeometry args={[400, 400]} />
+        <meshStandardMaterial color="#1a1a2a" metalness={0.2} roughness={0.8} />
+      </mesh>
+      
+      {/* Mountains */}
+      {mountains.map((m, i) => (
+        <Cone
+          key={i}
+          args={[m.width / 2, m.height, 4]}
+          position={[m.x, m.height / 2 - 1, m.z]}
+          rotation={[0, Math.PI / 4, 0]}
+        >
+          <meshStandardMaterial 
+            color={`hsl(${220 + i * 5}, 30%, ${10 + i * 2}%)`}
+            metalness={0.1}
+            roughness={0.9}
+          />
+        </Cone>
+      ))}
+      
+      {/* Fog effect using large planes */}
+      <mesh position={[0, 15, -80]}>
+        <planeGeometry args={[400, 100]} />
+        <meshBasicMaterial color="#1a1a3a" transparent opacity={0.4} />
+      </mesh>
+    </group>
+  );
+}
+
+/** Ocean Waves - Animated water plane */
+function OceanWavesBackground() {
+  const waterRef = useRef<THREE.Mesh>(null);
+  const time = useRef(0);
+  
+  useFrame((state) => {
+    time.current = state.clock.elapsedTime;
+    if (waterRef.current) {
+      const geometry = waterRef.current.geometry;
+      const position = geometry.attributes.position;
+      for (let i = 0; i < position.count; i++) {
+        const x = position.getX(i);
+        const y = position.getY(i);
+        const wave = Math.sin(x * 0.1 + time.current) * 0.5 + Math.sin(y * 0.1 + time.current * 0.8) * 0.3;
+        position.setZ(i, wave);
+      }
+      position.needsUpdate = true;
+    }
+  });
+  
+  return (
+    <group>
+      {/* Animated water surface */}
+      <mesh ref={waterRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]}>
+        <planeGeometry args={[300, 300, 50, 50]} />
+        <meshStandardMaterial 
+          color="#0a4a6e" 
+          metalness={0.8} 
+          roughness={0.2}
+          transparent
+          opacity={0.9}
+        />
+      </mesh>
+      
+      {/* Water glow at horizon */}
+      <mesh position={[0, 5, -140]}>
+        <planeGeometry args={[400, 60]} />
+        <meshBasicMaterial color="#0891b2" transparent opacity={0.2} />
+      </mesh>
+      
+      {/* Distant islands */}
+      <Cone args={[8, 15, 6]} position={[-80, 6, -100]}>
+        <meshStandardMaterial color="#1a4a3a" metalness={0.1} roughness={0.9} />
+      </Cone>
+      <Cone args={[6, 12, 6]} position={[60, 5, -120]}>
+        <meshStandardMaterial color="#1a3a3a" metalness={0.1} roughness={0.9} />
+      </Cone>
+    </group>
+  );
+}
+
+/** Forest Trees - Stylized low-poly trees */
+function ForestTreesBackground() {
+  const trees = useMemo(() => {
+    const result = [];
+    for (let i = 0; i < 40; i++) {
+      result.push({
+        x: (Math.random() - 0.5) * 250,
+        z: -30 - Math.random() * 100,
+        height: 8 + Math.random() * 15,
+        scale: 0.8 + Math.random() * 0.6,
+      });
+    }
+    return result;
+  }, []);
+  
+  return (
+    <group>
+      {/* Forest floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
+        <planeGeometry args={[400, 400]} />
+        <meshStandardMaterial color="#0a2a1a" metalness={0.1} roughness={0.9} />
+      </mesh>
+      
+      {/* Trees */}
+      {trees.map((tree, i) => (
+        <group key={i} position={[tree.x, 0, tree.z]} scale={tree.scale}>
+          {/* Trunk */}
+          <Cylinder args={[0.3, 0.5, tree.height * 0.3, 6]} position={[0, tree.height * 0.15, 0]}>
+            <meshStandardMaterial color="#4a3a2a" roughness={0.9} />
+          </Cylinder>
+          {/* Foliage layers */}
+          <Cone args={[tree.height * 0.3, tree.height * 0.5, 6]} position={[0, tree.height * 0.5, 0]}>
+            <meshStandardMaterial color="#1a4a2a" roughness={0.8} />
+          </Cone>
+          <Cone args={[tree.height * 0.25, tree.height * 0.4, 6]} position={[0, tree.height * 0.7, 0]}>
+            <meshStandardMaterial color="#2a5a3a" roughness={0.8} />
+          </Cone>
+          <Cone args={[tree.height * 0.18, tree.height * 0.3, 6]} position={[0, tree.height * 0.9, 0]}>
+            <meshStandardMaterial color="#3a6a4a" roughness={0.8} />
+          </Cone>
+        </group>
+      ))}
+      
+      {/* Fog layer */}
+      <mesh position={[0, 8, -60]}>
+        <planeGeometry args={[400, 80]} />
+        <meshBasicMaterial color="#2a3a2a" transparent opacity={0.3} />
+      </mesh>
+    </group>
+  );
+}
+
+/** City Skyline - Distant city buildings */
+function CitySkylineBackground() {
+  const buildings = useMemo(() => {
+    const result = [];
+    for (let i = 0; i < 30; i++) {
+      result.push({
+        x: -150 + i * 10 + Math.random() * 5,
+        z: -80 - Math.random() * 40,
+        width: 4 + Math.random() * 8,
+        height: 15 + Math.random() * 50,
+        depth: 4 + Math.random() * 8,
+      });
+    }
+    return result;
+  }, []);
+  
+  return (
+    <group>
+      {/* City ground */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
+        <planeGeometry args={[400, 400]} />
+        <meshStandardMaterial color="#1a1a2a" metalness={0.3} roughness={0.7} />
+      </mesh>
+      
+      {/* Buildings */}
+      {buildings.map((b, i) => (
+        <Box key={i} args={[b.width, b.height, b.depth]} position={[b.x, b.height / 2, b.z]}>
+          <meshStandardMaterial 
+            color={`hsl(${220 + i * 3}, 20%, ${15 + (i % 5) * 3}%)`}
+            metalness={0.6}
+            roughness={0.4}
+          />
+        </Box>
+      ))}
+      
+      {/* City lights glow */}
+      <mesh position={[0, 30, -90]}>
+        <planeGeometry args={[350, 100]} />
+        <meshBasicMaterial color="#4a3a6a" transparent opacity={0.2} />
+      </mesh>
+      
+      {/* Neon signs glow */}
+      {buildings.slice(0, 10).map((b, i) => (
+        <mesh key={`light-${i}`} position={[b.x, b.height * 0.7, b.z + 2]}>
+          <planeGeometry args={[b.width * 0.5, 2]} />
+          <meshBasicMaterial color={['#ff0066', '#00ffff', '#ff6600', '#6600ff'][i % 4]} transparent opacity={0.4} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+/** Abstract Waves - Wave/mesh terrain */
+function AbstractWavesBackground() {
+  const terrainRef = useRef<THREE.Mesh>(null);
+  
+  useFrame((state) => {
+    if (terrainRef.current) {
+      const geometry = terrainRef.current.geometry;
+      const position = geometry.attributes.position;
+      const time = state.clock.elapsedTime;
+      
+      for (let i = 0; i < position.count; i++) {
+        const x = position.getX(i);
+        const y = position.getY(i);
+        const wave = Math.sin(x * 0.05 + time * 0.5) * 3 + Math.sin(y * 0.05 + time * 0.3) * 2;
+        position.setZ(i, wave);
+      }
+      position.needsUpdate = true;
+    }
+  });
+  
+  return (
+    <group>
+      {/* Animated terrain */}
+      <mesh ref={terrainRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -5, 0]}>
+        <planeGeometry args={[300, 300, 60, 60]} />
+        <meshStandardMaterial 
+          color="#2a1a4a" 
+          metalness={0.5} 
+          roughness={0.5}
+          wireframe
+        />
+      </mesh>
+      
+      {/* Solid base */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -6, 0]}>
+        <planeGeometry args={[300, 300]} />
+        <meshStandardMaterial color="#0a0a1a" metalness={0.3} roughness={0.7} />
+      </mesh>
+      
+      {/* Glow orbs */}
+      {Array.from({ length: 8 }).map((_, i) => (
+        <Sphere
+          key={i}
+          args={[1.5, 16, 16]}
+          position={[
+            Math.sin(i * 0.8) * 40,
+            10 + Math.sin(i * 1.2) * 5,
+            -50 + Math.cos(i * 0.8) * 30
+          ]}
+        >
+          <meshBasicMaterial color={['#3B82F6', '#8B5CF6', '#EC4899'][i % 3]} transparent opacity={0.3} />
+        </Sphere>
+      ))}
+    </group>
+  );
+}
+
+/** Space Station - Sci-fi interior feel */
+function SpaceStationBackground() {
+  const ringRef = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (ringRef.current) {
+      ringRef.current.rotation.z = state.clock.elapsedTime * 0.1;
+    }
+  });
+  
+  return (
+    <group>
+      {/* Station floor with panels */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
+        <planeGeometry args={[400, 400]} />
+        <meshStandardMaterial color="#1a1a2a" metalness={0.7} roughness={0.3} />
+      </mesh>
+      
+      {/* Panel lines */}
+      <gridHelper args={[400, 40, '#3a3a5a', '#2a2a4a']} position={[0, -0.4, 0]} />
+      
+      {/* Rotating ring structure */}
+      <group ref={ringRef} position={[0, 40, -100]}>
+        <torus args={[30, 1, 8, 32]}>
+          <meshStandardMaterial color="#4a4a6a" metalness={0.8} roughness={0.2} emissive="#3B82F6" emissiveIntensity={0.2} />
+        </torus>
+        {Array.from({ length: 8 }).map((_, i) => (
+          <mesh key={i} position={[Math.cos(i * Math.PI / 4) * 30, Math.sin(i * Math.PI / 4) * 30, 0]}>
+            <boxGeometry args={[2, 2, 2]} />
+            <meshStandardMaterial color="#6a6a8a" metalness={0.9} roughness={0.1} emissive="#8B5CF6" emissiveIntensity={0.3} />
+          </mesh>
+        ))}
+      </group>
+      
+      {/* Pillars */}
+      {[-60, -30, 0, 30, 60].map((x, i) => (
+        <Cylinder key={i} args={[1, 1.2, 80, 8]} position={[x, 40, -120]}>
+          <meshStandardMaterial color="#2a2a4a" metalness={0.6} roughness={0.4} />
+        </Cylinder>
+      ))}
+      
+      {/* Light strips */}
+      {[-50, 0, 50].map((x, i) => (
+        <mesh key={`light-${i}`} position={[x, 60, -100]}>
+          <boxGeometry args={[0.5, 0.5, 150]} />
+          <meshBasicMaterial color="#3B82F6" />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+/** Main Background Renderer - Picks the right background based on preset */
+function BackgroundRenderer({ preset, baseColor }: { preset: string; baseColor: string }) {
+  switch (preset) {
+    case 'cyber-grid':
+      return <CyberGridBackground baseColor={baseColor} />;
+    case 'mountain-range':
+      return <MountainRangeBackground />;
+    case 'ocean-waves':
+      return <OceanWavesBackground />;
+    case 'forest-trees':
+      return <ForestTreesBackground />;
+    case 'city-skyline':
+      return <CitySkylineBackground />;
+    case 'abstract-waves':
+      return <AbstractWavesBackground />;
+    case 'space-station':
+      return <SpaceStationBackground />;
+    case 'none':
+    default:
+      return null;
+  }
 }
 
 function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, rank, name, value, subtitle, image, showLabel, isHighlighted, visible }: {
@@ -281,6 +663,7 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
     customModelScale = 2,
     customModelRotation = 0,
     animationDirection = 'top-to-bottom',
+    backgroundPreset = 'cyber-grid',
   } = data;
   
   // Sort items based on animation direction
@@ -340,6 +723,9 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
     <>
       <color attach="background" args={[backgroundColor]} />
       <fog attach="fog" args={[backgroundColor, 50, 180]} />
+      
+      {/* Background preset - renders behind everything */}
+      <BackgroundRenderer preset={backgroundPreset} baseColor={groundColor} />
       
       <StarField />
       <FloatingParticles />

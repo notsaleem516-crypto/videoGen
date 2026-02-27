@@ -1887,6 +1887,26 @@ function TowerChart3DEditor({ block, index }: EditorProps) {
       
       <CollapsibleSection title="Scene" icon={Layers} defaultOpen={false}>
         <div className="space-y-3">
+          {/* Background Preset Selector */}
+          <div>
+            <Label className="text-xs text-gray-400">Background Environment</Label>
+            <Select value={(block.backgroundPreset as string) || 'cyber-grid'} onValueChange={(v) => updateBlock(index, { backgroundPreset: v })}>
+              <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-9 text-xs mt-1">
+                <SelectValue placeholder="Select environment" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectItem value="none" className="text-white text-xs">None (Stars only)</SelectItem>
+                <SelectItem value="cyber-grid" className="text-white text-xs">🌟 Cyber Grid (Neon)</SelectItem>
+                <SelectItem value="mountain-range" className="text-white text-xs">🏔️ Mountain Range</SelectItem>
+                <SelectItem value="ocean-waves" className="text-white text-xs">🌊 Ocean Waves</SelectItem>
+                <SelectItem value="forest-trees" className="text-white text-xs">🌲 Forest Trees</SelectItem>
+                <SelectItem value="city-skyline" className="text-white text-xs">🏙️ City Skyline</SelectItem>
+                <SelectItem value="abstract-waves" className="text-white text-xs">〰️ Abstract Waves</SelectItem>
+                <SelectItem value="space-station" className="text-white text-xs">🚀 Space Station</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
           <ColorPicker value={(block.backgroundColor as string) || '#0d0d1a'} onChange={(v) => updateBlock(index, { backgroundColor: v })} label="Background" />
           <ColorPicker value={(block.groundColor as string) || '#1a1a2e'} onChange={(v) => updateBlock(index, { groundColor: v })} label="Ground" />
           <SliderInput label="Tower Spacing" value={(block.towerSpacing as number) || 5} onChange={(v) => updateBlock(index, { towerSpacing: v })} min={3} max={10} step={1} unit="" />

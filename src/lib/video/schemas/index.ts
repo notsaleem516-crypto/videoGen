@@ -703,6 +703,18 @@ export const TowerChart3DBlockSchema = z.object({
   ambientIntensity: z.number().min(0.3).max(2).default(0.6),
   showLabels3D: z.boolean().default(true),
   
+  // Background Preset - Built-in 3D environments
+  backgroundPreset: z.enum([
+    'none',           // No background, just stars
+    'cyber-grid',     // Neon grid floor with glow
+    'mountain-range', // Distant mountain silhouettes
+    'ocean-waves',    // Animated ocean/water plane
+    'forest-trees',   // Stylized low-poly trees
+    'city-skyline',   // Distant city buildings
+    'abstract-waves', // Abstract wave/mesh terrain
+    'space-station',  // Space station interior feel
+  ]).default('cyber-grid'),
+  
   // Animation
   introAnimation: z.enum(['fade', 'zoom', 'slide-up', 'none']).default('fade'),
   itemRevealDelay: z.number().min(0).max(0.5).default(0.05), // Delay between item reveals
