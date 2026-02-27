@@ -22,6 +22,7 @@ export type { TextSceneProps, QuoteSceneProps, HighlightTextSceneProps } from '.
 
 export { WhatsAppChatScene } from './WhatsAppChatScene';
 export type { WhatsAppChatSceneProps } from './WhatsAppChatScene';
+export { Tower3DScene } from './Tower3DScene';
 
 // Component registry for dynamic lookup
 import { COMPONENT_IDS } from '../schemas';
@@ -97,6 +98,7 @@ export function getComponentIdForType(type: ContentBlock['type']): ComponentId {
     quote: COMPONENT_IDS.QUOTE,
     image: COMPONENT_IDS.IMAGE,
     'whatsapp-chat': COMPONENT_IDS.WHATSAPP_CHAT,
+    'tower-3d': COMPONENT_IDS.TOWER_3D,
   };
   
   return mapping[type] ?? COMPONENT_IDS.TEXT;

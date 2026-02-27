@@ -33,6 +33,7 @@ import { CTAScene } from '../components/CTAScene';
 import { GradientTextScene } from '../components/GradientTextScene';
 import { AnimatedBgScene } from '../components/AnimatedBgScene';
 import { CountdownScene } from '../components/CountdownScene';
+import { Tower3DScene } from '../components/Tower3DScene';
 import {
   type VideoInput,
   type AIDecision,
@@ -63,6 +64,7 @@ import {
   type GradientTextBlock,
   type AnimatedBackgroundBlock,
   type CountdownBlock,
+  type Tower3DBlock,
   COMPONENT_IDS,
 } from '../schemas';
 import { getTheme } from '../utils/theme';
@@ -422,6 +424,16 @@ function SceneRenderer({
           animation={animation}
         />
       );
+
+    case COMPONENT_IDS.TOWER_3D:
+      return (
+        <Tower3DScene
+          data={block as Tower3DBlock}
+          theme={theme}
+          motionProfile={motionProfile}
+          animation={animation}
+        />
+      );
       
     default:
       // Fallback: render based on block type directly
@@ -488,6 +500,8 @@ function renderByBlockType(
       return <AnimatedBgScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
     case 'countdown':
       return <CountdownScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
+    case 'tower-3d':
+      return <Tower3DScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
     default:
       return (
         <TextScene

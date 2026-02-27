@@ -35,6 +35,7 @@ const BLOCK_CATEGORIES = [
       { type: 'pie-chart', label: 'Pie Chart', icon: PieChart, gradient: 'from-amber-500 to-yellow-500', description: 'Data breakdown' },
       { type: 'counter', label: 'Counter', icon: Timer, gradient: 'from-cyan-500 to-blue-500', description: 'Animated counter' },
       { type: 'progress-bar', label: 'Progress', icon: BarChart3, gradient: 'from-green-500 to-emerald-500', description: 'Progress bar' },
+      { type: 'tower-3d', label: 'Tower 3D', icon: BarChart3, gradient: 'from-sky-500 to-indigo-600', description: '3D ranking tower' },
     ],
   },
   {

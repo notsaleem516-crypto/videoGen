@@ -620,6 +620,37 @@ export const CountdownBlockSchema = z.object({
 export type CountdownBlock = z.infer<typeof CountdownBlockSchema>;
 
 /**
+ * 3D Tower item schema
+ */
+export const Tower3DItemSchema = z.object({
+  rank: z.number().int().min(1).max(20).optional(),
+  name: z.string().min(1).max(80),
+  value: z.number().min(0),
+  color: z.string().optional(),
+});
+
+export type Tower3DItem = z.infer<typeof Tower3DItemSchema>;
+
+/**
+ * 3D Tower block schema
+ */
+export const Tower3DBlockSchema = z.object({
+  type: z.literal('tower-3d'),
+  title: z.string().max(120).default('Top 20'),
+  categoryLabel: z.string().max(80).default('Video Games'),
+  valueLabel: z.string().max(40).default('Units Sold'),
+  items: z.array(Tower3DItemSchema).min(2).max(20),
+  pauseMs: z.number().min(50).max(2000).default(250),
+  travelMs: z.number().min(100).max(4000).default(700),
+  towerWidth: z.number().min(0.8).max(4).default(2),
+  towerDepth: z.number().min(0.8).max(4).default(2),
+  minHeight: z.number().min(0.8).max(6).default(1.2),
+  maxHeight: z.number().min(2).max(18).default(8.5),
+}).merge(BlockCustomizationSchema);
+
+export type Tower3DBlock = z.infer<typeof Tower3DBlockSchema>;
+
+/**
  * Union type for all content blocks
  */
 export const ContentBlockSchema = z.discriminatedUnion('type', [
@@ -649,6 +680,7 @@ export const ContentBlockSchema = z.discriminatedUnion('type', [
   GradientTextBlockSchema,
   AnimatedBackgroundBlockSchema,
   CountdownBlockSchema,
+  Tower3DBlockSchema,
 ]);
 
 export type ContentBlock = z.infer<typeof ContentBlockSchema>;
@@ -757,6 +789,7 @@ export const COMPONENT_IDS = {
   GRADIENT_TEXT: 'gradient-text-scene',
   ANIMATED_BG: 'animated-bg-scene',
   COUNTDOWN: 'countdown-scene',
+  TOWER_3D: 'tower-3d-scene',
 } as const;
 
 export type ComponentId = typeof COMPONENT_IDS[keyof typeof COMPONENT_IDS];
@@ -791,5 +824,6 @@ export const TYPE_TO_COMPONENT_MAP: Record<string, ComponentId[]> = {
   'gradient-text': [COMPONENT_IDS.GRADIENT_TEXT],
   'animated-bg': [COMPONENT_IDS.ANIMATED_BG],
   countdown: [COMPONENT_IDS.COUNTDOWN],
+  'tower-3d': [COMPONENT_IDS.TOWER_3D],
 };
 

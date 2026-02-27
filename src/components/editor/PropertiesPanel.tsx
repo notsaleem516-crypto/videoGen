@@ -33,7 +33,7 @@ const BLOCK_ICONS: Record<string, React.ComponentType<{ className?: string }>> =
   // New blocks
   counter: Clock, 'progress-bar': BarChart3, 'qr-code': Image, video: Image,
   'avatar-grid': Users, 'social-stats': Share2, cta: MousePointer,
-  'gradient-text': Palette, 'animated-bg': Waves, countdown: Hourglass,
+  'gradient-text': Palette, 'animated-bg': Waves, countdown: Hourglass, 'tower-3d': TrendingUp,
 };
 
 const BLOCK_GRADIENTS: Record<string, string> = {
@@ -51,6 +51,7 @@ const BLOCK_GRADIENTS: Record<string, string> = {
   'avatar-grid': 'from-orange-500 to-amber-500', 'social-stats': 'from-blue-500 to-indigo-500',
   cta: 'from-emerald-500 to-teal-500', 'gradient-text': 'from-violet-500 to-fuchsia-500',
   'animated-bg': 'from-indigo-500 to-purple-500', countdown: 'from-rose-500 to-orange-500',
+  'tower-3d': 'from-sky-500 to-indigo-600',
 };
 
 // Color Picker Component
@@ -483,6 +484,7 @@ export function PropertiesPanel() {
           {blockType === 'gradient-text' && <GradientTextEditor block={selectedBlock} index={selectedBlockIndex} />}
           {blockType === 'animated-bg' && <AnimatedBgEditor block={selectedBlock} index={selectedBlockIndex} />}
           {blockType === 'countdown' && <CountdownEditor block={selectedBlock} index={selectedBlockIndex} />}
+          {blockType === 'tower-3d' && <Tower3DEditor block={selectedBlock} index={selectedBlockIndex} />}
           
           {/* Common Settings for all blocks */}
           <CommonSettings block={selectedBlock} index={selectedBlockIndex} />
@@ -1701,5 +1703,167 @@ function CountdownEditor({ block, index }: EditorProps) {
         <div className="flex items-center gap-2"><Switch checked={(block.showLabels as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { showLabels: v })} /><Label className="text-xs text-gray-400">Show Labels</Label></div>
       </div>
     </CollapsibleSection>
+  );
+}
+
+function Tower3DEditor({ block, index }: EditorProps) {
+  const { updateBlock } = useEditorStore();
+  const items = ((block.items as Array<{ rank?: number; name: string; value: number; color?: string }>) || []).slice(0, 20);
+
+  return (
+    <>
+      <CollapsibleSection title="Tower Settings" icon={TrendingUp} defaultOpen={true}>
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs text-gray-400">Title</Label>
+            <Input
+              value={(block.title as string) || ''}
+              onChange={(e) => updateBlock(index, { title: e.target.value })}
+              className="bg-gray-800/50 border-gray-700/50 text-white h-10"
+              placeholder="Top 20 Video Games"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label className="text-xs text-gray-400">Category Label</Label>
+              <Input
+                value={(block.categoryLabel as string) || ''}
+                onChange={(e) => updateBlock(index, { categoryLabel: e.target.value })}
+                className="bg-gray-800/50 border-gray-700/50 text-white h-10"
+                placeholder="All-Time Sales"
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-gray-400">Value Label</Label>
+              <Input
+                value={(block.valueLabel as string) || ''}
+                onChange={(e) => updateBlock(index, { valueLabel: e.target.value })}
+                className="bg-gray-800/50 border-gray-700/50 text-white h-10"
+                placeholder="million copies"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <SliderInput
+              label="Pause / rank"
+              value={((block.pauseMs as number) || 250) / 1000}
+              onChange={(v) => updateBlock(index, { pauseMs: Math.round(v * 1000) })}
+              min={0.05}
+              max={1.5}
+              step={0.05}
+              unit="s"
+            />
+            <SliderInput
+              label="Travel / rank"
+              value={((block.travelMs as number) || 700) / 1000}
+              onChange={(v) => updateBlock(index, { travelMs: Math.round(v * 1000) })}
+              min={0.1}
+              max={2.5}
+              step={0.05}
+              unit="s"
+            />
+          </div>
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Tower Geometry" icon={Box} defaultOpen={false}>
+        <div className="space-y-3">
+          <SliderInput
+            label="Min Height"
+            value={(block.minHeight as number) || 1.2}
+            onChange={(v) => updateBlock(index, { minHeight: v })}
+            min={0.8}
+            max={6}
+            step={0.1}
+            unit=""
+          />
+          <SliderInput
+            label="Max Height"
+            value={(block.maxHeight as number) || 8.5}
+            onChange={(v) => updateBlock(index, { maxHeight: v })}
+            min={2}
+            max={18}
+            step={0.1}
+            unit=""
+          />
+          <div className="grid grid-cols-2 gap-2">
+            <SliderInput
+              label="Tower Width"
+              value={(block.towerWidth as number) || 2}
+              onChange={(v) => updateBlock(index, { towerWidth: v })}
+              min={0.8}
+              max={4}
+              step={0.1}
+              unit=""
+            />
+            <SliderInput
+              label="Tower Depth"
+              value={(block.towerDepth as number) || 2}
+              onChange={(v) => updateBlock(index, { towerDepth: v })}
+              min={0.8}
+              max={4}
+              step={0.1}
+              unit=""
+            />
+          </div>
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Top Rankings" icon={List} defaultOpen={false}>
+        <div className="space-y-3">
+          {items.map((item, itemIndex) => (
+            <div key={itemIndex} className="bg-gray-800/40 border border-gray-700/50 rounded-lg p-3 space-y-2">
+              <div className="grid grid-cols-4 gap-2">
+                <Input
+                  value={(item.rank || itemIndex + 1).toString()}
+                  onChange={(e) => {
+                    const next = [...items];
+                    next[itemIndex] = { ...next[itemIndex], rank: parseInt(e.target.value) || itemIndex + 1 };
+                    updateBlock(index, { items: next });
+                  }}
+                  className="bg-gray-700/50 border-gray-600 text-white h-9 text-sm"
+                  placeholder="Rank"
+                />
+                <div className="col-span-3">
+                  <Input
+                    value={item.name || ''}
+                    onChange={(e) => {
+                      const next = [...items];
+                      next[itemIndex] = { ...next[itemIndex], name: e.target.value };
+                      updateBlock(index, { items: next });
+                    }}
+                    className="bg-gray-700/50 border-gray-600 text-white h-9 text-sm"
+                    placeholder="Name"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  type="number"
+                  value={(item.value ?? 0).toString()}
+                  onChange={(e) => {
+                    const next = [...items];
+                    next[itemIndex] = { ...next[itemIndex], value: parseFloat(e.target.value) || 0 };
+                    updateBlock(index, { items: next });
+                  }}
+                  className="bg-gray-700/50 border-gray-600 text-white h-9 text-sm"
+                  placeholder="Value"
+                />
+                <Input
+                  value={item.color || ''}
+                  onChange={(e) => {
+                    const next = [...items];
+                    next[itemIndex] = { ...next[itemIndex], color: e.target.value };
+                    updateBlock(index, { items: next });
+                  }}
+                  className="bg-gray-700/50 border-gray-600 text-white h-9 text-sm"
+                  placeholder="#3B82F6 (optional)"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </CollapsibleSection>
+    </>
   );
 }

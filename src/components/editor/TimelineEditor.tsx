@@ -37,7 +37,7 @@ const BLOCK_ICONS: Record<string, React.ComponentType<{ className?: string }>> =
   // New blocks
   counter: Timer, 'progress-bar': BarChart3, 'qr-code': QrCode, video: Video,
   'avatar-grid': Users, 'social-stats': Share2, cta: MousePointer,
-  'gradient-text': Palette, 'animated-bg': Waves, countdown: Hourglass,
+  'gradient-text': Palette, 'animated-bg': Waves, countdown: Hourglass, 'tower-3d': BarChart3,
 };
 
 const BLOCK_GRADIENTS: Record<string, string> = {
@@ -55,6 +55,7 @@ const BLOCK_GRADIENTS: Record<string, string> = {
   'avatar-grid': 'from-orange-500 to-amber-500', 'social-stats': 'from-blue-500 to-indigo-500',
   cta: 'from-emerald-500 to-teal-500', 'gradient-text': 'from-violet-500 to-fuchsia-500',
   'animated-bg': 'from-indigo-500 to-purple-500', countdown: 'from-rose-500 to-orange-500',
+  'tower-3d': 'from-sky-500 to-indigo-600',
 };
 
 interface SortableBlockProps {
@@ -194,6 +195,7 @@ function getBlockLabel(block: { type: string; [key: string]: unknown }): string 
     case 'gradient-text': return ((block as { text?: string }).text?.slice(0, 12) || 'Gradient') + '...';
     case 'animated-bg': return 'Background';
     case 'countdown': return (block as { title?: string }).title || 'Countdown';
+    case 'tower-3d': return (block as { title?: string }).title || 'Tower 3D';
     default: return block.type;
   }
 }

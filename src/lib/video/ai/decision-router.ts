@@ -43,6 +43,7 @@ Rules:
 - icon-list→icon-list-scene, line-chart→line-chart-scene, pie-chart→pie-chart-scene
 - code→code-scene, testimonial→testimonial-scene, whatsapp-chat→whatsapp-chat-scene
 - motivational-image→motivational-image-scene
+- tower-3d→tower-3d-scene
 - motionProfile: subtle|dynamic|energetic (complexity-based)
 - duration: 2-8s for most content, 5-60s for whatsapp-chat, 4-120s for motivational-image (use provided duration if available)
 - animation: enter/hold/exit in seconds, total=duration`;
@@ -130,6 +131,7 @@ function validateComponentId(componentId: string, blockType: string): string {
     'testimonial': COMPONENT_IDS.TESTIMONIAL,
     'whatsapp-chat': COMPONENT_IDS.WHATSAPP_CHAT,
     'motivational-image': COMPONENT_IDS.MOTIVATIONAL_IMAGE,
+    'tower-3d': COMPONENT_IDS.TOWER_3D,
   };
 
   return validMapping[blockType] || componentId;
@@ -155,6 +157,7 @@ function getDefaultDecision(block: ContentBlock, index: number): AIDecision {
     testimonial: COMPONENT_IDS.TESTIMONIAL,
     'whatsapp-chat': COMPONENT_IDS.WHATSAPP_CHAT,
     'motivational-image': COMPONENT_IDS.MOTIVATIONAL_IMAGE,
+    'tower-3d': COMPONENT_IDS.TOWER_3D,
   };
 
   // Determine motion profile based on content complexity
@@ -174,6 +177,8 @@ function getDefaultDecision(block: ContentBlock, index: number): AIDecision {
     motionProfile = 'subtle'; // Chat should have subtle, natural animations
   } else if (block.type === 'motivational-image') {
     motionProfile = 'dynamic'; // Motivational images should have dynamic, inspiring animations
+  } else if (block.type === 'tower-3d') {
+    motionProfile = 'dynamic';
   }
 
   // Determine duration based on content
@@ -231,6 +236,11 @@ function getDefaultDecision(block: ContentBlock, index: number): AIDecision {
       const readingTime = Math.ceil(textLength / 30); // ~30 chars per second reading
       duration = Math.min(10, baseDuration + readingTime);
     }
+  } else if (block.type === 'tower-3d') {
+    const itemCount = block.items?.length || 10;
+    const holdDuration = ((block.pauseMs ?? 250) / 1000) * itemCount;
+    const travelDuration = ((block.travelMs ?? 700) / 1000) * Math.max(0, itemCount - 1);
+    duration = Math.min(30, Math.max(6, Math.round(holdDuration + travelDuration + 1)));
   }
 
   return {
