@@ -5,7 +5,7 @@
 import React, { useRef, useMemo, useEffect, useState, Suspense, Component } from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from 'remotion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Text, Box, Plane, ContactShadows, Billboard, Stars, Float, Cone, Cylinder, Sphere, Torus, MeshDistortMaterial, MeshWobbleMaterial } from '@react-three/drei';
+import { Text, Box, Plane, Billboard, Stars, Float, Cone, Cylinder, Sphere, Torus, MeshDistortMaterial, MeshWobbleMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { TowerChart3DBlock, AnimationPhase } from '../schemas';
@@ -2058,7 +2058,6 @@ function ConcertStageBackground() {
             penumbra={0.5}
             intensity={2}
             distance={40}
-            castShadow
           />
         </group>
       ))}
@@ -3048,13 +3047,13 @@ function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, ran
   return (
     <group position={position}>
       {/* Base glow */}
-      <mesh position={[0, 0.05, 0]} receiveShadow>
+      <mesh position={[0, 0.05, 0]}>
         <planeGeometry args={[width + 1.5, depth + 1.5]} />
         <meshBasicMaterial color={color} transparent opacity={0.25 * opacity} />
       </mesh>
       
       {/* Main tower */}
-      <Box args={[width, height, depth]} position={[0, height / 2, 0]} castShadow receiveShadow>
+      <Box args={[width, height, depth]} position={[0, height / 2, 0]}>
         <meshStandardMaterial 
           color={color} 
           metalness={0.5} 
@@ -3105,7 +3104,7 @@ function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, ran
 function Ground({ color }: { color: string }) {
   return (
     <group>
-      <Plane args={[400, 400]} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1, 0]} receiveShadow>
+      <Plane args={[400, 400]} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1, 0]}>
         <meshStandardMaterial color={color} metalness={0.4} roughness={0.6} />
       </Plane>
       <gridHelper args={[400, 80, '#2a2a4a', '#1a1a3a']} position={[0, 0.01, 0]} />
@@ -3259,14 +3258,13 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
       <StarField />
       <FloatingParticles />
       
-      <ambientLight intensity={ambientIntensity} />
-      <directionalLight position={[50, 80, 50]} intensity={1.1} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} shadow-camera-far={250} shadow-camera-left={-100} shadow-camera-right={100} shadow-camera-top={100} shadow-camera-bottom={-100} />
+      <ambientLight intensity={ambientIntensity + 0.3} />
+      <directionalLight position={[50, 80, 50]} intensity={1.2} />
       <directionalLight position={[-40, 50, -40]} intensity={0.4} color="#6666ff" />
       <pointLight position={[0, 80, 0]} intensity={0.6} />
-      <hemisphereLight args={['#5555aa', '#222233', 0.4]} />
+      <hemisphereLight args={['#5555aa', '#222233', 0.5]} />
       
       {showGround && <Ground color={groundColor} />}
-      <ContactShadows position={[0, 0.02, 0]} opacity={0.35} scale={180} blur={2} far={80} />
       
       {customModelPath && (
         <ModelErrorBoundary>
@@ -3370,14 +3368,6 @@ function CustomModel({ modelPath, position, scale, rotation }: {
           gltf.scene.rotation.set(0, 0, 0);
           gltf.scene.scale.set(1, 1, 1);
           
-          // Enable shadows on all meshes
-          gltf.scene.traverse((child) => {
-            if ((child as THREE.Mesh).isMesh) {
-              child.castShadow = true;
-              child.receiveShadow = true;
-            }
-          });
-          
           setScene(gltf.scene);
         }
       },
@@ -3424,10 +3414,9 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
   return (
     <AbsoluteFill style={{ backgroundColor }}>
       <Canvas
-        shadows
         camera={{ position: [35, 18, -25], fov: 50, near: 0.1, far: 600 }}
         style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
-        gl={{ antialias: true, alpha: false, preserveDrawingBuffer: true }}
+        gl={{ antialias: false, alpha: false, preserveDrawingBuffer: true, powerPreference: 'high-performance' }}
         dpr={1}
       >
         <TowerChartScene data={data} frame={frame} fps={fps} />
