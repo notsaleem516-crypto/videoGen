@@ -852,7 +852,7 @@ serve({
           );
         }
         
-        // Render the video
+        // Render the video with H264 settings for maximum compatibility
         await renderMedia({
           serveUrl: BUNDLE_PATH,
           composition: {
@@ -868,6 +868,8 @@ serve({
           inputProps: props,
           crf,
           logLevel: 'warn',
+          // Ensure audio track exists even if silent (required for some players)
+          enforceAudioTrack: true,
         });
         
         // Read the video file
@@ -981,7 +983,7 @@ serve({
           );
         }
         
-        // Render the video
+        // Render the video with H264 settings for maximum compatibility
         await renderMedia({
           serveUrl: BUNDLE_PATH,
           composition: {
@@ -997,6 +999,8 @@ serve({
           inputProps: props,
           crf,
           logLevel: 'warn',
+          // Ensure audio track exists even if silent (required for some players)
+          enforceAudioTrack: true,
         });
         
         // Read the video file
