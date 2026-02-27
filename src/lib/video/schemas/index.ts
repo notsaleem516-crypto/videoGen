@@ -640,12 +640,18 @@ export const Tower3DBlockSchema = z.object({
   categoryLabel: z.string().max(80).default('Video Games'),
   valueLabel: z.string().max(40).default('Units Sold'),
   items: z.array(Tower3DItemSchema).min(2).max(20),
+  environmentPreset: z.enum(['studio', 'sunset', 'neon']).default('studio'),
   pauseMs: z.number().min(50).max(2000).default(250),
   travelMs: z.number().min(100).max(4000).default(700),
   towerWidth: z.number().min(0.8).max(4).default(2),
   towerDepth: z.number().min(0.8).max(4).default(2),
   minHeight: z.number().min(0.8).max(6).default(1.2),
   maxHeight: z.number().min(2).max(18).default(8.5),
+  laneSpacing: z.number().min(2).max(10).default(4.5),
+  laneCurve: z.number().min(0).max(4).default(1.35),
+  cameraAngleDeg: z.number().min(20).max(70).default(46),
+  cameraDistance: z.number().min(10).max(36).default(20),
+  cameraHeight: z.number().min(5).max(24).default(12),
 }).merge(BlockCustomizationSchema);
 
 export type Tower3DBlock = z.infer<typeof Tower3DBlockSchema>;

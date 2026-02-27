@@ -1744,6 +1744,22 @@ function Tower3DEditor({ block, index }: EditorProps) {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label className="text-xs text-gray-400">Environment</Label>
+              <Select
+                value={(block.environmentPreset as string) || 'studio'}
+                onValueChange={(v) => updateBlock(index, { environmentPreset: v })}
+              >
+                <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-10">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="studio">Studio</SelectItem>
+                  <SelectItem value="sunset">Sunset</SelectItem>
+                  <SelectItem value="neon">Neon</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <SliderInput
               label="Pause / rank"
               value={((block.pauseMs as number) || 250) / 1000}
@@ -1761,6 +1777,26 @@ function Tower3DEditor({ block, index }: EditorProps) {
               max={2.5}
               step={0.05}
               unit="s"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <SliderInput
+              label="Lane Spacing"
+              value={(block.laneSpacing as number) || 4.5}
+              onChange={(v) => updateBlock(index, { laneSpacing: v })}
+              min={2}
+              max={10}
+              step={0.1}
+              unit=""
+            />
+            <SliderInput
+              label="Lane Curve"
+              value={(block.laneCurve as number) || 1.35}
+              onChange={(v) => updateBlock(index, { laneCurve: v })}
+              min={0}
+              max={4}
+              step={0.05}
+              unit=""
             />
           </div>
         </div>
@@ -1806,6 +1842,38 @@ function Tower3DEditor({ block, index }: EditorProps) {
               unit=""
             />
           </div>
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="3D Camera" icon={Video} defaultOpen={false}>
+        <div className="space-y-3">
+          <SliderInput
+            label="Camera Angle"
+            value={(block.cameraAngleDeg as number) || 46}
+            onChange={(v) => updateBlock(index, { cameraAngleDeg: v })}
+            min={20}
+            max={70}
+            step={1}
+            unit="°"
+          />
+          <SliderInput
+            label="Camera Distance"
+            value={(block.cameraDistance as number) || 20}
+            onChange={(v) => updateBlock(index, { cameraDistance: v })}
+            min={10}
+            max={36}
+            step={0.5}
+            unit=""
+          />
+          <SliderInput
+            label="Camera Height"
+            value={(block.cameraHeight as number) || 12}
+            onChange={(v) => updateBlock(index, { cameraHeight: v })}
+            min={5}
+            max={24}
+            step={0.5}
+            unit=""
+          />
         </div>
       </CollapsibleSection>
 
