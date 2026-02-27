@@ -1,0 +1,11 @@
+{
+  "name": "plugin-server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run index.ts"
+  },
+  "dependencies": {
+    "zod": "3.22.3"
+  }
+}
