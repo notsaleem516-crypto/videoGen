@@ -1,4 +1,4 @@
-import { renderMedia, getCompositions } from '@remotion/renderer';
+import { renderMedia, getCompositions, makeCancelSignal } from '@remotion/renderer';
 import { serve } from 'bun';
 import path from 'path';
 import fs from 'fs';
@@ -47,6 +47,51 @@ const QUALITY_SETTINGS: Record<string, { crf: number }> = {
   medium: { crf: 23 },
   high: { crf: 18 },
 };
+
+const MAX_VIDEO_DURATION_SECONDS = 120;
+const MAX_RENDER_TIMEOUT_MS = 15 * 60 * 1000;
+
+function sanitizeDurationSeconds(duration?: number): number | undefined {
+  if (!Number.isFinite(duration) || duration === undefined || duration <= 0) {
+    return undefined;
+  }
+
+  return Math.min(duration, MAX_VIDEO_DURATION_SECONDS);
+}
+
+function getRenderTimeoutMs(durationInFrames: number, fps: number): number {
+  const durationSeconds = Math.max(1, durationInFrames / fps);
+  const estimatedMs = durationSeconds * 4000 + 90_000;
+  return Math.min(Math.max(120_000, estimatedMs), MAX_RENDER_TIMEOUT_MS);
+}
+
+async function renderMediaWithTimeout(
+  renderOptions: Parameters<typeof renderMedia>[0],
+  timeoutMs: number
+): Promise<void> {
+  const { cancelSignal, cancel } = makeCancelSignal();
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    timeoutHandle = setTimeout(() => {
+      cancel();
+    }, timeoutMs);
+
+    await renderMedia({
+      ...renderOptions,
+      cancelSignal,
+      timeoutInMilliseconds: timeoutMs,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('got cancelled')) {
+      throw new Error(`Render timed out after ${Math.round(timeoutMs / 1000)} seconds`);
+    }
+
+    throw error;
+  } finally {
+    if (timeoutHandle) clearTimeout(timeoutHandle);
+  }
+}
 
 // ============================================================================
 // SCHEMAS (copied to avoid React context issues)
@@ -571,7 +616,11 @@ function calculateCompositionConfig(input: z.infer<typeof VideoInputSchema>) {
   const totalDurationSeconds = introDuration + contentDuration + outroDuration;
   
   // Use provided duration or calculated
-  const totalDuration = videoMeta.duration || totalDurationSeconds;
+  const userProvidedDuration = sanitizeDurationSeconds(videoMeta.duration);
+  const safeAutoDuration = Number.isFinite(totalDurationSeconds) && totalDurationSeconds > 0
+    ? Math.min(totalDurationSeconds, MAX_VIDEO_DURATION_SECONDS)
+    : 8;
+  const totalDuration = userProvidedDuration ?? safeAutoDuration;
   const durationInFrames = Math.round(totalDuration * videoMeta.fps);
   
   return {
@@ -802,6 +851,7 @@ serve({
     // Render endpoint (receives pre-calculated props)
     if (url.pathname === '/render' && req.method === 'POST') {
       const startTime = Date.now();
+      let outputPath: string | null = null;
       
       try {
         const body = await req.json();
@@ -835,7 +885,7 @@ serve({
         const tempDir = os.tmpdir();
         const videoId = crypto.randomBytes(8).toString('hex');
         const outputFileName = `video-${videoId}.mp4`;
-        const outputPath = path.join(tempDir, outputFileName);
+        outputPath = path.join(tempDir, outputFileName);
         
         const { crf } = QUALITY_SETTINGS[quality] || QUALITY_SETTINGS.medium;
         
@@ -853,7 +903,9 @@ serve({
         }
         
         // Render the video with H264 settings for maximum compatibility
-        await renderMedia({
+        const renderTimeoutMs = getRenderTimeoutMs(compositionConfig.durationInFrames, compositionConfig.fps);
+
+        await renderMediaWithTimeout({
           serveUrl: BUNDLE_PATH,
           composition: {
             id: composition.id,
@@ -870,14 +922,11 @@ serve({
           logLevel: 'warn',
           // Ensure audio track exists even if silent (required for some players)
           enforceAudioTrack: true,
-        });
+        }, renderTimeoutMs);
         
         // Read the video file
         const videoBuffer = fs.readFileSync(outputPath);
-        
-        // Clean up
-        try { fs.unlinkSync(outputPath); } catch {}
-        
+
         const processingTime = ((Date.now() - startTime) / 1000).toFixed(1);
         
         console.log(`✅ Video rendered in ${processingTime}s (${videoBuffer.length} bytes)`);
@@ -905,12 +954,17 @@ serve({
           },
           { status: 500, headers: corsHeaders }
         );
+      } finally {
+        if (outputPath && fs.existsSync(outputPath)) {
+          try { fs.unlinkSync(outputPath); } catch {}
+        }
       }
     }
     
     // Full render endpoint (handles everything from raw input)
     if (url.pathname === '/render-full' && req.method === 'POST') {
       const startTime = Date.now();
+      let outputPath: string | null = null;
       
       try {
         const body = await req.json();
@@ -966,7 +1020,7 @@ serve({
         const tempDir = os.tmpdir();
         const videoId = crypto.randomBytes(8).toString('hex');
         const outputFileName = `video-${videoId}.mp4`;
-        const outputPath = path.join(tempDir, outputFileName);
+        outputPath = path.join(tempDir, outputFileName);
         
         const { crf } = QUALITY_SETTINGS[quality] || QUALITY_SETTINGS.medium;
         
@@ -984,7 +1038,9 @@ serve({
         }
         
         // Render the video with H264 settings for maximum compatibility
-        await renderMedia({
+        const renderTimeoutMs = getRenderTimeoutMs(compositionConfig.durationInFrames, compositionConfig.fps);
+
+        await renderMediaWithTimeout({
           serveUrl: BUNDLE_PATH,
           composition: {
             id: composition.id,
@@ -1001,14 +1057,11 @@ serve({
           logLevel: 'warn',
           // Ensure audio track exists even if silent (required for some players)
           enforceAudioTrack: true,
-        });
+        }, renderTimeoutMs);
         
         // Read the video file
         const videoBuffer = fs.readFileSync(outputPath);
-        
-        // Clean up
-        try { fs.unlinkSync(outputPath); } catch {}
-        
+
         const processingTime = ((Date.now() - startTime) / 1000).toFixed(1);
         
         console.log(`✅ Video rendered in ${processingTime}s (${videoBuffer.length} bytes)`);
@@ -1037,6 +1090,10 @@ serve({
           },
           { status: 500, headers: corsHeaders }
         );
+      } finally {
+        if (outputPath && fs.existsSync(outputPath)) {
+          try { fs.unlinkSync(outputPath); } catch {}
+        }
       }
     }
     

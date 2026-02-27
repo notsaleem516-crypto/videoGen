@@ -3,7 +3,7 @@
 // ============================================================================
 
 import React, { useRef, useMemo, useEffect, useState, Suspense, Component } from 'react';
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, getRemotionEnvironment } from 'remotion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Text, Box, Plane, ContactShadows, Billboard, Stars, Float, Cone, Cylinder, Sphere, Torus, MeshDistortMaterial, MeshWobbleMaterial } from '@react-three/drei';
 import * as THREE from 'three';
@@ -3193,6 +3193,12 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
     animationDirection = 'top-to-bottom',
     backgroundPreset = 'cyber-grid',
   } = data;
+
+  const {isRendering} = getRemotionEnvironment();
+  const renderOptimized = isRendering;
+  const resolvedBackgroundPreset = renderOptimized ? 'none' : backgroundPreset;
+  const resolvedShowLabels3D = renderOptimized ? false : showLabels3D;
+  const resolvedAmbientIntensity = renderOptimized ? Math.min(ambientIntensity, 0.45) : ambientIntensity;
   
   // Sort items based on animation direction
   const sortedItems = useMemo(() => {
@@ -3234,7 +3240,7 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
   const totalItems = items.length;
   const pauseFrames = cameraPauseDuration * fps;
   const moveFrames = cameraMoveSpeed * fps;
-  const totalAnimFrames = totalItems * (pauseFrames + moveFrames);
+  const totalAnimFrames = Math.max(1, totalItems * (pauseFrames + moveFrames));
   
   const animFrame = Math.max(0, frame - introDuration);
   const animProgress = Math.min(animFrame / totalAnimFrames, 1);
@@ -3254,12 +3260,12 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
       <fog attach="fog" args={[backgroundColor, 50, 180]} />
       
       {/* Background preset - renders behind everything */}
-      <BackgroundRenderer preset={backgroundPreset} baseColor={groundColor} />
+      <BackgroundRenderer preset={resolvedBackgroundPreset} baseColor={groundColor} />
       
-      <StarField />
-      <FloatingParticles />
+      {!renderOptimized && <StarField />}
+      {!renderOptimized && <FloatingParticles />}
       
-      <ambientLight intensity={ambientIntensity} />
+      <ambientLight intensity={resolvedAmbientIntensity} />
       <directionalLight position={[50, 80, 50]} intensity={1.1} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} shadow-camera-far={250} shadow-camera-left={-100} shadow-camera-right={100} shadow-camera-top={100} shadow-camera-bottom={-100} />
       <directionalLight position={[-40, 50, -40]} intensity={0.4} color="#6666ff" />
       <pointLight position={[0, 80, 0]} intensity={0.6} />
@@ -3268,7 +3274,7 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
       {showGround && <Ground color={groundColor} />}
       <ContactShadows position={[0, 0.02, 0]} opacity={0.35} scale={180} blur={2} far={80} />
       
-      {customModelPath && (
+      {!renderOptimized && customModelPath && (
         <ModelErrorBoundary>
           <CustomModel 
             modelPath={customModelPath} 
@@ -3295,7 +3301,7 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
         const itemReveal = Math.max(0, Math.min(1, (revealProgress * totalItems * 1.2) - index * 0.12));
         const isHighlighted = index === currentIndex || index === currentIndex + 1;
         // Show label for all revealed towers (not just current window)
-        const shouldShowLabel = showLabels3D && itemReveal > 0.25 && isRevealed;
+        const shouldShowLabel = resolvedShowLabels3D && itemReveal > 0.25 && isRevealed;
         
         return (
           <Tower
