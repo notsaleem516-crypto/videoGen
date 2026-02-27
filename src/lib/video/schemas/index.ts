@@ -693,6 +693,9 @@ export const TowerChart3DBlockSchema = z.object({
   cameraMoveSpeed: z.number().min(0.3).max(3).default(0.8), // Speed between ranks (seconds)
   cameraAngle: z.number().min(0).max(90).default(30), // Viewing angle (degrees)
   
+  // Animation direction
+  animationDirection: z.enum(['top-to-bottom', 'bottom-to-top']).default('top-to-bottom'), // Camera movement direction
+  
   // Scene settings
   backgroundColor: z.string().default('#0a0a1a'),
   groundColor: z.string().default('#151525'),
@@ -706,6 +709,13 @@ export const TowerChart3DBlockSchema = z.object({
   
   // Custom 3D Model (optional GLB file path)
   customModelPath: z.string().optional(), // Path to custom GLB model in /models folder
+  customModelPosition: z.object({
+    x: z.number().default(0),
+    y: z.number().default(35),
+    z: z.number().default(-60),
+  }).optional(),
+  customModelScale: z.number().min(0.1).max(10).default(2),
+  customModelRotation: z.number().min(0).max(360).default(0),
 }).merge(BlockCustomizationSchema);
 
 export type TowerChart3DBlock = z.infer<typeof TowerChart3DBlockSchema>;

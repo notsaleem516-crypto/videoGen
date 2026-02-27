@@ -277,9 +277,18 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
     ambientIntensity = 0.5,
     itemRevealDelay = 0.06,
     customModelPath,
+    customModelPosition,
+    customModelScale = 2,
+    customModelRotation = 0,
+    animationDirection = 'top-to-bottom',
   } = data;
   
-  const sortedItems = useMemo(() => [...items].sort((a, b) => a.rank - b.rank), [items]);
+  // Sort items based on animation direction
+  const sortedItems = useMemo(() => {
+    const sorted = [...items].sort((a, b) => a.rank - b.rank);
+    // If bottom-to-top, reverse the order so we start from highest rank (last position)
+    return animationDirection === 'bottom-to-top' ? sorted.reverse() : sorted;
+  }, [items, animationDirection]);
   
   const { minValue, maxValue } = useMemo(() => {
     if (items.length === 0) return { minValue: 0, maxValue: 1 };
@@ -304,6 +313,11 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
       };
     });
   }, [sortedItems, minValue, maxValue, baseHeight, maxHeight, gradientStart, gradientEnd, useGradientByRank, towerSpacing, items.length]);
+  
+  // Model position with defaults
+  const modelPos: [number, number, number] = customModelPosition 
+    ? [customModelPosition.x, customModelPosition.y, customModelPosition.z] 
+    : [0, 35, -60];
   
   const introDuration = 40;
   const totalItems = items.length;
@@ -342,7 +356,12 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
       {customModelPath && (
         <Suspense fallback={null}>
           <Float speed={0.8} rotationIntensity={0.15} floatIntensity={0.4}>
-            <CustomModel modelPath={customModelPath} position={[0, 35, -60]} scale={2} />
+            <CustomModel 
+              modelPath={customModelPath} 
+              position={modelPos} 
+              scale={customModelScale} 
+              rotation={customModelRotation}
+            />
           </Float>
         </Suspense>
       )}
@@ -384,7 +403,12 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
   );
 }
 
-function CustomModel({ modelPath, position, scale }: { modelPath: string; position: [number, number, number]; scale: number }) {
+function CustomModel({ modelPath, position, scale, rotation }: { 
+  modelPath: string; 
+  position: [number, number, number]; 
+  scale: number;
+  rotation: number;
+}) {
   const gltf = useGLTF(modelPath);
   const scene = gltf?.scene;
   const modelRef = useRef<THREE.Group>(null);
@@ -414,7 +438,7 @@ function CustomModel({ modelPath, position, scale }: { modelPath: string; positi
   useFrame((state) => {
     if (modelRef.current) {
       modelRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 0.4) * 0.5;
-      modelRef.current.rotation.y = state.clock.elapsedTime * 0.15;
+      modelRef.current.rotation.y = (rotation * Math.PI / 180) + state.clock.elapsedTime * 0.15;
     }
   });
   

@@ -1866,6 +1866,18 @@ function TowerChart3DEditor({ block, index }: EditorProps) {
       
       <CollapsibleSection title="Camera" icon={Move} defaultOpen={false}>
         <div className="space-y-3">
+          <div>
+            <Label className="text-xs text-gray-400">Animation Direction</Label>
+            <Select value={(block.animationDirection as string) || 'top-to-bottom'} onValueChange={(v) => updateBlock(index, { animationDirection: v })}>
+              <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-9 text-xs mt-1">
+                <SelectValue placeholder="Select direction" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectItem value="top-to-bottom" className="text-white text-xs">Top to Bottom (Rank 1 → 10)</SelectItem>
+                <SelectItem value="bottom-to-top" className="text-white text-xs">Bottom to Top (Rank 10 → 1)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <SliderInput label="Camera Distance" value={(block.cameraDistance as number) || 25} onChange={(v) => updateBlock(index, { cameraDistance: v })} min={15} max={50} step={5} unit="" />
           <SliderInput label="Camera Angle" value={(block.cameraAngle as number) || 25} onChange={(v) => updateBlock(index, { cameraAngle: v })} min={0} max={60} step={5} unit="°" />
           <SliderInput label="Pause Duration" value={(block.cameraPauseDuration as number) || 0.5} onChange={(v) => updateBlock(index, { cameraPauseDuration: v })} min={0.2} max={2} step={0.1} unit="s" />
@@ -1897,6 +1909,65 @@ function TowerChart3DEditor({ block, index }: EditorProps) {
             />
             <p className="text-[10px] text-gray-500 mt-1">Upload GLB files to /public/models/ folder</p>
           </div>
+          
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <Label className="text-[10px] text-gray-500">X Position</Label>
+              <Input 
+                type="number"
+                value={((block.customModelPosition as { x?: number; y?: number; z?: number })?.x) ?? 0}
+                onChange={(e) => updateBlock(index, { 
+                  customModelPosition: { 
+                    ...((block.customModelPosition as { x?: number; y?: number; z?: number }) || { x: 0, y: 35, z: -60 }), 
+                    x: parseFloat(e.target.value) || 0 
+                  } 
+                })}
+                className="bg-gray-800/50 border-gray-700/50 text-white h-8 text-xs mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-[10px] text-gray-500">Y Position</Label>
+              <Input 
+                type="number"
+                value={((block.customModelPosition as { x?: number; y?: number; z?: number })?.y) ?? 35}
+                onChange={(e) => updateBlock(index, { 
+                  customModelPosition: { 
+                    ...((block.customModelPosition as { x?: number; y?: number; z?: number }) || { x: 0, y: 35, z: -60 }), 
+                    y: parseFloat(e.target.value) || 35 
+                  } 
+                })}
+                className="bg-gray-800/50 border-gray-700/50 text-white h-8 text-xs mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-[10px] text-gray-500">Z Position</Label>
+              <Input 
+                type="number"
+                value={((block.customModelPosition as { x?: number; y?: number; z?: number })?.z) ?? -60}
+                onChange={(e) => updateBlock(index, { 
+                  customModelPosition: { 
+                    ...((block.customModelPosition as { x?: number; y?: number; z?: number }) || { x: 0, y: 35, z: -60 }), 
+                    z: parseFloat(e.target.value) || -60 
+                  } 
+                })}
+                className="bg-gray-800/50 border-gray-700/50 text-white h-8 text-xs mt-1"
+              />
+            </div>
+          </div>
+          
+          <SliderInput 
+            label="Model Scale" 
+            value={(block.customModelScale as number) || 2} 
+            onChange={(v) => updateBlock(index, { customModelScale: v })} 
+            min={0.5} max={10} step={0.5} unit="" 
+          />
+          
+          <SliderInput 
+            label="Model Rotation" 
+            value={(block.customModelRotation as number) || 0} 
+            onChange={(v) => updateBlock(index, { customModelRotation: v })} 
+            min={0} max={360} step={15} unit="°" 
+          />
         </div>
       </CollapsibleSection>
     </>
