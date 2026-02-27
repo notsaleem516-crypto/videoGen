@@ -10,8 +10,12 @@ import {
 } from '@/components/editor';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion } from 'framer-motion';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 export function VideoEditor() {
+  // Initialize keyboard shortcuts
+  useKeyboardShortcuts();
+
   return (
     <div className="h-screen flex flex-col bg-gray-950 overflow-hidden">
       {/* Top Toolbar */}

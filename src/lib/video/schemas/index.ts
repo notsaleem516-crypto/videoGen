@@ -397,6 +397,177 @@ export const MotivationalImageBlockSchema = z.object({
 
 export type MotivationalImageBlock = z.infer<typeof MotivationalImageBlockSchema>;
 
+// ============================================================================
+// NEW ADVANCED BLOCK SCHEMAS
+// ============================================================================
+
+/**
+ * Counter Block Schema - Animated counting numbers
+ */
+export const CounterBlockSchema = z.object({
+  type: z.literal('counter'),
+  label: z.string().max(100),
+  from: z.number().default(0),
+  to: z.number().default(100),
+  duration: z.number().min(1).max(10).default(3),
+  prefix: z.string().max(20).optional(),
+  suffix: z.string().max(20).optional(),
+  decimals: z.number().min(0).max(5).default(0),
+  color: z.string().default('#3B82F6'),
+  animationStyle: z.enum(['linear', 'easeOut', 'easeInOut', 'bounce']).default('easeOut'),
+});
+
+export type CounterBlock = z.infer<typeof CounterBlockSchema>;
+
+/**
+ * Progress Bar Block Schema
+ */
+export const ProgressBarBlockSchema = z.object({
+  type: z.literal('progress-bar'),
+  label: z.string().max(100).optional(),
+  value: z.number().min(0).max(100).default(75),
+  color: z.string().default('#10B981'),
+  backgroundColor: z.string().default('#1F2937'),
+  height: z.enum(['small', 'medium', 'large']).default('medium'),
+  showPercentage: z.boolean().default(true),
+  animated: z.boolean().default(true),
+  stripes: z.boolean().default(false),
+});
+
+export type ProgressBarBlock = z.infer<typeof ProgressBarBlockSchema>;
+
+/**
+ * QR Code Block Schema
+ */
+export const QRCodeBlockSchema = z.object({
+  type: z.literal('qr-code'),
+  data: z.string().min(1).max(500),
+  title: z.string().max(100).optional(),
+  subtitle: z.string().max(200).optional(),
+  size: z.enum(['small', 'medium', 'large']).default('medium'),
+  fgColor: z.string().default('#000000'),
+  bgColor: z.string().default('#FFFFFF'),
+});
+
+export type QRCodeBlock = z.infer<typeof QRCodeBlockSchema>;
+
+/**
+ * Video/GIF Block Schema
+ */
+export const VideoBlockSchema = z.object({
+  type: z.literal('video'),
+  src: z.string().min(1),
+  poster: z.string().optional(),
+  autoPlay: z.boolean().default(true),
+  loop: z.boolean().default(false),
+  muted: z.boolean().default(true),
+  controls: z.boolean().default(false),
+  caption: z.string().max(200).optional(),
+});
+
+export type VideoBlock = z.infer<typeof VideoBlockSchema>;
+
+/**
+ * Avatar Grid Block Schema
+ */
+export const AvatarGridBlockSchema = z.object({
+  type: z.literal('avatar-grid'),
+  title: z.string().max(100).optional(),
+  subtitle: z.string().max(200).optional(),
+  avatars: z.array(z.object({
+    name: z.string().max(50),
+    role: z.string().max(100).optional(),
+    image: z.string().optional(),
+  })).min(1).max(12),
+  layout: z.enum(['grid', 'carousel', 'stacked']).default('grid'),
+  columns: z.number().min(2).max(6).default(3),
+});
+
+export type AvatarGridBlock = z.infer<typeof AvatarGridBlockSchema>;
+
+/**
+ * Social Stats Block Schema
+ */
+export const SocialStatsBlockSchema = z.object({
+  type: z.literal('social-stats'),
+  platform: z.enum(['twitter', 'instagram', 'youtube', 'tiktok', 'linkedin', 'facebook']),
+  username: z.string().max(50),
+  followers: z.number().min(0),
+  posts: z.number().min(0).optional(),
+  likes: z.number().min(0).optional(),
+  verified: z.boolean().default(false),
+  showGrowth: z.boolean().default(true),
+  growthPercentage: z.number().optional(),
+});
+
+export type SocialStatsBlock = z.infer<typeof SocialStatsBlockSchema>;
+
+/**
+ * CTA Button Block Schema
+ */
+export const CTABlockSchema = z.object({
+  type: z.literal('cta'),
+  text: z.string().max(50),
+  description: z.string().max(200).optional(),
+  buttonStyle: z.enum(['primary', 'secondary', 'outline', 'ghost']).default('primary'),
+  color: z.string().default('#3B82F6'),
+  size: z.enum(['small', 'medium', 'large']).default('large'),
+  icon: z.string().optional(),
+  pulse: z.boolean().default(true),
+});
+
+export type CTABlock = z.infer<typeof CTABlockSchema>;
+
+/**
+ * Gradient Text Block Schema
+ */
+export const GradientTextBlockSchema = z.object({
+  type: z.literal('gradient-text'),
+  text: z.string().max(200),
+  gradient: z.array(z.string()).min(2).max(5).default(['#3B82F6', '#8B5CF6']),
+  angle: z.number().min(0).max(360).default(45),
+  animate: z.boolean().default(true),
+  animationSpeed: z.number().min(1).max(10).default(3),
+  fontSize: z.enum(['small', 'medium', 'large', 'xlarge', 'xxlarge']).default('xlarge'),
+  fontWeight: z.enum(['normal', 'bold', 'black']).default('bold'),
+});
+
+export type GradientTextBlock = z.infer<typeof GradientTextBlockSchema>;
+
+/**
+ * Animated Background Block Schema
+ */
+export const AnimatedBackgroundBlockSchema = z.object({
+  type: z.literal('animated-bg'),
+  style: z.enum(['particles', 'waves', 'gradient', 'noise', 'geometric', 'aurora']),
+  primaryColor: z.string().default('#3B82F6'),
+  secondaryColor: z.string().default('#8B5CF6'),
+  speed: z.number().min(0.5).max(5).default(1),
+  intensity: z.number().min(0.1).max(1).default(0.5),
+  overlay: z.boolean().default(false),
+  overlayOpacity: z.number().min(0).max(1).default(0.3),
+});
+
+export type AnimatedBackgroundBlock = z.infer<typeof AnimatedBackgroundBlockSchema>;
+
+/**
+ * Countdown Timer Block Schema
+ */
+export const CountdownBlockSchema = z.object({
+  type: z.literal('countdown'),
+  title: z.string().max(100).optional(),
+  targetDate: z.string().optional(), // ISO date string
+  days: z.number().min(0).optional(),
+  hours: z.number().min(0).max(23).optional(),
+  minutes: z.number().min(0).max(59).optional(),
+  seconds: z.number().min(0).max(59).optional(),
+  style: z.enum(['modern', 'classic', 'minimal', 'flip']).default('modern'),
+  color: z.string().default('#FFFFFF'),
+  showLabels: z.boolean().default(true),
+});
+
+export type CountdownBlock = z.infer<typeof CountdownBlockSchema>;
+
 /**
  * Union type for all content blocks
  */
@@ -416,6 +587,17 @@ export const ContentBlockSchema = z.discriminatedUnion('type', [
   TestimonialBlockSchema,
   WhatsAppChatBlockSchema,
   MotivationalImageBlockSchema,
+  // New blocks
+  CounterBlockSchema,
+  ProgressBarBlockSchema,
+  QRCodeBlockSchema,
+  VideoBlockSchema,
+  AvatarGridBlockSchema,
+  SocialStatsBlockSchema,
+  CTABlockSchema,
+  GradientTextBlockSchema,
+  AnimatedBackgroundBlockSchema,
+  CountdownBlockSchema,
 ]);
 
 export type ContentBlock = z.infer<typeof ContentBlockSchema>;
@@ -513,6 +695,17 @@ export const COMPONENT_IDS = {
   TESTIMONIAL: 'testimonial-scene',
   WHATSAPP_CHAT: 'whatsapp-chat-scene',
   MOTIVATIONAL_IMAGE: 'motivational-image-scene',
+  // New components
+  COUNTER: 'counter-scene',
+  PROGRESS_BAR: 'progress-bar-scene',
+  QR_CODE: 'qr-code-scene',
+  VIDEO: 'video-scene',
+  AVATAR_GRID: 'avatar-grid-scene',
+  SOCIAL_STATS: 'social-stats-scene',
+  CTA: 'cta-scene',
+  GRADIENT_TEXT: 'gradient-text-scene',
+  ANIMATED_BG: 'animated-bg-scene',
+  COUNTDOWN: 'countdown-scene',
 } as const;
 
 export type ComponentId = typeof COMPONENT_IDS[keyof typeof COMPONENT_IDS];
@@ -536,5 +729,16 @@ export const TYPE_TO_COMPONENT_MAP: Record<string, ComponentId[]> = {
   testimonial: [COMPONENT_IDS.TESTIMONIAL],
   'whatsapp-chat': [COMPONENT_IDS.WHATSAPP_CHAT],
   'motivational-image': [COMPONENT_IDS.MOTIVATIONAL_IMAGE],
+  // New block types
+  counter: [COMPONENT_IDS.COUNTER],
+  'progress-bar': [COMPONENT_IDS.PROGRESS_BAR],
+  'qr-code': [COMPONENT_IDS.QR_CODE],
+  video: [COMPONENT_IDS.VIDEO],
+  'avatar-grid': [COMPONENT_IDS.AVATAR_GRID],
+  'social-stats': [COMPONENT_IDS.SOCIAL_STATS],
+  cta: [COMPONENT_IDS.CTA],
+  'gradient-text': [COMPONENT_IDS.GRADIENT_TEXT],
+  'animated-bg': [COMPONENT_IDS.ANIMATED_BG],
+  countdown: [COMPONENT_IDS.COUNTDOWN],
 };
 

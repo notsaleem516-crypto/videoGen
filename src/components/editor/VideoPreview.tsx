@@ -26,6 +26,17 @@ function generatePlanFromBlocks(videoInput: { contentBlocks: Array<{ type: strin
     'testimonial': COMPONENT_IDS.TESTIMONIAL,
     'whatsapp-chat': COMPONENT_IDS.WHATSAPP_CHAT,
     'motivational-image': COMPONENT_IDS.MOTIVATIONAL_IMAGE,
+    // New blocks
+    'counter': COMPONENT_IDS.COUNTER,
+    'progress-bar': COMPONENT_IDS.PROGRESS_BAR,
+    'qr-code': COMPONENT_IDS.QR_CODE,
+    'video': COMPONENT_IDS.VIDEO,
+    'avatar-grid': COMPONENT_IDS.AVATAR_GRID,
+    'social-stats': COMPONENT_IDS.SOCIAL_STATS,
+    'cta': COMPONENT_IDS.CTA,
+    'gradient-text': COMPONENT_IDS.GRADIENT_TEXT,
+    'animated-bg': COMPONENT_IDS.ANIMATED_BG,
+    'countdown': COMPONENT_IDS.COUNTDOWN,
   };
 
   const decisions: AIDecision[] = videoInput.contentBlocks.map((block) => {
@@ -50,6 +61,10 @@ function getDefaultDuration(type: string): number {
     'stat': 3, 'comparison': 4, 'text': 3, 'image': 4, 'quote': 4, 'list': 5,
     'timeline': 6, 'callout': 3, 'icon-list': 5, 'line-chart': 5, 'pie-chart': 5,
     'code': 6, 'testimonial': 5, 'whatsapp-chat': 8, 'motivational-image': 6,
+    // New blocks
+    'counter': 4, 'progress-bar': 3, 'qr-code': 4, 'video': 5,
+    'avatar-grid': 5, 'social-stats': 4, 'cta': 3, 'gradient-text': 4,
+    'animated-bg': 5, 'countdown': 4,
   };
   return durations[type] || 4;
 }

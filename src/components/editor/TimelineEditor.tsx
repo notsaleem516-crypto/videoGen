@@ -3,6 +3,7 @@
 import { useEditorStore } from '@/store/editor-store';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Slider } from '@/components/ui/slider';
 import {
   DndContext,
   closestCenter,
@@ -21,32 +22,22 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  GripVertical, 
-  Trash2, 
-  Copy, 
-  Clock,
-  BarChart3,
-  Type,
-  Image,
-  Quote,
-  List,
-  Clock as ClockIcon,
-  AlertCircle,
-  MessageSquare,
-  Code,
-  Heart,
-  MessageCircle,
-  LineChart,
-  PieChart,
-  Grid3X3,
-  Sparkles
+  GripVertical, Trash2, Copy, Clock, BarChart3, Type, Image, Quote,
+  List, AlertCircle, MessageSquare, Code, Heart, MessageCircle,
+  LineChart, PieChart, Grid3X3, Sparkles, ZoomIn, ZoomOut, Timer,
+  QrCode, Video, Users, Share2, MousePointer, Palette, Waves, Hourglass
 } from 'lucide-react';
+import { useState } from 'react';
 
 const BLOCK_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   stat: BarChart3, comparison: BarChart3, text: Type, image: Image, quote: Quote,
-  list: List, timeline: ClockIcon, callout: AlertCircle, 'icon-list': Grid3X3,
+  list: List, timeline: Clock, callout: AlertCircle, 'icon-list': Grid3X3,
   'line-chart': LineChart, 'pie-chart': PieChart, code: Code, testimonial: MessageSquare,
   'whatsapp-chat': MessageCircle, 'motivational-image': Heart,
+  // New blocks
+  counter: Timer, 'progress-bar': BarChart3, 'qr-code': QrCode, video: Video,
+  'avatar-grid': Users, 'social-stats': Share2, cta: MousePointer,
+  'gradient-text': Palette, 'animated-bg': Waves, countdown: Hourglass,
 };
 
 const BLOCK_GRADIENTS: Record<string, string> = {
@@ -58,18 +49,25 @@ const BLOCK_GRADIENTS: Record<string, string> = {
   'pie-chart': 'from-amber-500 to-yellow-500', code: 'from-slate-500 to-zinc-600',
   testimonial: 'from-indigo-500 to-purple-500', 'whatsapp-chat': 'from-green-500 to-green-600',
   'motivational-image': 'from-rose-500 to-pink-500',
+  // New blocks
+  counter: 'from-cyan-500 to-blue-500', 'progress-bar': 'from-green-500 to-emerald-500',
+  'qr-code': 'from-slate-500 to-gray-600', video: 'from-red-500 to-rose-500',
+  'avatar-grid': 'from-orange-500 to-amber-500', 'social-stats': 'from-blue-500 to-indigo-500',
+  cta: 'from-emerald-500 to-teal-500', 'gradient-text': 'from-violet-500 to-fuchsia-500',
+  'animated-bg': 'from-indigo-500 to-purple-500', countdown: 'from-rose-500 to-orange-500',
 };
 
 interface SortableBlockProps {
   block: { type: string; [key: string]: unknown };
   index: number;
   isSelected: boolean;
+  zoom: number;
   onSelect: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
 }
 
-function SortableBlock({ block, index, isSelected, onSelect, onDuplicate, onDelete }: SortableBlockProps) {
+function SortableBlock({ block, index, isSelected, zoom, onSelect, onDuplicate, onDelete }: SortableBlockProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: index.toString() });
 
   const style = {
@@ -81,6 +79,10 @@ function SortableBlock({ block, index, isSelected, onSelect, onDuplicate, onDele
   const Icon = BLOCK_ICONS[block.type] || BarChart3;
   const gradient = BLOCK_GRADIENTS[block.type] || 'from-gray-500 to-gray-600';
   const duration = (block as { duration?: number }).duration || 3;
+  
+  // Calculate width based on zoom level
+  const baseWidth = 120;
+  const width = Math.max(100, baseWidth * zoom);
 
   return (
     <motion.div
@@ -91,13 +93,14 @@ function SortableBlock({ block, index, isSelected, onSelect, onDuplicate, onDele
       animate={{ opacity: isDragging ? 0.8 : 1, scale: isDragging ? 1.05 : 1 }}
       exit={{ opacity: 0, scale: 0.8 }}
       className={`
-        relative flex-shrink-0 w-44 rounded-xl cursor-pointer transition-all duration-200
+        relative flex-shrink-0 rounded-xl cursor-pointer transition-all duration-200 group
         ${isSelected 
           ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-900 shadow-lg shadow-purple-500/25' 
           : 'hover:ring-1 hover:ring-gray-600'
         }
         ${isDragging ? 'shadow-2xl' : ''}
       `}
+      style={{ width: `${width}px` }}
       onClick={onSelect}
     >
       {/* Block Card */}
@@ -127,7 +130,7 @@ function SortableBlock({ block, index, isSelected, onSelect, onDuplicate, onDele
         {/* Duration Bar */}
         <div className="h-1.5 bg-gray-700/50 rounded-full overflow-hidden mb-2">
           <div 
-            className={`h-full bg-gradient-to-r ${gradient} rounded-full`}
+            className={`h-full bg-gradient-to-r ${gradient} rounded-full transition-all duration-300`}
             style={{ width: `${Math.min((duration / 15) * 100, 100)}%` }}
           />
         </div>
@@ -169,7 +172,7 @@ function getBlockLabel(block: { type: string; [key: string]: unknown }): string 
     case 'comparison': return (block as { title?: string }).title || 'Comparison';
     case 'text': return ((block as { content?: string }).content?.slice(0, 15) || 'Text') + '...';
     case 'image': return (block as { caption?: string }).caption || 'Image';
-    case 'quote': return (block as { author?: string }).author ? `Quote` : 'Quote';
+    case 'quote': return 'Quote';
     case 'list': return (block as { title?: string }).title || 'List';
     case 'timeline': return (block as { title?: string }).title || 'Timeline';
     case 'callout': return (block as { title?: string }).title || 'Callout';
@@ -180,12 +183,24 @@ function getBlockLabel(block: { type: string; [key: string]: unknown }): string 
     case 'testimonial': return (block as { author?: string }).author || 'Review';
     case 'whatsapp-chat': return `${(block as { messages?: unknown[] }).messages?.length || 0} Messages`;
     case 'motivational-image': return ((block as { text?: string }).text?.slice(0, 12) || 'Poster') + '...';
+    // New blocks
+    case 'counter': return (block as { label?: string }).label || 'Counter';
+    case 'progress-bar': return (block as { label?: string }).label || 'Progress';
+    case 'qr-code': return (block as { title?: string }).title || 'QR Code';
+    case 'video': return 'Video';
+    case 'avatar-grid': return (block as { title?: string }).title || 'Team';
+    case 'social-stats': return (block as { username?: string }).username || 'Social';
+    case 'cta': return (block as { text?: string }).text || 'CTA';
+    case 'gradient-text': return ((block as { text?: string }).text?.slice(0, 12) || 'Gradient') + '...';
+    case 'animated-bg': return 'Background';
+    case 'countdown': return (block as { title?: string }).title || 'Countdown';
     default: return block.type;
   }
 }
 
 export function TimelineEditor() {
   const { videoInput, selectedBlockIndex, selectBlock, moveBlock, duplicateBlock, removeBlock } = useEditorStore();
+  const [zoom, setZoom] = useState(1);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -220,14 +235,48 @@ export function TimelineEditor() {
           </div>
         </div>
         
-        {/* Time ruler */}
-        <div className="flex items-center gap-6 text-[10px] text-gray-600 font-mono">
-          {[0, 5, 10, 15, 20, 25, 30].map((t) => (
-            <span key={t} className="flex flex-col items-center">
-              <span>{t}s</span>
-              <span className="w-px h-2 bg-gray-700 mt-1" />
-            </span>
-          ))}
+        {/* Controls */}
+        <div className="flex items-center gap-4">
+          {/* Zoom Controls */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 text-gray-400 hover:text-white"
+              onClick={() => setZoom(Math.max(0.5, zoom - 0.25))}
+              disabled={zoom <= 0.5}
+            >
+              <ZoomOut className="w-4 h-4" />
+            </Button>
+            <Slider
+              value={[zoom]}
+              onValueChange={([v]) => setZoom(v)}
+              min={0.5}
+              max={2}
+              step={0.25}
+              className="w-20"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 text-gray-400 hover:text-white"
+              onClick={() => setZoom(Math.min(2, zoom + 0.25))}
+              disabled={zoom >= 2}
+            >
+              <ZoomIn className="w-4 h-4" />
+            </Button>
+            <span className="text-xs text-gray-500 w-12 text-center">{Math.round(zoom * 100)}%</span>
+          </div>
+          
+          {/* Time ruler */}
+          <div className="flex items-center gap-4 text-[10px] text-gray-600 font-mono">
+            {[0, 5, 10, 15, 20, 25, 30].slice(0, Math.ceil(totalDuration / 5) + 1).map((t) => (
+              <span key={t} className="flex flex-col items-center">
+                <span>{t}s</span>
+                <span className="w-px h-2 bg-gray-700 mt-1" />
+              </span>
+            ))}
+          </div>
         </div>
       </div>
       
@@ -259,6 +308,7 @@ export function TimelineEditor() {
                         block={block}
                         index={index}
                         isSelected={selectedBlockIndex === index}
+                        zoom={zoom}
                         onSelect={() => selectBlock(index)}
                         onDuplicate={() => duplicateBlock(index)}
                         onDelete={() => removeBlock(index)}

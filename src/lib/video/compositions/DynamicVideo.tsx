@@ -1,7 +1,10 @@
 import React from 'react';
 import { 
   AbsoluteFill, 
-  Sequence, 
+  Sequence,
+  useCurrentFrame,
+  interpolate,
+  spring,
 } from 'remotion';
 import {
   Intro,
@@ -19,6 +22,17 @@ import { LineChartScene, PieChartScene } from '../components/ChartScene';
 import { CodeScene, TestimonialScene } from '../components/CodeTestimonialScene';
 import { WhatsAppChatScene } from '../components/WhatsAppChatScene';
 import { MotivationalImageScene } from '../components/MotivationalImageScene';
+// New block components
+import { CounterScene } from '../components/CounterScene';
+import { ProgressBarScene } from '../components/ProgressBarScene';
+import { QRCodeScene } from '../components/QRCodeScene';
+import { VideoScene } from '../components/VideoScene';
+import { AvatarGridScene } from '../components/AvatarGridScene';
+import { SocialStatsScene } from '../components/SocialStatsScene';
+import { CTAScene } from '../components/CTAScene';
+import { GradientTextScene } from '../components/GradientTextScene';
+import { AnimatedBgScene } from '../components/AnimatedBgScene';
+import { CountdownScene } from '../components/CountdownScene';
 import {
   type VideoInput,
   type AIDecision,
@@ -38,6 +52,17 @@ import {
   type TestimonialBlock,
   type WhatsAppChatBlock,
   type MotivationalImageBlock,
+  // New block types
+  type CounterBlock,
+  type ProgressBarBlock,
+  type QRCodeBlock,
+  type VideoBlock,
+  type AvatarGridBlock,
+  type SocialStatsBlock,
+  type CTABlock,
+  type GradientTextBlock,
+  type AnimatedBackgroundBlock,
+  type CountdownBlock,
   COMPONENT_IDS,
 } from '../schemas';
 import { getTheme } from '../utils/theme';
@@ -297,6 +322,107 @@ function SceneRenderer({
         />
       );
       
+    // New blocks
+    case COMPONENT_IDS.COUNTER:
+      return (
+        <CounterScene
+          data={block as CounterBlock}
+          theme={theme}
+          motionProfile={motionProfile}
+          animation={animation}
+        />
+      );
+      
+    case COMPONENT_IDS.PROGRESS_BAR:
+      return (
+        <ProgressBarScene
+          data={block as ProgressBarBlock}
+          theme={theme}
+          motionProfile={motionProfile}
+          animation={animation}
+        />
+      );
+      
+    case COMPONENT_IDS.QR_CODE:
+      return (
+        <QRCodeScene
+          data={block as QRCodeBlock}
+          theme={theme}
+          motionProfile={motionProfile}
+          animation={animation}
+        />
+      );
+      
+    case COMPONENT_IDS.VIDEO:
+      return (
+        <VideoScene
+          data={block as VideoBlock}
+          theme={theme}
+          motionProfile={motionProfile}
+          animation={animation}
+        />
+      );
+      
+    case COMPONENT_IDS.AVATAR_GRID:
+      return (
+        <AvatarGridScene
+          data={block as AvatarGridBlock}
+          theme={theme}
+          motionProfile={motionProfile}
+          animation={animation}
+        />
+      );
+      
+    case COMPONENT_IDS.SOCIAL_STATS:
+      return (
+        <SocialStatsScene
+          data={block as SocialStatsBlock}
+          theme={theme}
+          motionProfile={motionProfile}
+          animation={animation}
+        />
+      );
+      
+    case COMPONENT_IDS.CTA:
+      return (
+        <CTAScene
+          data={block as CTABlock}
+          theme={theme}
+          motionProfile={motionProfile}
+          animation={animation}
+        />
+      );
+      
+    case COMPONENT_IDS.GRADIENT_TEXT:
+      return (
+        <GradientTextScene
+          data={block as GradientTextBlock}
+          theme={theme}
+          motionProfile={motionProfile}
+          animation={animation}
+        />
+      );
+      
+    case COMPONENT_IDS.ANIMATED_BG:
+      return (
+        <AnimatedBgScene
+          data={block as AnimatedBackgroundBlock}
+          theme={theme}
+          motionProfile={motionProfile}
+          animation={animation}
+        />
+      );
+      
+    case COMPONENT_IDS.COUNTDOWN:
+      return (
+        <CountdownScene
+          data={block as CountdownBlock}
+          theme={theme}
+          motionProfile={motionProfile}
+          animation={animation}
+        />
+      );
+      
     default:
       // Fallback: render based on block type directly
       return renderByBlockType(block, theme, motionProfile, animation);
@@ -341,6 +467,27 @@ function renderByBlockType(
       return <WhatsAppChatScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
     case 'motivational-image':
       return <MotivationalImageScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
+    // New blocks
+    case 'counter':
+      return <CounterScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
+    case 'progress-bar':
+      return <ProgressBarScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
+    case 'qr-code':
+      return <QRCodeScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
+    case 'video':
+      return <VideoScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
+    case 'avatar-grid':
+      return <AvatarGridScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
+    case 'social-stats':
+      return <SocialStatsScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
+    case 'cta':
+      return <CTAScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
+    case 'gradient-text':
+      return <GradientTextScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
+    case 'animated-bg':
+      return <AnimatedBgScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
+    case 'countdown':
+      return <CountdownScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
     default:
       return (
         <TextScene

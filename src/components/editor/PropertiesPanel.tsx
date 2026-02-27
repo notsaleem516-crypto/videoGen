@@ -16,18 +16,23 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Copy, Settings, Plus, X, Sparkles, ChevronDown } from 'lucide-react';
-import { useState } from 'react';
 import { 
+  Trash2, Copy, Settings, Plus, X, Sparkles, ChevronDown,
   BarChart3, Type, Image, Quote, List, Clock, AlertCircle, 
-  Grid3X3, LineChart, PieChart, Code, MessageSquare, Heart, MessageCircle 
+  Grid3X3, LineChart, PieChart, Code, MessageSquare, Heart, MessageCircle,
+  Timer, QrCode, Video, Users, Share2, MousePointer, Palette, Waves, Hourglass
 } from 'lucide-react';
+import { useState } from 'react';
 
 const BLOCK_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   stat: BarChart3, comparison: BarChart3, text: Type, image: Image, quote: Quote,
   list: List, timeline: Clock, callout: AlertCircle, 'icon-list': Grid3X3,
   'line-chart': LineChart, 'pie-chart': PieChart, code: Code, testimonial: MessageSquare,
   'whatsapp-chat': MessageCircle, 'motivational-image': Heart,
+  // New blocks
+  counter: Clock, 'progress-bar': BarChart3, 'qr-code': Image, video: Image,
+  'avatar-grid': Users, 'social-stats': Share2, cta: MousePointer,
+  'gradient-text': Palette, 'animated-bg': Waves, countdown: Hourglass,
 };
 
 const BLOCK_GRADIENTS: Record<string, string> = {
@@ -39,6 +44,12 @@ const BLOCK_GRADIENTS: Record<string, string> = {
   'pie-chart': 'from-amber-500 to-yellow-500', code: 'from-slate-500 to-zinc-600',
   testimonial: 'from-indigo-500 to-purple-500', 'whatsapp-chat': 'from-green-500 to-green-600',
   'motivational-image': 'from-rose-500 to-pink-500',
+  // New blocks
+  counter: 'from-cyan-500 to-blue-500', 'progress-bar': 'from-green-500 to-emerald-500',
+  'qr-code': 'from-slate-500 to-gray-600', video: 'from-red-500 to-rose-500',
+  'avatar-grid': 'from-orange-500 to-amber-500', 'social-stats': 'from-blue-500 to-indigo-500',
+  cta: 'from-emerald-500 to-teal-500', 'gradient-text': 'from-violet-500 to-fuchsia-500',
+  'animated-bg': 'from-indigo-500 to-purple-500', countdown: 'from-rose-500 to-orange-500',
 };
 
 // Color Picker Component
@@ -226,14 +237,22 @@ export function PropertiesPanel() {
           {blockType === 'line-chart' && <LineChartEditor block={selectedBlock} index={selectedBlockIndex} />}
           {blockType === 'pie-chart' && <PieChartEditor block={selectedBlock} index={selectedBlockIndex} />}
           {blockType === 'icon-list' && <IconListEditor block={selectedBlock} index={selectedBlockIndex} />}
+          {/* New block editors */}
+          {blockType === 'counter' && <CounterEditor block={selectedBlock} index={selectedBlockIndex} />}
+          {blockType === 'progress-bar' && <ProgressBarEditor block={selectedBlock} index={selectedBlockIndex} />}
+          {blockType === 'qr-code' && <QRCodeEditor block={selectedBlock} index={selectedBlockIndex} />}
+          {blockType === 'video' && <VideoBlockEditor block={selectedBlock} index={selectedBlockIndex} />}
+          {blockType === 'avatar-grid' && <AvatarGridEditor block={selectedBlock} index={selectedBlockIndex} />}
+          {blockType === 'social-stats' && <SocialStatsEditor block={selectedBlock} index={selectedBlockIndex} />}
+          {blockType === 'cta' && <CTAEditor block={selectedBlock} index={selectedBlockIndex} />}
+          {blockType === 'gradient-text' && <GradientTextEditor block={selectedBlock} index={selectedBlockIndex} />}
+          {blockType === 'animated-bg' && <AnimatedBgEditor block={selectedBlock} index={selectedBlockIndex} />}
+          {blockType === 'countdown' && <CountdownEditor block={selectedBlock} index={selectedBlockIndex} />}
         </div>
       </ScrollArea>
     </div>
   );
 }
-
-// Import necessary icon
-import { Clock } from 'lucide-react';
 
 // ============================================================================
 // BLOCK EDITORS
@@ -243,8 +262,6 @@ interface EditorProps {
   block: Record<string, unknown>;
   index: number;
 }
-
-const { updateBlock: useUpdateBlock } = useEditorStore.getState();
 
 function StatEditor({ block, index }: EditorProps) {
   const { updateBlock } = useEditorStore();
@@ -678,6 +695,344 @@ function IconListEditor({ block, index }: EditorProps) {
             </div>
           ))}
         </div>
+      </div>
+    </CollapsibleSection>
+  );
+}
+
+// ============================================================================
+// NEW BLOCK EDITORS
+// ============================================================================
+
+function CounterEditor({ block, index }: EditorProps) {
+  const { updateBlock } = useEditorStore();
+  return (
+    <CollapsibleSection title="Counter Settings" icon={Timer} defaultOpen={true}>
+      <div className="space-y-3">
+        <div><Label className="text-xs text-gray-400">Label</Label><Input value={(block.label as string) || ''} onChange={(e) => updateBlock(index, { label: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" /></div>
+        <div className="grid grid-cols-2 gap-2">
+          <div><Label className="text-xs text-gray-400">From</Label><Input value={(block.from as number) ?? 0} onChange={(e) => updateBlock(index, { from: parseFloat(e.target.value) || 0 })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" type="number" /></div>
+          <div><Label className="text-xs text-gray-400">To</Label><Input value={(block.to as number) ?? 100} onChange={(e) => updateBlock(index, { to: parseFloat(e.target.value) || 0 })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" type="number" /></div>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div><Label className="text-xs text-gray-400">Prefix</Label><Input value={(block.prefix as string) || ''} onChange={(e) => updateBlock(index, { prefix: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" placeholder="$" /></div>
+          <div><Label className="text-xs text-gray-400">Suffix</Label><Input value={(block.suffix as string) || ''} onChange={(e) => updateBlock(index, { suffix: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" placeholder="%" /></div>
+        </div>
+        <SliderInput label="Animation Duration" value={(block.duration as number) || 3} onChange={(v) => updateBlock(index, { duration: v })} min={1} max={10} step={0.5} unit="s" />
+        <ColorPicker value={(block.color as string) || '#3B82F6'} onChange={(v) => updateBlock(index, { color: v })} label="Color" />
+        <div><Label className="text-xs text-gray-400">Animation Style</Label>
+          <Select value={(block.animationStyle as string) || 'easeOut'} onValueChange={(v) => updateBlock(index, { animationStyle: v })}>
+            <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-10"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="linear">Linear</SelectItem>
+              <SelectItem value="easeOut">Ease Out</SelectItem>
+              <SelectItem value="easeInOut">Ease In Out</SelectItem>
+              <SelectItem value="bounce">Bounce</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </CollapsibleSection>
+  );
+}
+
+function ProgressBarEditor({ block, index }: EditorProps) {
+  const { updateBlock } = useEditorStore();
+  return (
+    <CollapsibleSection title="Progress Bar Settings" icon={BarChart3} defaultOpen={true}>
+      <div className="space-y-3">
+        <div><Label className="text-xs text-gray-400">Label</Label><Input value={(block.label as string) || ''} onChange={(e) => updateBlock(index, { label: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" /></div>
+        <SliderInput label="Value" value={(block.value as number) || 75} onChange={(v) => updateBlock(index, { value: v })} min={0} max={100} step={1} unit="%" />
+        <ColorPicker value={(block.color as string) || '#10B981'} onChange={(v) => updateBlock(index, { color: v })} label="Bar Color" />
+        <ColorPicker value={(block.backgroundColor as string) || '#1F2937'} onChange={(v) => updateBlock(index, { backgroundColor: v })} label="Background" />
+        <div><Label className="text-xs text-gray-400">Height</Label>
+          <Select value={(block.height as string) || 'medium'} onValueChange={(v) => updateBlock(index, { height: v })}>
+            <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-10"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="small">Small</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="large">Large</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-2"><Switch checked={(block.showPercentage as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { showPercentage: v })} /><Label className="text-xs text-gray-400">Show Percentage</Label></div>
+        <div className="flex items-center gap-2"><Switch checked={(block.animated as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { animated: v })} /><Label className="text-xs text-gray-400">Animated</Label></div>
+        <div className="flex items-center gap-2"><Switch checked={(block.stripes as boolean) ?? false} onCheckedChange={(v) => updateBlock(index, { stripes: v })} /><Label className="text-xs text-gray-400">Stripes</Label></div>
+      </div>
+    </CollapsibleSection>
+  );
+}
+
+function QRCodeEditor({ block, index }: EditorProps) {
+  const { updateBlock } = useEditorStore();
+  return (
+    <CollapsibleSection title="QR Code Settings" icon={QrCode} defaultOpen={true}>
+      <div className="space-y-3">
+        <div><Label className="text-xs text-gray-400">Data/URL</Label><Textarea value={(block.data as string) || ''} onChange={(e) => updateBlock(index, { data: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white min-h-[60px]" /></div>
+        <div><Label className="text-xs text-gray-400">Title</Label><Input value={(block.title as string) || ''} onChange={(e) => updateBlock(index, { title: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" /></div>
+        <div><Label className="text-xs text-gray-400">Subtitle</Label><Input value={(block.subtitle as string) || ''} onChange={(e) => updateBlock(index, { subtitle: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" /></div>
+        <div><Label className="text-xs text-gray-400">Size</Label>
+          <Select value={(block.size as string) || 'medium'} onValueChange={(v) => updateBlock(index, { size: v })}>
+            <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-10"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="small">Small</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="large">Large</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <ColorPicker value={(block.fgColor as string) || '#000000'} onChange={(v) => updateBlock(index, { fgColor: v })} label="Foreground" />
+        <ColorPicker value={(block.bgColor as string) || '#FFFFFF'} onChange={(v) => updateBlock(index, { bgColor: v })} label="Background" />
+      </div>
+    </CollapsibleSection>
+  );
+}
+
+function VideoBlockEditor({ block, index }: EditorProps) {
+  const { updateBlock } = useEditorStore();
+  return (
+    <CollapsibleSection title="Video Settings" icon={Video} defaultOpen={true}>
+      <div className="space-y-3">
+        <div><Label className="text-xs text-gray-400">Video URL</Label><Input value={(block.src as string) || ''} onChange={(e) => updateBlock(index, { src: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" placeholder="https://..." /></div>
+        <div><Label className="text-xs text-gray-400">Poster Image</Label><Input value={(block.poster as string) || ''} onChange={(e) => updateBlock(index, { poster: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" placeholder="https://..." /></div>
+        <div><Label className="text-xs text-gray-400">Caption</Label><Input value={(block.caption as string) || ''} onChange={(e) => updateBlock(index, { caption: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" /></div>
+        <div className="flex items-center gap-2"><Switch checked={(block.autoPlay as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { autoPlay: v })} /><Label className="text-xs text-gray-400">Auto Play</Label></div>
+        <div className="flex items-center gap-2"><Switch checked={(block.loop as boolean) ?? false} onCheckedChange={(v) => updateBlock(index, { loop: v })} /><Label className="text-xs text-gray-400">Loop</Label></div>
+        <div className="flex items-center gap-2"><Switch checked={(block.muted as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { muted: v })} /><Label className="text-xs text-gray-400">Muted</Label></div>
+        <div className="flex items-center gap-2"><Switch checked={(block.controls as boolean) ?? false} onCheckedChange={(v) => updateBlock(index, { controls: v })} /><Label className="text-xs text-gray-400">Show Controls</Label></div>
+      </div>
+    </CollapsibleSection>
+  );
+}
+
+function AvatarGridEditor({ block, index }: EditorProps) {
+  const { updateBlock } = useEditorStore();
+  const avatars = (block.avatars as Array<{ name: string; role?: string; image?: string }>) || [];
+  return (
+    <>
+      <CollapsibleSection title="Grid Settings" icon={Users} defaultOpen={true}>
+        <div className="space-y-3">
+          <div><Label className="text-xs text-gray-400">Title</Label><Input value={(block.title as string) || ''} onChange={(e) => updateBlock(index, { title: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" /></div>
+          <div><Label className="text-xs text-gray-400">Subtitle</Label><Input value={(block.subtitle as string) || ''} onChange={(e) => updateBlock(index, { subtitle: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" /></div>
+          <div className="grid grid-cols-2 gap-2">
+            <div><Label className="text-xs text-gray-400">Layout</Label>
+              <Select value={(block.layout as string) || 'grid'} onValueChange={(v) => updateBlock(index, { layout: v })}>
+                <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-10"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="grid">Grid</SelectItem>
+                  <SelectItem value="carousel">Carousel</SelectItem>
+                  <SelectItem value="stacked">Stacked</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label className="text-xs text-gray-400">Columns</Label>
+              <Select value={((block.columns as number) || 3).toString()} onValueChange={(v) => updateBlock(index, { columns: parseInt(v) })}>
+                <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-10"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2">2</SelectItem>
+                  <SelectItem value="3">3</SelectItem>
+                  <SelectItem value="4">4</SelectItem>
+                  <SelectItem value="5">5</SelectItem>
+                  <SelectItem value="6">6</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+      </CollapsibleSection>
+      <CollapsibleSection title="Team Members" icon={Users} defaultOpen={false}>
+        <div className="space-y-3">
+          <div className="flex justify-end"><Button variant="outline" size="sm" className="h-7 text-xs bg-gray-800 border-gray-700" onClick={() => updateBlock(index, { avatars: [...avatars, { name: 'New Member', role: '' }] })}><Plus className="w-3 h-3 mr-1" /> Add</Button></div>
+          {avatars.map((avatar, i) => (
+            <div key={i} className="bg-gray-800/50 rounded-lg p-3 space-y-2 border border-gray-700/30">
+              <div className="flex gap-2">
+                <Input value={avatar.name} onChange={(e) => { const n = [...avatars]; n[i] = { ...n[i], name: e.target.value }; updateBlock(index, { avatars: n }); }} className="bg-gray-700/50 border-gray-600 text-white flex-1 h-9 text-sm" placeholder="Name" />
+                <Button variant="ghost" size="sm" className="h-9 w-9 p-0 text-red-400" onClick={() => updateBlock(index, { avatars: avatars.filter((_, idx) => idx !== i) })}><X className="w-4 h-4" /></Button>
+              </div>
+              <Input value={avatar.role || ''} onChange={(e) => { const n = [...avatars]; n[i] = { ...n[i], role: e.target.value }; updateBlock(index, { avatars: n }); }} className="bg-gray-700/50 border-gray-600 text-white h-9 text-sm" placeholder="Role" />
+              <Input value={avatar.image || ''} onChange={(e) => { const n = [...avatars]; n[i] = { ...n[i], image: e.target.value }; updateBlock(index, { avatars: n }); }} className="bg-gray-700/50 border-gray-600 text-white h-9 text-sm" placeholder="Image URL" />
+            </div>
+          ))}
+        </div>
+      </CollapsibleSection>
+    </>
+  );
+}
+
+function SocialStatsEditor({ block, index }: EditorProps) {
+  const { updateBlock } = useEditorStore();
+  return (
+    <CollapsibleSection title="Social Stats" icon={Share2} defaultOpen={true}>
+      <div className="space-y-3">
+        <div><Label className="text-xs text-gray-400">Platform</Label>
+          <Select value={(block.platform as string) || 'twitter'} onValueChange={(v) => updateBlock(index, { platform: v })}>
+            <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-10"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="twitter">Twitter/X</SelectItem>
+              <SelectItem value="instagram">Instagram</SelectItem>
+              <SelectItem value="youtube">YouTube</SelectItem>
+              <SelectItem value="tiktok">TikTok</SelectItem>
+              <SelectItem value="linkedin">LinkedIn</SelectItem>
+              <SelectItem value="facebook">Facebook</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div><Label className="text-xs text-gray-400">Username</Label><Input value={(block.username as string) || ''} onChange={(e) => updateBlock(index, { username: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" placeholder="@username" /></div>
+        <div><Label className="text-xs text-gray-400">Followers</Label><Input value={(block.followers as number) || 0} onChange={(e) => updateBlock(index, { followers: parseInt(e.target.value) || 0 })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" type="number" /></div>
+        <div className="grid grid-cols-2 gap-2">
+          <div><Label className="text-xs text-gray-400">Posts</Label><Input value={(block.posts as number) || 0} onChange={(e) => updateBlock(index, { posts: parseInt(e.target.value) || 0 })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" type="number" /></div>
+          <div><Label className="text-xs text-gray-400">Likes</Label><Input value={(block.likes as number) || 0} onChange={(e) => updateBlock(index, { likes: parseInt(e.target.value) || 0 })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" type="number" /></div>
+        </div>
+        <div className="flex items-center gap-2"><Switch checked={(block.verified as boolean) ?? false} onCheckedChange={(v) => updateBlock(index, { verified: v })} /><Label className="text-xs text-gray-400">Verified</Label></div>
+        <div className="flex items-center gap-2"><Switch checked={(block.showGrowth as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { showGrowth: v })} /><Label className="text-xs text-gray-400">Show Growth</Label></div>
+        {(block.showGrowth as boolean) && <div><Label className="text-xs text-gray-400">Growth %</Label><Input value={(block.growthPercentage as number) || 0} onChange={(e) => updateBlock(index, { growthPercentage: parseFloat(e.target.value) || 0 })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" type="number" step="0.1" /></div>}
+      </div>
+    </CollapsibleSection>
+  );
+}
+
+function CTAEditor({ block, index }: EditorProps) {
+  const { updateBlock } = useEditorStore();
+  return (
+    <CollapsibleSection title="CTA Button" icon={MousePointer} defaultOpen={true}>
+      <div className="space-y-3">
+        <div><Label className="text-xs text-gray-400">Button Text</Label><Input value={(block.text as string) || ''} onChange={(e) => updateBlock(index, { text: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" /></div>
+        <div><Label className="text-xs text-gray-400">Description</Label><Textarea value={(block.description as string) || ''} onChange={(e) => updateBlock(index, { description: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white min-h-[60px]" /></div>
+        <div className="grid grid-cols-2 gap-2">
+          <div><Label className="text-xs text-gray-400">Style</Label>
+            <Select value={(block.buttonStyle as string) || 'primary'} onValueChange={(v) => updateBlock(index, { buttonStyle: v })}>
+              <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-10"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="primary">Primary</SelectItem>
+                <SelectItem value="secondary">Secondary</SelectItem>
+                <SelectItem value="outline">Outline</SelectItem>
+                <SelectItem value="ghost">Ghost</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div><Label className="text-xs text-gray-400">Size</Label>
+            <Select value={(block.size as string) || 'large'} onValueChange={(v) => updateBlock(index, { size: v })}>
+              <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-10"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="small">Small</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="large">Large</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <ColorPicker value={(block.color as string) || '#3B82F6'} onChange={(v) => updateBlock(index, { color: v })} label="Button Color" />
+        <div><Label className="text-xs text-gray-400">Icon (emoji)</Label><Input value={(block.icon as string) || ''} onChange={(e) => updateBlock(index, { icon: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" placeholder="🚀" /></div>
+        <div className="flex items-center gap-2"><Switch checked={(block.pulse as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { pulse: v })} /><Label className="text-xs text-gray-400">Pulse Animation</Label></div>
+      </div>
+    </CollapsibleSection>
+  );
+}
+
+function GradientTextEditor({ block, index }: EditorProps) {
+  const { updateBlock } = useEditorStore();
+  const gradient = (block.gradient as string[]) || ['#3B82F6', '#8B5CF6'];
+  return (
+    <CollapsibleSection title="Gradient Text" icon={Palette} defaultOpen={true}>
+      <div className="space-y-3">
+        <div><Label className="text-xs text-gray-400">Text</Label><Textarea value={(block.text as string) || ''} onChange={(e) => updateBlock(index, { text: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white min-h-[60px]" /></div>
+        <div className="space-y-2">
+          <Label className="text-xs text-gray-400">Gradient Colors</Label>
+          <div className="flex gap-2">
+            {gradient.map((color, i) => (
+              <div key={i} className="relative">
+                <input type="color" value={color} onChange={(e) => { const n = [...gradient]; n[i] = e.target.value; updateBlock(index, { gradient: n }); }} className="w-10 h-10 rounded-lg border border-gray-700 cursor-pointer bg-gray-800" />
+              </div>
+            ))}
+            <Button variant="outline" size="sm" className="h-10 px-2 bg-gray-800 border-gray-700" onClick={() => updateBlock(index, { gradient: [...gradient, '#EC4899'] })}><Plus className="w-4 h-4" /></Button>
+          </div>
+        </div>
+        <SliderInput label="Angle" value={(block.angle as number) || 45} onChange={(v) => updateBlock(index, { angle: v })} min={0} max={360} step={15} unit="°" />
+        <div className="flex items-center gap-2"><Switch checked={(block.animate as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { animate: v })} /><Label className="text-xs text-gray-400">Animate Gradient</Label></div>
+        {(block.animate as boolean) && <SliderInput label="Animation Speed" value={(block.animationSpeed as number) || 3} onChange={(v) => updateBlock(index, { animationSpeed: v })} min={1} max={10} step={0.5} unit="s" />}
+        <div className="grid grid-cols-2 gap-2">
+          <div><Label className="text-xs text-gray-400">Font Size</Label>
+            <Select value={(block.fontSize as string) || 'xlarge'} onValueChange={(v) => updateBlock(index, { fontSize: v })}>
+              <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-10"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="small">Small</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="large">Large</SelectItem>
+                <SelectItem value="xlarge">XLarge</SelectItem>
+                <SelectItem value="xxlarge">XXLarge</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div><Label className="text-xs text-gray-400">Font Weight</Label>
+            <Select value={(block.fontWeight as string) || 'bold'} onValueChange={(v) => updateBlock(index, { fontWeight: v })}>
+              <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-10"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="normal">Normal</SelectItem>
+                <SelectItem value="bold">Bold</SelectItem>
+                <SelectItem value="black">Black</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+    </CollapsibleSection>
+  );
+}
+
+function AnimatedBgEditor({ block, index }: EditorProps) {
+  const { updateBlock } = useEditorStore();
+  return (
+    <CollapsibleSection title="Animated Background" icon={Waves} defaultOpen={true}>
+      <div className="space-y-3">
+        <div><Label className="text-xs text-gray-400">Style</Label>
+          <Select value={(block.style as string) || 'particles'} onValueChange={(v) => updateBlock(index, { style: v })}>
+            <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-10"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="particles">Particles</SelectItem>
+              <SelectItem value="waves">Waves</SelectItem>
+              <SelectItem value="gradient">Gradient Flow</SelectItem>
+              <SelectItem value="noise">Noise</SelectItem>
+              <SelectItem value="geometric">Geometric</SelectItem>
+              <SelectItem value="aurora">Aurora</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <ColorPicker value={(block.primaryColor as string) || '#3B82F6'} onChange={(v) => updateBlock(index, { primaryColor: v })} label="Primary Color" />
+        <ColorPicker value={(block.secondaryColor as string) || '#8B5CF6'} onChange={(v) => updateBlock(index, { secondaryColor: v })} label="Secondary Color" />
+        <SliderInput label="Speed" value={(block.speed as number) || 1} onChange={(v) => updateBlock(index, { speed: v })} min={0.5} max={5} step={0.5} unit="x" />
+        <SliderInput label="Intensity" value={(block.intensity as number) || 0.5} onChange={(v) => updateBlock(index, { intensity: v })} min={0.1} max={1} step={0.1} unit="" />
+        <div className="flex items-center gap-2"><Switch checked={(block.overlay as boolean) ?? false} onCheckedChange={(v) => updateBlock(index, { overlay: v })} /><Label className="text-xs text-gray-400">Dark Overlay</Label></div>
+        {(block.overlay as boolean) && <SliderInput label="Overlay Opacity" value={(block.overlayOpacity as number) || 0.3} onChange={(v) => updateBlock(index, { overlayOpacity: v })} min={0} max={1} step={0.1} unit="" />}
+      </div>
+    </CollapsibleSection>
+  );
+}
+
+function CountdownEditor({ block, index }: EditorProps) {
+  const { updateBlock } = useEditorStore();
+  return (
+    <CollapsibleSection title="Countdown Timer" icon={Hourglass} defaultOpen={true}>
+      <div className="space-y-3">
+        <div><Label className="text-xs text-gray-400">Title</Label><Input value={(block.title as string) || ''} onChange={(e) => updateBlock(index, { title: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" /></div>
+        <div className="grid grid-cols-4 gap-2">
+          <div><Label className="text-xs text-gray-400">Days</Label><Input value={(block.days as number) || 0} onChange={(e) => updateBlock(index, { days: parseInt(e.target.value) || 0 })} className="bg-gray-800/50 border-gray-700/50 text-white h-10 text-center" type="number" /></div>
+          <div><Label className="text-xs text-gray-400">Hours</Label><Input value={(block.hours as number) || 0} onChange={(e) => updateBlock(index, { hours: parseInt(e.target.value) || 0 })} className="bg-gray-800/50 border-gray-700/50 text-white h-10 text-center" type="number" /></div>
+          <div><Label className="text-xs text-gray-400">Min</Label><Input value={(block.minutes as number) || 0} onChange={(e) => updateBlock(index, { minutes: parseInt(e.target.value) || 0 })} className="bg-gray-800/50 border-gray-700/50 text-white h-10 text-center" type="number" /></div>
+          <div><Label className="text-xs text-gray-400">Sec</Label><Input value={(block.seconds as number) || 0} onChange={(e) => updateBlock(index, { seconds: parseInt(e.target.value) || 0 })} className="bg-gray-800/50 border-gray-700/50 text-white h-10 text-center" type="number" /></div>
+        </div>
+        <div><Label className="text-xs text-gray-400">Style</Label>
+          <Select value={(block.style as string) || 'modern'} onValueChange={(v) => updateBlock(index, { style: v })}>
+            <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-10"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="modern">Modern</SelectItem>
+              <SelectItem value="classic">Classic</SelectItem>
+              <SelectItem value="minimal">Minimal</SelectItem>
+              <SelectItem value="flip">Flip</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <ColorPicker value={(block.color as string) || '#FFFFFF'} onChange={(v) => updateBlock(index, { color: v })} label="Color" />
+        <div className="flex items-center gap-2"><Switch checked={(block.showLabels as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { showLabels: v })} /><Label className="text-xs text-gray-400">Show Labels</Label></div>
       </div>
     </CollapsibleSection>
   );
