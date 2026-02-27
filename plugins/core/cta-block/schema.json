@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "CTA Block Properties",
+  "properties": {
+    "text": {
+      "type": "string",
+      "title": "Button Text",
+      "default": "Click Here",
+      "editor": "text",
+      "maxLength": 50
+    },
+    "description": {
+      "type": "string",
+      "title": "Description",
+      "default": "",
+      "editor": "textarea"
+    },
+    "color": {
+      "type": "string",
+      "title": "Button Color",
+      "default": "#3B82F6",
+      "editor": "color"
+    },
+    "style": {
+      "type": "string",
+      "title": "Button Style",
+      "enum": ["primary", "secondary", "outline", "ghost"],
+      "default": "primary",
+      "editor": "select"
+    },
+    "size": {
+      "type": "string",
+      "title": "Button Size",
+      "enum": ["small", "medium", "large"],
+      "default": "large",
+      "editor": "select"
+    },
+    "pulse": {
+      "type": "boolean",
+      "title": "Pulse Animation",
+      "default": true,
+      "editor": "toggle"
+    }
+  },
+  "required": ["text"],
+  "ui": {
+    "sections": [
+      { "title": "Content", "icon": "Type", "fields": ["text", "description"], "defaultOpen": true },
+      { "title": "Style", "icon": "Palette", "fields": ["color", "style", "size", "pulse"], "defaultOpen": false }
+    ]
+  },
+  "customization": { "inherit": true },
+  "defaults": { "text": "Get Started", "color": "#3B82F6", "style": "primary", "size": "large", "pulse": true }
+}

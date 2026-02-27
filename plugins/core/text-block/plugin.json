@@ -1,0 +1,31 @@
+{
+  "id": "text-block",
+  "name": "Text Block",
+  "version": "1.0.0",
+  "description": "Simple text block with customizable styling",
+  "author": "Saleem",
+  "category": "content",
+  "tags": ["text", "heading", "paragraph"],
+  "icon": "type",
+  "color": "#6366F1",
+  "main": "./src/index.ts",
+  "scene": "./src/Scene.tsx",
+  "editor": "./src/Editor.tsx",
+  "schema": "./schema.json",
+  "remotion": {
+    "compositionId": "TextScene",
+    "defaultDuration": 3,
+    "fps": 30,
+    "width": 1080,
+    "height": 1920
+  },
+  "dependencies": {
+    "external": [],
+    "peer": ["react", "remotion"]
+  },
+  "status": "stable",
+  "features": {
+    "supportsTheming": true,
+    "supportsCustomization": true
+  }
+}

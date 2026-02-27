@@ -1,0 +1,42 @@
+{
+  "id": "counter-block",
+  "name": "Animated Counter",
+  "version": "1.0.0",
+  "description": "Animated number counter with customizable styles and animations",
+  "author": "Saleem",
+  "category": "data",
+  "tags": ["counter", "animation", "numbers", "statistics"],
+  
+  "icon": "timer",
+  "color": "#3B82F6",
+  
+  "main": "./src/index.ts",
+  "scene": "./src/Scene.tsx",
+  "editor": "./src/Editor.tsx",
+  
+  "schema": "./schema.json",
+  
+  "remotion": {
+    "compositionId": "CounterScene",
+    "defaultDuration": 4,
+    "fps": 30,
+    "width": 1080,
+    "height": 1920
+  },
+  
+  "dependencies": {
+    "external": [],
+    "peer": ["react", "remotion", "@remotion/player"]
+  },
+  
+  "keywords": ["counter", "animated", "numbers"],
+  "license": "MIT",
+  "status": "stable",
+  
+  "features": {
+    "supportsTheming": true,
+    "supportsCustomization": true,
+    "supportsAudio": false,
+    "supportsVideo": false
+  }
+}

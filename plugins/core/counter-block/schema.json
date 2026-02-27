@@ -1,0 +1,173 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Counter Block Properties",
+  
+  "properties": {
+    "value": {
+      "type": "number",
+      "title": "Target Value",
+      "description": "The final number to count up to",
+      "default": 10000,
+      "editor": "number"
+    },
+    "from": {
+      "type": "number",
+      "title": "Starting Value",
+      "description": "The number to start counting from",
+      "default": 0,
+      "editor": "number"
+    },
+    "prefix": {
+      "type": "string",
+      "title": "Prefix",
+      "description": "Text before the number (e.g., $)",
+      "default": "",
+      "editor": "text",
+      "maxLength": 20
+    },
+    "suffix": {
+      "type": "string",
+      "title": "Suffix",
+      "description": "Text after the number (e.g., +)",
+      "default": "",
+      "editor": "text",
+      "maxLength": 20
+    },
+    "label": {
+      "type": "string",
+      "title": "Label",
+      "description": "Description text below the counter",
+      "default": "",
+      "editor": "text",
+      "maxLength": 100
+    },
+    "color": {
+      "type": "string",
+      "title": "Text Color",
+      "default": "#3B82F6",
+      "editor": "color"
+    },
+    "animationStyle": {
+      "type": "string",
+      "title": "Animation Style",
+      "enum": ["linear", "easeOut", "easeInOut", "bounce"],
+      "default": "easeOut",
+      "editor": "select",
+      "enumLabels": {
+        "linear": "Linear",
+        "easeOut": "Ease Out",
+        "easeInOut": "Ease In Out",
+        "bounce": "Bounce"
+      }
+    },
+    "duration": {
+      "type": "number",
+      "title": "Animation Duration",
+      "default": 3,
+      "editor": "slider",
+      "editorConfig": {
+        "min": 1,
+        "max": 10,
+        "step": 0.5,
+        "unit": "s"
+      }
+    },
+    "decimals": {
+      "type": "number",
+      "title": "Decimal Places",
+      "default": 0,
+      "editor": "number",
+      "editorConfig": {
+        "min": 0,
+        "max": 5
+      }
+    },
+    "fontSize": {
+      "type": "string",
+      "title": "Font Size",
+      "enum": ["small", "medium", "large", "xlarge", "xxlarge"],
+      "default": "xxlarge",
+      "editor": "select",
+      "enumLabels": {
+        "small": "Small",
+        "medium": "Medium",
+        "large": "Large",
+        "xlarge": "Extra Large",
+        "xxlarge": "2X Large"
+      }
+    },
+    "fontWeight": {
+      "type": "string",
+      "title": "Font Weight",
+      "enum": ["normal", "bold", "black"],
+      "default": "black",
+      "editor": "select",
+      "enumLabels": {
+        "normal": "Normal",
+        "bold": "Bold",
+        "black": "Black"
+      }
+    },
+    "glowEnabled": {
+      "type": "boolean",
+      "title": "Enable Glow Effect",
+      "default": true,
+      "editor": "toggle"
+    },
+    "glowColor": {
+      "type": "string",
+      "title": "Glow Color",
+      "default": "",
+      "editor": "color",
+      "conditional": {
+        "field": "glowEnabled",
+        "values": [true]
+      }
+    }
+  },
+  
+  "required": ["value"],
+  
+  "ui": {
+    "sections": [
+      {
+        "title": "Content",
+        "icon": "Type",
+        "fields": ["value", "from", "prefix", "suffix", "label"],
+        "defaultOpen": true
+      },
+      {
+        "title": "Animation",
+        "icon": "Zap",
+        "fields": ["animationStyle", "duration", "decimals"],
+        "defaultOpen": false
+      },
+      {
+        "title": "Style",
+        "icon": "Palette",
+        "fields": ["color", "fontSize", "fontWeight", "glowEnabled", "glowColor"],
+        "defaultOpen": false
+      }
+    ]
+  },
+  
+  "customization": {
+    "inherit": true
+  },
+  
+  "defaults": {
+    "value": 10000,
+    "from": 0,
+    "prefix": "",
+    "suffix": "+",
+    "label": "Downloads",
+    "color": "#3B82F6",
+    "animationStyle": "easeOut",
+    "duration": 3,
+    "decimals": 0,
+    "fontSize": "xxlarge",
+    "fontWeight": "black",
+    "glowEnabled": true
+  }
+}

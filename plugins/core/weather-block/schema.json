@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Weather Widget",
+  "properties": {
+    "location": { "type": "string", "title": "Location", "default": "San Francisco" },
+    "temperature": { "type": "number", "title": "Temperature", "default": 72 },
+    "unit": { "type": "string", "enum": ["F", "C"], "default": "F" },
+    "condition": { "type": "string", "enum": ["sunny", "partly-cloudy", "cloudy", "rainy"], "default": "partly-cloudy" },
+    "humidity": { "type": "number", "default": 65, "minimum": 0, "maximum": 100 },
+    "windSpeed": { "type": "number", "default": 12 },
+    "highTemp": { "type": "number", "default": 78 },
+    "lowTemp": { "type": "number", "default": 58 },
+    "showForecast": { "type": "boolean", "default": true },
+    "showDetails": { "type": "boolean", "default": true },
+    "cardStyle": { "type": "string", "enum": ["glass", "solid", "minimal"], "default": "glass" },
+    "accentColor": { "type": "string", "default": "#38BDF8" },
+    "animateIcon": { "type": "boolean", "default": true }
+  },
+  "defaults": {
+    "location": "San Francisco",
+    "temperature": 72,
+    "unit": "F"
+    "condition": "partly-cloudy"
+    "humidity": 65
+    "windSpeed": 12
+    "highTemp": 78
+    "lowTemp": 58
+    "showForecast": true
+    "showDetails": true
+    "cardStyle": "glass"
+    "accentColor": "#38BDF8"
+    "animateIcon": true
+  }
+}

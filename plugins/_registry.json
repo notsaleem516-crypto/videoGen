@@ -1,0 +1,71 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2024-01-15T00:00:00.000Z",
+  "plugins": [
+    {
+      "id": "counter-block",
+      "name": "Animated Counter",
+      "path": "./plugins/core/counter-block",
+      "category": "data",
+      "icon": "timer",
+      "color": "#3B82F6",
+      "description": "Animated number counter with customizable styles and animations",
+      "version": "1.0.0",
+      "status": "stable"
+    },
+    {
+      "id": "text-block",
+      "name": "Text Block",
+      "path": "./plugins/core/text-block",
+      "category": "content",
+      "icon": "type",
+      "color": "#6366F1",
+      "description": "Simple text block with customizable styling"
+      "version": "1.0.0",
+      "status": "stable"
+    },
+    {
+      "id": "cta-block",
+      "name": "CTA Button",
+      "path": "./plugins/core/cta-block",
+      "category": "interactive",
+      "icon": "mouse-pointer-click",
+      "color": "#F59E0B",
+      "description": "Call-to-action button with pulse animation"
+      "version": "1.0.0"
+      "status": "stable"
+    },
+    {
+      "id": "stat-block",
+      "name": "Statistics",
+      "path": "./plugins/core/stat-block",
+      "category": "data",
+      "icon": "trending-up",
+      "color": "#10B981",
+      "description": "Display statistics with trend indicators"
+      "version": "1.0.0",
+      "status": "stable"
+    },
+    {
+      "id": "weather-block",
+      "name": "Weather Widget",
+      "path": "./plugins/core/weather-block",
+      "category": "visual",
+      "icon": "cloud-sun",
+      "color": "#38BDF8",
+      "description": "Display weather information with animated icons and temperature",
+      "version": "1.0.0",
+      "status": "stable"
+    }
+  ],
+  "categories": {
+    "content": ["text-block"],
+    "data": ["counter-block", "stat-block"]
+    "visual": ["weather-block"]
+    "interactive": ["cta-block"]
+    "social": []
+    "media": []
+    "layout": []
+    "other": []
+  }
+}

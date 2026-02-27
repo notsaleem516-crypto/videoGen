@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Text Block Properties",
+  "properties": {
+    "content": {
+      "type": "string",
+      "title": "Content",
+      "description": "The text content to display",
+      "default": "Hello World",
+      "editor": "textarea"
+    },
+    "style": {
+      "type": "string",
+      "title": "Style",
+      "enum": ["heading", "body", "caption", "quote"],
+      "default": "heading",
+      "editor": "select",
+      "enumLabels": {
+        "heading": "Heading",
+        "body": "Body",
+        "caption": "Caption",
+        "quote": "Quote"
+      }
+    },
+    "align": {
+      "type": "string",
+      "title": "Text Alignment",
+      "enum": ["left", "center", "right"],
+      "default": "center",
+      "editor": "select"
+    },
+    "color": {
+      "type": "string",
+      "title": "Text Color",
+      "default": "#FFFFFF",
+      "editor": "color"
+    },
+    "fontSize": {
+      "type": "string",
+      "title": "Font Size",
+      "enum": ["small", "medium", "large", "xlarge", "xxlarge"],
+      "default": "xlarge",
+      "editor": "select"
+    },
+    "fontWeight": {
+      "type": "string",
+      "title": "Font Weight",
+      "enum": ["normal", "medium", "bold", "black"],
+      "default": "bold",
+      "editor": "select"
+    }
+  },
+  "required": ["content"],
+  "ui": {
+    "sections": [
+      {
+        "title": "Content",
+        "icon": "Type",
+        "fields": ["content", "style"],
+        "defaultOpen": true
+      },
+      {
+        "title": "Style",
+        "icon": "Palette",
+        "fields": ["align", "color", "fontSize", "fontWeight"],
+        "defaultOpen": false
+      }
+    ]
+  },
+  "customization": {
+    "inherit": true
+  },
+  "defaults": {
+    "content": "Hello World",
+    "style": "heading",
+    "align": "center",
+    "color": "#FFFFFF",
+    "fontSize": "xlarge",
+    "fontWeight": "bold"
+  }
+}

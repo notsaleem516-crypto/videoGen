@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Stat Block Properties",
+  "properties": {
+    "heading": { "type": "string", "title": "Heading", "default": "Total Users", "editor": "text" },
+    "value": { "type": "string", "title": "Value", "default": "10,000+", "editor": "text" },
+    "subtext": { "type": "string", "title": "Subtext", "default": "", "editor": "text" },
+    "trend": { "type": "string", "title": "Trend", "enum": ["up", "down", "neutral"], "default": "up", "editor": "select" },
+    "color": { "type": "string", "title": "Accent Color", "default": "#10B981", "editor": "color" }
+  },
+  "required": ["heading", "value"],
+  "ui": {
+    "sections": [
+      { "title": "Content", "icon": "Type", "fields": ["heading", "value", "subtext", "trend"], "defaultOpen": true },
+      { "title": "Style", "icon": "Palette", "fields": ["color"], "defaultOpen": false }
+    ]
+  },
+  "customization": { "inherit": true },
+  "defaults": { "heading": "Total Users", "value": "10,000+", "trend": "up", "color": "#10B981" }
+}

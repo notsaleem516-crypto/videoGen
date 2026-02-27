@@ -1,0 +1,13 @@
+{
+  "id": "weather-block",
+  "name": "Weather Widget",
+  "version": "1.0.0",
+  "category": "visual",
+  "icon": "cloud-sun",
+  "color": "#38BDF8",
+  "remotion": {
+    "defaultDuration": 4,
+    "fps": 30
+  },
+  "status": "stable"
+}

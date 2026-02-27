@@ -1,0 +1,19 @@
+{
+  "id": "cta-block",
+  "name": "CTA Button",
+  "version": "1.0.0",
+  "description": "Call-to-action button with pulse animation",
+  "category": "interactive",
+  "icon": "mouse-pointer-click",
+  "color": "#F59E0B",
+  "main": "./src/index.ts",
+  "scene": "./src/Scene.tsx",
+  "schema": "./schema.json",
+  "remotion": {
+    "compositionId": "CTAScene",
+    "defaultDuration": 4,
+    "fps": 30
+  },
+  "status": "stable",
+  "features": { "supportsTheming": true }
+}

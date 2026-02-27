@@ -1,0 +1,15 @@
+{
+  "id": "stat-block",
+  "name": "Statistics",
+  "version": "1.0.0",
+  "description": "Display statistics with trend indicators",
+  "category": "data",
+  "icon": "trending-up",
+  "color": "#10B981",
+  "main": "./src/index.ts",
+  "scene": "./src/Scene.tsx",
+  "schema": "./schema.json",
+  "remotion": { "compositionId": "StatScene", "defaultDuration": 3, "fps": 30 },
+  "status": "stable",
+  "features": { "supportsTheming": true }
+}
