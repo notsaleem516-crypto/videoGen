@@ -2095,7 +2095,8 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
   const introOpacity = Math.min(1, frame / introDuration);
   const revealProgress = Math.min(1, frame / (introDuration + totalItems * itemRevealDelay * fps * 0.5));
   
-  const visibleStart = Math.max(0, currentIndex - 1);
+  // Keep ALL towers visible once revealed (start from 0)
+  const visibleStart = 0;
   const visibleEnd = Math.min(towers.length - 1, currentIndex + 4);
   
   return (
@@ -2142,9 +2143,12 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
       )}
       
       {towers.map((tower, index) => {
-        const inVisibleRange = index >= visibleStart && index <= visibleEnd;
+        // Tower is visible if it's been revealed (index <= visibleEnd)
+        const isRevealed = index <= visibleEnd;
         const itemReveal = Math.max(0, Math.min(1, (revealProgress * totalItems * 1.2) - index * 0.12));
         const isHighlighted = index === currentIndex || index === currentIndex + 1;
+        // Show label for all revealed towers (not just current window)
+        const shouldShowLabel = showLabels3D && itemReveal > 0.25 && isRevealed;
         
         return (
           <Tower
@@ -2158,9 +2162,9 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
             value={tower.valueFormatted}
             subtitle={tower.subtitle}
             image={tower.image}
-            showLabel={showLabels3D && itemReveal > 0.25 && inVisibleRange}
+            showLabel={shouldShowLabel}
             isHighlighted={isHighlighted}
-            visible={inVisibleRange || itemReveal > 0}
+            visible={isRevealed || itemReveal > 0}
           />
         );
       })}

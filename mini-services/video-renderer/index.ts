@@ -371,6 +371,77 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     color: z.string().default('#FFFFFF'),
     showLabels: z.boolean().default(true),
   }).merge(BlockCustomizationSchema),
+
+  // Weather Block
+  z.object({
+    type: z.literal('weather-block'),
+    location: z.string().max(100).default('San Francisco'),
+    temperature: z.number().default(72),
+    unit: z.enum(['F', 'C']).default('F'),
+    condition: z.enum(['sunny', 'partly-cloudy', 'cloudy', 'rainy', 'stormy', 'snowy', 'windy', 'foggy', 'night-clear', 'night-cloudy']).default('partly-cloudy'),
+    description: z.string().max(100).optional(),
+    humidity: z.number().min(0).max(100).default(65),
+    windSpeed: z.number().min(0).default(12),
+    highTemp: z.number().optional(),
+    lowTemp: z.number().optional(),
+    showForecast: z.boolean().default(true),
+    showDetails: z.boolean().default(true),
+    cardStyle: z.enum(['glass', 'solid', 'minimal', 'gradient']).default('glass'),
+    accentColor: z.string().default('#38BDF8'),
+    animateIcon: z.boolean().default(true),
+  }).merge(BlockCustomizationSchema),
+
+  // 3D Tower Chart Block
+  z.object({
+    type: z.literal('tower-chart-3d'),
+    title: z.string().max(100).default('Top Rankings'),
+    subtitle: z.string().max(200).optional(),
+    items: z.array(z.object({
+      rank: z.number().int().min(1),
+      name: z.string().max(100),
+      value: z.number().min(0),
+      valueFormatted: z.string().max(50).optional(),
+      color: z.string().optional(),
+      image: z.string().optional(),
+      subtitle: z.string().max(100).optional(),
+    })).min(1).max(50),
+    towerStyle: z.enum(['boxes', 'cylinders', 'hexagons']).default('boxes'),
+    towerSpacing: z.number().min(2).max(10).default(5),
+    baseHeight: z.number().min(1).max(5).default(2),
+    maxHeight: z.number().min(10).max(50).default(25),
+    gradientStart: z.string().default('#3B82F6'),
+    gradientEnd: z.string().default('#8B5CF6'),
+    useGradientByRank: z.boolean().default(true),
+    showValueLabels: z.boolean().default(true),
+    showRankNumbers: z.boolean().default(true),
+    cameraDistance: z.number().min(10).max(50).default(20),
+    cameraPauseDuration: z.number().min(0.2).max(2).default(0.4),
+    cameraMoveSpeed: z.number().min(0.3).max(3).default(0.8),
+    cameraAngle: z.number().min(0).max(90).default(30),
+    animationDirection: z.enum(['top-to-bottom', 'bottom-to-top']).default('top-to-bottom'),
+    backgroundColor: z.string().default('#0a0a1a'),
+    groundColor: z.string().default('#151525'),
+    showGround: z.boolean().default(true),
+    ambientIntensity: z.number().min(0.3).max(2).default(0.6),
+    showLabels3D: z.boolean().default(true),
+    backgroundPreset: z.enum([
+      'none', 'cyber-grid', 'mountain-range', 'ocean-waves', 'forest-trees',
+      'city-skyline', 'abstract-waves', 'space-station', 'aurora-borealis',
+      'volcanic-inferno', 'crystal-caves', 'desert-dunes', 'neon-tokyo',
+      'floating-islands', 'deep-ocean', 'galaxy-nebula', 'matrix-rain',
+      'ice-glacier', 'steampunk-gears', 'alien-planet', 'tron-grid'
+    ]).default('cyber-grid'),
+    introAnimation: z.enum(['fade', 'zoom', 'slide-up', 'none']).default('fade'),
+    itemRevealDelay: z.number().min(0).max(0.5).default(0.05),
+    customModelPath: z.string().optional(),
+    customModelPosition: z.object({
+      x: z.number().default(0),
+      y: z.number().default(35),
+      z: z.number().default(-60),
+    }).optional(),
+    customModelScale: z.number().min(0.1).max(10).default(2),
+    customModelRotation: z.number().min(0).max(360).default(0),
+  }).merge(BlockCustomizationSchema),
 ]);
 
 const VideoInputSchema = z.object({
@@ -478,6 +549,17 @@ function calculateCompositionConfig(input: z.infer<typeof VideoInputSchema>) {
     } else if (blockType === 'countdown') {
       // Countdown typically shows for 5-10 seconds
       contentDuration += 6;
+    } else if (blockType === 'weather-block') {
+      // Weather block with animated icons - 4-6 seconds
+      contentDuration += 5;
+    } else if (blockType === 'tower-chart-3d') {
+      // 3D Tower chart duration based on number of items
+      const items = (block as { items?: unknown[] }).items || [];
+      const cameraPauseDuration = (block as { cameraPauseDuration?: number }).cameraPauseDuration || 0.4;
+      const cameraMoveSpeed = (block as { cameraMoveSpeed?: number }).cameraMoveSpeed || 0.8;
+      // Intro + (items * (pause + move)) + outro buffer
+      const towerDuration = 1.5 + items.length * (cameraPauseDuration + cameraMoveSpeed) + 1;
+      contentDuration += Math.min(60, towerDuration); // Cap at 60 seconds
     } else {
       contentDuration += 3; // default 3 seconds per block
     }
@@ -530,6 +612,8 @@ async function generateVideoPlan(videoMeta: z.infer<typeof VideoMetaSchema>, con
     'gradient-text': 'gradient-text-scene',
     'animated-bg': 'animated-bg-scene',
     'countdown': 'countdown-scene',
+    'weather-block': 'weather-scene',
+    'tower-chart-3d': 'tower-chart-3d-scene',
   };
   
   // Create decisions for each block
@@ -614,6 +698,16 @@ async function generateVideoPlan(videoMeta: z.infer<typeof VideoMetaSchema>, con
     } else if (blockType === 'countdown') {
       // Countdown typically shows for 5-10 seconds
       duration = 6;
+    } else if (blockType === 'weather-block') {
+      // Weather block with animated icons - 4-6 seconds
+      duration = 5;
+    } else if (blockType === 'tower-chart-3d') {
+      // 3D Tower chart duration based on number of items
+      const items = (block as { items?: unknown[] }).items || [];
+      const cameraPauseDuration = (block as { cameraPauseDuration?: number }).cameraPauseDuration || 0.4;
+      const cameraMoveSpeed = (block as { cameraMoveSpeed?: number }).cameraMoveSpeed || 0.8;
+      // Intro + (items * (pause + move)) + outro buffer
+      duration = Math.min(60, 1.5 + items.length * (cameraPauseDuration + cameraMoveSpeed) + 1);
     }
     
     return {
