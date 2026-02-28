@@ -41,6 +41,103 @@ BUNDLE_PATHS.forEach(p => {
 console.log(`📁 Using bundle path: ${BUNDLE_PATH}`);
 console.log(`📁 Bundle exists: ${fs.existsSync(BUNDLE_PATH)}`);
 
+// ============================================================================
+// GPU DETECTION - Auto-detect and enable GPU acceleration
+// ============================================================================
+
+interface GPUInfo {
+  available: boolean;
+  type: 'nvidia' | 'amd' | 'intel' | 'apple' | 'unknown' | 'none';
+  name: string;
+}
+
+function detectGPU(): GPUInfo {
+  // Check for NVIDIA GPU
+  try {
+    const nvidiaResult = require('child_process').execSync('nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null', { encoding: 'utf-8' });
+    if (nvidiaResult && nvidiaResult.trim()) {
+      console.log(`🎮 GPU Detected: NVIDIA ${nvidiaResult.trim()}`);
+      return { available: true, type: 'nvidia', name: nvidiaResult.trim() };
+    }
+  } catch {}
+
+  // Check for GPU on macOS
+  if (process.platform === 'darwin') {
+    try {
+      const gpuResult = require('child_process').execSync('system_profiler SPDisplaysDataType 2>/dev/null | grep "Chipset Model"', { encoding: 'utf-8' });
+      if (gpuResult && gpuResult.includes('Apple') || gpuResult.includes('AMD') || gpuResult.includes('Intel')) {
+        const name = gpuResult.split(':')[1]?.trim() || 'Apple GPU';
+        console.log(`🎮 GPU Detected: ${name}`);
+        if (gpuResult.includes('Apple')) return { available: true, type: 'apple', name };
+        if (gpuResult.includes('AMD')) return { available: true, type: 'amd', name };
+        return { available: true, type: 'intel', name };
+      }
+    } catch {}
+  }
+
+  // Check for GPU on Linux (via /sys)
+  try {
+    const gpuDevices = fs.readdirSync('/sys/class/drm').filter(d => d.startsWith('card'));
+    if (gpuDevices.length > 0) {
+      // Try to get GPU name
+      for (const device of gpuDevices) {
+        const devicePath = `/sys/class/drm/${device}/device/uevent`;
+        if (fs.existsSync(devicePath)) {
+          const content = fs.readFileSync(devicePath, 'utf-8');
+          if (content.includes('NVIDIA')) {
+            console.log(`🎮 GPU Detected: NVIDIA (via sysfs)`);
+            return { available: true, type: 'nvidia', name: 'NVIDIA GPU' };
+          }
+          if (content.includes('AMD')) {
+            console.log(`🎮 GPU Detected: AMD (via sysfs)`);
+            return { available: true, type: 'amd', name: 'AMD GPU' };
+          }
+        }
+      }
+      // Generic GPU found
+      console.log(`🎮 GPU Detected: Generic (${gpuDevices.length} device(s))`);
+      return { available: true, type: 'unknown', name: 'Generic GPU' };
+    }
+  } catch {}
+
+  console.log('⚠️  No GPU detected - using CPU rendering (SwiftShader)');
+  return { available: false, type: 'none', name: 'CPU Only' };
+}
+
+const GPU_INFO = detectGPU();
+
+// Get Chromium options based on GPU availability
+function getChromiumOptions() {
+  if (GPU_INFO.available) {
+    console.log('✅ GPU acceleration ENABLED');
+    return {
+      // Enable GPU acceleration
+      gl: 'angle' as const,
+      enableMultiProcessors: true,
+      // Additional GPU flags passed via args
+      args: [
+        '--use-gl=angle',
+        '--use-angle=gl',
+        '--enable-gpu-rasterization',
+        '--enable-zero-copy',
+        '--ignore-gpu-blocklist',
+        '--enable-features=VaapiVideoDecoder',
+        '--disable-software-rasterizer', // Don't fall back to SwiftShader
+      ],
+    };
+  }
+  
+  console.log('ℹ️  Using CPU rendering (software)');
+  return {
+    enableMultiProcessors: true,
+    args: [
+      '--use-gl=swiftshader', // Explicitly use SwiftShader for consistency
+    ],
+  };
+}
+
+const CHROMIUM_OPTIONS = getChromiumOptions();
+
 // Quality settings for H264
 const QUALITY_SETTINGS: Record<string, { crf: number }> = {
   low: { crf: 28 },
@@ -872,6 +969,8 @@ serve({
           enforceAudioTrack: true,
           // Parallel rendering
           concurrency: Math.max(2, os.cpus().length - 1),
+          // GPU acceleration (auto-detected at startup)
+          chromiumOptions: CHROMIUM_OPTIONS,
         });
         
         // Read the video file
@@ -1005,6 +1104,8 @@ serve({
           enforceAudioTrack: true,
           // Parallel rendering
           concurrency: Math.max(2, os.cpus().length - 1),
+          // GPU acceleration (auto-detected at startup)
+          chromiumOptions: CHROMIUM_OPTIONS,
         });
         
         // Read the video file
