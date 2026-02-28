@@ -527,11 +527,13 @@ function SpaceStationEnvironment({ totalLength }: { totalLength: number }) {
 // ADVANCED ENVIRONMENT PRESETS
 // ============================================================================
 
-function AuroraBorealisEnvironment() {
+function AuroraBorealisEnvironment({ totalLength }: { totalLength: number }) {
+  const auroraCount = Math.max(Math.ceil(totalLength / 30), 5);
+  
   return (
-    <group position={[0, 30, -100]}>
-      {[...Array(5)].map((_, i) => (
-        <mesh key={i} position={[-40 + i * 20, Math.sin(i) * 10, 0]} rotation={[0.3, 0, 0.1 * i]}>
+    <group position={[0, 30, totalLength / 2 - 50]}>
+      {[...Array(auroraCount)].map((_, i) => (
+        <mesh key={i} position={[-40 + (i % 5) * 20, Math.sin(i) * 10, -totalLength / 2 + i * 30]} rotation={[0.3, 0, 0.1 * i]}>
           <planeGeometry args={[15, 50]} />
           <meshBasicMaterial 
             color={`hsl(${120 + i * 30}, 80%, 50%)`} 
@@ -545,45 +547,52 @@ function AuroraBorealisEnvironment() {
   );
 }
 
-function VolcanicInfernoEnvironment() {
+function VolcanicInfernoEnvironment({ totalLength }: { totalLength: number }) {
+  const volcanoCount = Math.max(Math.ceil(totalLength / 150), 1);
+  
   return (
-    <group>
-      {/* Volcano */}
-      <mesh position={[0, 15, -80]}>
-        <coneGeometry args={[40, 60, 8]} />
-        <meshStandardMaterial color="#1a0a0a" roughness={0.9} />
-      </mesh>
-      {/* Lava glow */}
-      <mesh position={[0, 48, -80]}>
-        <sphereGeometry args={[8, 16, 16]} />
-        <meshBasicMaterial color="#ff4400" transparent opacity={0.8} />
-      </mesh>
-      {/* Lava streams */}
-      {[...Array(6)].map((_, i) => (
-        <mesh key={i} position={[-15 + i * 6, 30 - i * 5, -75 + i * 2]} rotation={[0.3, 0, 0.2]}>
-          <boxGeometry args={[2, 20, 1]} />
-          <meshBasicMaterial color="#ff6600" transparent opacity={0.7} />
-        </mesh>
+    <group position={[0, 0, totalLength / 2]}>
+      {[...Array(volcanoCount)].map((_, v) => (
+        <group key={v} position={[0, 0, -totalLength / 2 + v * 150 + 75]}>
+          {/* Volcano */}
+          <mesh position={[0, 15, -80]}>
+            <coneGeometry args={[40, 60, 8]} />
+            <meshStandardMaterial color="#1a0a0a" roughness={0.9} />
+          </mesh>
+          {/* Lava glow */}
+          <mesh position={[0, 48, -80]}>
+            <sphereGeometry args={[8, 16, 16]} />
+            <meshBasicMaterial color="#ff4400" transparent opacity={0.8} />
+          </mesh>
+          {/* Lava streams */}
+          {[...Array(6)].map((_, i) => (
+            <mesh key={i} position={[-15 + i * 6, 30 - i * 5, -75 + i * 2]} rotation={[0.3, 0, 0.2]}>
+              <boxGeometry args={[2, 20, 1]} />
+              <meshBasicMaterial color="#ff6600" transparent opacity={0.7} />
+            </mesh>
+          ))}
+          <pointLight position={[0, 50, -80]} intensity={2} color="#ff4400" distance={100} />
+        </group>
       ))}
-      <pointLight position={[0, 50, -80]} intensity={2} color="#ff4400" distance={100} />
     </group>
   );
 }
 
-function CrystalCavesEnvironment() {
+function CrystalCavesEnvironment({ totalLength }: { totalLength: number }) {
+  const crystalCount = Math.max(Math.ceil(totalLength / 8), 20);
   const crystals = useMemo(() => {
-    return [...Array(20)].map(() => ({
-      x: (Math.random() - 0.5) * 100,
-      z: -30 - Math.random() * 80,
-      height: 5 + Math.random() * 20,
-      color: `hsl(${200 + Math.random() * 60}, 70%, 60%)`,
+    return [...Array(crystalCount)].map((_, i) => ({
+      x: (i % 2 === 0 ? -1 : 1) * (30 + (i * 17 % 40)),
+      z: i * (totalLength / crystalCount),
+      height: 5 + (i * 13 % 20),
+      color: `hsl(${200 + (i * 7 % 60)}, 70%, 60%)`,
     }));
-  }, []);
+  }, [crystalCount, totalLength]);
   
   return (
-    <group>
+    <group position={[0, 0, totalLength / 2]}>
       {crystals.map((c, i) => (
-        <mesh key={i} position={[c.x, c.height / 2, c.z]} rotation={[0, Math.random() * Math.PI, 0]}>
+        <mesh key={i} position={[c.x, c.height / 2, c.z - totalLength / 2]} rotation={[0, i * 0.3, 0]}>
           <coneGeometry args={[1.5, c.height, 6]} />
           <meshStandardMaterial color={c.color} transparent opacity={0.7} metalness={0.3} roughness={0.1} />
         </mesh>
@@ -592,18 +601,21 @@ function CrystalCavesEnvironment() {
   );
 }
 
-function DesertDunesEnvironment() {
+function DesertDunesEnvironment({ totalLength }: { totalLength: number }) {
+  const duneCount = Math.max(Math.ceil(totalLength / 20), 8);
+  const cactusCount = Math.max(Math.ceil(totalLength / 30), 5);
+  
   return (
-    <group position={[0, 0, -60]}>
-      {[...Array(8)].map((_, i) => (
-        <mesh key={i} position={[-80 + i * 20, 0, -i * 10]} rotation={[0, i * 0.3, 0]}>
+    <group position={[0, 0, totalLength / 2]}>
+      {[...Array(duneCount)].map((_, i) => (
+        <mesh key={i} position={[-80 + (i % 5) * 40, 0, -totalLength / 2 + i * 20]} rotation={[0, i * 0.3, 0]}>
           <sphereGeometry args={[20 + i * 2, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
           <meshStandardMaterial color="#c2a060" roughness={0.9} />
         </mesh>
       ))}
       {/* Cacti */}
-      {[...Array(5)].map((_, i) => (
-        <group key={`cactus-${i}`} position={[-40 + i * 20, 0, -30 - i * 10]}>
+      {[...Array(cactusCount)].map((_, i) => (
+        <group key={`cactus-${i}`} position={[-40 + (i % 3) * 40, 0, -totalLength / 2 + i * 30]}>
           <mesh position={[0, 5, 0]}>
             <cylinderGeometry args={[0.8, 1, 10, 8]} />
             <meshStandardMaterial color="#2d5a27" roughness={0.8} />
@@ -618,50 +630,51 @@ function DesertDunesEnvironment() {
   );
 }
 
-function NeonTokyoEnvironment() {
+function NeonTokyoEnvironment({ totalLength }: { totalLength: number }) {
+  const buildingCount = Math.max(Math.ceil(totalLength / 12), 15);
+  
   return (
-    <group>
+    <group position={[0, 0, totalLength / 2]}>
       {/* Neon buildings */}
-      {[...Array(15)].map((_, i) => (
-        <group key={i} position={[-70 + i * 10, 0, -50 - i * 3]}>
-          <mesh position={[0, 20 + i * 2, 0]}>
-            <boxGeometry args={[8, 40 + i * 4, 8]} />
+      {[...Array(buildingCount)].map((_, i) => (
+        <group key={i} position={[-70 + (i % 10) * 15, 0, -totalLength / 2 + i * 12]}>
+          <mesh position={[0, 20 + (i % 5) * 5, 0]}>
+            <boxGeometry args={[8, 40 + (i % 6) * 8, 8]} />
             <meshStandardMaterial color="#0a0a15" metalness={0.5} roughness={0.5} />
           </mesh>
           {/* Neon signs */}
-          <mesh position={[4.1, 15 + i * 2, 0]}>
+          <mesh position={[4.1, 15 + (i % 3) * 5, 0]}>
             <planeGeometry args={[1, 8]} />
             <meshBasicMaterial color={`hsl(${300 + i * 20}, 100%, 50%)`} />
           </mesh>
         </group>
       ))}
       {/* Neon strips */}
-      <mesh position={[0, 0.1, -30]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[150, 2]} />
-        <meshBasicMaterial color="#ff00ff" />
-      </mesh>
-      <mesh position={[0, 0.1, -60]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[150, 2]} />
-        <meshBasicMaterial color="#00ffff" />
-      </mesh>
+      {[...Array(Math.ceil(totalLength / 40))].map((_, i) => (
+        <mesh key={`strip-${i}`} position={[0, 0.1, -totalLength / 2 + 20 + i * 40]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[150, 2]} />
+          <meshBasicMaterial color={i % 2 === 0 ? "#ff00ff" : "#00ffff"} />
+        </mesh>
+      ))}
     </group>
   );
 }
 
-function FloatingIslandsEnvironment() {
+function FloatingIslandsEnvironment({ totalLength }: { totalLength: number }) {
+  const islandCount = Math.max(Math.ceil(totalLength / 25), 6);
   const islands = useMemo(() => {
-    return [...Array(6)].map((_, i) => ({
-      x: -60 + i * 25,
-      y: 10 + Math.random() * 30,
-      z: -40 - Math.random() * 60,
-      size: 8 + Math.random() * 12,
+    return [...Array(islandCount)].map((_, i) => ({
+      x: (i % 2 === 0 ? -1 : 1) * (30 + (i * 13 % 40)),
+      y: 10 + (i * 17 % 30),
+      z: i * (totalLength / islandCount),
+      size: 8 + (i * 11 % 12),
     }));
-  }, []);
+  }, [islandCount, totalLength]);
   
   return (
-    <group>
+    <group position={[0, 0, totalLength / 2]}>
       {islands.map((island, i) => (
-        <group key={i} position={[island.x, island.y, island.z]}>
+        <group key={i} position={[island.x, island.y, island.z - totalLength / 2]}>
           {/* Island base */}
           <mesh>
             <sphereGeometry args={[island.size, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
@@ -683,24 +696,27 @@ function FloatingIslandsEnvironment() {
   );
 }
 
-function DeepOceanEnvironment() {
+function DeepOceanEnvironment({ totalLength }: { totalLength: number }) {
+  const coralCount = Math.max(Math.ceil(totalLength / 10), 15);
+  const seaweedCount = Math.max(Math.ceil(totalLength / 15), 10);
+  
   return (
-    <group>
+    <group position={[0, 0, totalLength / 2]}>
       {/* Ocean floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -10, 0]}>
-        <planeGeometry args={[300, 300]} />
+        <planeGeometry args={[300, totalLength + 100]} />
         <meshStandardMaterial color="#001a33" roughness={0.9} />
       </mesh>
       {/* Coral */}
-      {[...Array(15)].map((_, i) => (
-        <mesh key={i} position={[-60 + i * 8, -5, -30 - i * 5]} rotation={[0, i * 0.5, 0]}>
+      {[...Array(coralCount)].map((_, i) => (
+        <mesh key={i} position={[-60 + (i % 10) * 12, -5, -totalLength / 2 + i * 10]} rotation={[0, i * 0.5, 0]}>
           <cylinderGeometry args={[0.5, 2, 8, 6]} />
           <meshStandardMaterial color={`hsl(${340 + i * 10}, 70%, 50%)`} roughness={0.7} />
         </mesh>
       ))}
       {/* Seaweed */}
-      {[...Array(10)].map((_, i) => (
-        <mesh key={`seaweed-${i}`} position={[-40 + i * 10, 0, -50]} rotation={[0.1 * i, 0, 0.1]}>
+      {[...Array(seaweedCount)].map((_, i) => (
+        <mesh key={`seaweed-${i}`} position={[-40 + (i % 6) * 15, 0, -totalLength / 2 + i * 15]} rotation={[0.1 * i, 0, 0.1]}>
           <boxGeometry args={[0.5, 15, 0.5]} />
           <meshStandardMaterial color="#1a4d1a" transparent opacity={0.7} />
         </mesh>
@@ -709,76 +725,88 @@ function DeepOceanEnvironment() {
   );
 }
 
-function GalaxyNebulaEnvironment() {
+function GalaxyNebulaEnvironment({ totalLength }: { totalLength: number }) {
+  const nebulaCount = Math.max(Math.ceil(totalLength / 80), 2);
+  
   return (
-    <group position={[0, 30, -100]}>
-      {/* Nebula clouds */}
-      {[...Array(8)].map((_, i) => (
-        <mesh key={i} position={[Math.cos(i * 0.8) * 30, Math.sin(i * 0.5) * 20, Math.sin(i * 0.3) * 20]}>
-          <sphereGeometry args={[15 + i * 2, 16, 16]} />
-          <meshBasicMaterial color={`hsl(${250 + i * 15}, 80%, 40%)`} transparent opacity={0.15} />
-        </mesh>
+    <group position={[0, 30, totalLength / 2]}>
+      {[...Array(nebulaCount)].map((_, n) => (
+        <group key={n} position={[0, 0, -totalLength / 2 + n * 80 + 40]}>
+          {/* Nebula clouds */}
+          {[...Array(8)].map((_, i) => (
+            <mesh key={i} position={[Math.cos(i * 0.8) * 30, Math.sin(i * 0.5) * 20, Math.sin(i * 0.3) * 20]}>
+              <sphereGeometry args={[15 + i * 2, 16, 16]} />
+              <meshBasicMaterial color={`hsl(${250 + i * 15}, 80%, 40%)`} transparent opacity={0.15} />
+            </mesh>
+          ))}
+          {/* Stars cluster */}
+          {[...Array(30)].map((_, i) => (
+            <mesh key={`star-${i}`} position={[
+              (i * 17 % 80) - 40,
+              (i * 23 % 60) - 30,
+              (i * 11 % 40) - 20,
+            ]}>
+              <sphereGeometry args={[0.3, 4, 4]} />
+              <meshBasicMaterial color="#ffffff" />
+            </mesh>
+          ))}
+        </group>
       ))}
-      {/* Stars cluster */}
-      {[...Array(50)].map((_, i) => (
-        <mesh key={`star-${i}`} position={[
-          (Math.random() - 0.5) * 80,
-          (Math.random() - 0.5) * 60,
-          (Math.random() - 0.5) * 40,
-        ]}>
-          <sphereGeometry args={[0.3, 4, 4]} />
-          <meshBasicMaterial color="#ffffff" />
+    </group>
+  );
+}
+
+function MatrixRainEnvironment({ totalLength }: { totalLength: number }) {
+  const rainCount = Math.max(Math.ceil(totalLength / 5), 40);
+  
+  return (
+    <group position={[0, 30, totalLength / 2]}>
+      {[...Array(rainCount)].map((_, i) => (
+        <mesh key={i} position={[-60 + (i % 20) * 6, (i * 7 % 30) - 15, -totalLength / 2 + (i % Math.ceil(totalLength / 10)) * 10]}>
+          <boxGeometry args={[0.5, 10 + (i * 3 % 20), 0.1]} />
+          <meshBasicMaterial color="#00ff00" transparent opacity={0.4 + (i * 7 % 10) / 25} />
         </mesh>
       ))}
     </group>
   );
 }
 
-function MatrixRainEnvironment() {
+function IceGlacierEnvironment({ totalLength }: { totalLength: number }) {
+  const icebergCount = Math.max(Math.ceil(totalLength / 15), 8);
+  
   return (
-    <group position={[0, 30, -50]}>
-      {[...Array(40)].map((_, i) => (
-        <mesh key={i} position={[-60 + (i % 20) * 6, Math.floor(i / 20) * 30 - 15, -i % 10]}>
-          <boxGeometry args={[0.5, 10 + Math.random() * 20, 0.1]} />
-          <meshBasicMaterial color="#00ff00" transparent opacity={0.4 + Math.random() * 0.4} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function IceGlacierEnvironment() {
-  return (
-    <group position={[0, 0, -60]}>
+    <group position={[0, 0, totalLength / 2]}>
       {/* Icebergs */}
-      {[...Array(8)].map((_, i) => (
-        <mesh key={i} position={[-80 + i * 20, 5, -i * 10]} rotation={[0, i * 0.4, 0]}>
-          <icosahedronGeometry args={[10 + i * 2, 0]} />
+      {[...Array(icebergCount)].map((_, i) => (
+        <mesh key={i} position={[-80 + (i % 6) * 30, 5, -totalLength / 2 + i * 15]} rotation={[0, i * 0.4, 0]}>
+          <icosahedronGeometry args={[10 + (i * 3 % 5), 0]} />
           <meshStandardMaterial color="#a8d8ea" transparent opacity={0.8} metalness={0.1} roughness={0.2} />
         </mesh>
       ))}
       {/* Ice floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
-        <planeGeometry args={[200, 200]} />
+        <planeGeometry args={[200, totalLength + 100]} />
         <meshStandardMaterial color="#d4f1f9" transparent opacity={0.6} metalness={0.1} roughness={0.3} />
       </mesh>
     </group>
   );
 }
 
-function SteampunkGearsEnvironment() {
+function SteampunkGearsEnvironment({ totalLength }: { totalLength: number }) {
+  const gearCount = Math.max(Math.ceil(totalLength / 25), 6);
+  
   return (
-    <group position={[0, 15, -60]}>
-      {[...Array(6)].map((_, i) => (
-        <mesh key={i} position={[-40 + i * 15, Math.sin(i) * 10, -i * 5]} rotation={[i * 0.5, i * 0.3, 0]}>
-          <torusGeometry args={[8 + i * 2, 1, 8, 12]} />
+    <group position={[0, 15, totalLength / 2]}>
+      {[...Array(gearCount)].map((_, i) => (
+        <mesh key={i} position={[-40 + (i % 4) * 25, Math.sin(i) * 10, -totalLength / 2 + i * 25]} rotation={[i * 0.5, i * 0.3, 0]}>
+          <torusGeometry args={[8 + (i * 3 % 4), 1, 8, 12]} />
           <meshStandardMaterial color="#8b4513" metalness={0.8} roughness={0.4} />
         </mesh>
       ))}
       {/* Pipes */}
-      {[...Array(4)].map((_, i) => (
-        <mesh key={`pipe-${i}`} position={[0, -10 + i * 8, 0]} rotation={[Math.PI / 2, 0, i * 0.2]}>
-          <cylinderGeometry args={[1, 1, 80, 8]} />
+      {[...Array(Math.ceil(totalLength / 40))].map((_, i) => (
+        <mesh key={`pipe-${i}`} position={[0, -10 + (i % 3) * 8, -totalLength / 2 + i * 40]} rotation={[Math.PI / 2, 0, i * 0.2]}>
+          <cylinderGeometry args={[1, 1, totalLength * 0.6, 8]} />
           <meshStandardMaterial color="#654321" metalness={0.7} roughness={0.5} />
         </mesh>
       ))}
@@ -786,19 +814,22 @@ function SteampunkGearsEnvironment() {
   );
 }
 
-function AlienPlanetEnvironment() {
+function AlienPlanetEnvironment({ totalLength }: { totalLength: number }) {
+  const terrainCount = Math.max(Math.ceil(totalLength / 12), 10);
+  const mushroomCount = Math.max(Math.ceil(totalLength / 15), 8);
+  
   return (
-    <group position={[0, 0, -60]}>
+    <group position={[0, 0, totalLength / 2]}>
       {/* Alien terrain */}
-      {[...Array(10)].map((_, i) => (
-        <mesh key={i} position={[-50 + i * 10, 2, -i * 8]} rotation={[0, i * 0.5, 0]}>
-          <dodecahedronGeometry args={[5 + i, 0]} />
+      {[...Array(terrainCount)].map((_, i) => (
+        <mesh key={i} position={[-50 + (i % 8) * 15, 2, -totalLength / 2 + i * 12]} rotation={[0, i * 0.5, 0]}>
+          <dodecahedronGeometry args={[5 + (i * 2 % 6), 0]} />
           <meshStandardMaterial color={`hsl(${280 + i * 15}, 60%, 30%)`} flatShading />
         </mesh>
       ))}
       {/* Glowing mushrooms */}
-      {[...Array(8)].map((_, i) => (
-        <group key={`mushroom-${i}`} position={[-30 + i * 8, 0, -20 - i * 5]}>
+      {[...Array(mushroomCount)].map((_, i) => (
+        <group key={`mushroom-${i}`} position={[-30 + (i % 4) * 20, 0, -totalLength / 2 + i * 15]}>
           <mesh position={[0, 3, 0]}>
             <cylinderGeometry args={[0.5, 1, 6, 6]} />
             <meshStandardMaterial color="#2a0a3a" />
@@ -814,23 +845,27 @@ function AlienPlanetEnvironment() {
   );
 }
 
-function TronGridEnvironment() {
+function TronGridEnvironment({ totalLength }: { totalLength: number }) {
+  const gridLength = Math.max(totalLength + 100, 200);
+  const verticalLineCount = Math.max(Math.ceil(totalLength / 20), 10);
+  const beamCount = Math.max(Math.ceil(totalLength / 40), 5);
+  
   return (
-    <group>
+    <group position={[0, 0, totalLength / 2]}>
       {/* Grid floor */}
-      <gridHelper args={[200, 40, '#00ffff', '#004444']} position={[0, 0.1, 0]} />
+      <gridHelper args={[gridLength, Math.floor(gridLength / 5), '#00ffff', '#004444']} position={[0, 0.1, 0]} />
       {/* Vertical lines */}
-      {[...Array(10)].map((_, i) => (
-        <mesh key={i} position={[-90 + i * 20, 25, -80]}>
+      {[...Array(verticalLineCount)].map((_, i) => (
+        <mesh key={i} position={[-90 + (i % 10) * 20, 25, -totalLength / 2 + i * 20]}>
           <boxGeometry args={[0.3, 50, 0.3]} />
           <meshBasicMaterial color="#00ffff" transparent opacity={0.6} />
         </mesh>
       ))}
       {/* Horizontal beams */}
-      {[...Array(5)].map((_, i) => (
-        <mesh key={`beam-${i}`} position={[0, 10 + i * 15, -60]} rotation={[0, 0, 0]}>
-          <boxGeometry args={[200, 0.3, 0.3]} />
-          <meshBasicMaterial color="#ff00ff" transparent opacity={0.6} />
+      {[...Array(beamCount)].map((_, i) => (
+        <mesh key={`beam-${i}`} position={[0, 10 + (i % 3) * 15, -totalLength / 2 + i * 40]} rotation={[0, 0, 0]}>
+          <boxGeometry args={[gridLength, 0.3, 0.3]} />
+          <meshBasicMaterial color={i % 2 === 0 ? "#ff00ff" : "#00ffff"} transparent opacity={0.6} />
         </mesh>
       ))}
     </group>
@@ -1440,6 +1475,7 @@ function TowerChartScene({
   customModelPosition,
   customModelScale,
   customModelRotation,
+  towerSpacing,
 }: { 
   towers: ReturnType<typeof calculateTowers>;
   cameraPosition: [number, number, number];
@@ -1460,6 +1496,7 @@ function TowerChartScene({
   customModelPosition: [number, number, number];
   customModelScale: number;
   customModelRotation: number;
+  towerSpacing: number;
 }) {
   return (
     <>
@@ -1737,6 +1774,7 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
           customModelPosition={modelPos}
           customModelScale={customModelScale}
           customModelRotation={customModelRotation}
+          towerSpacing={towerSpacing}
         />
       </Canvas>
       
