@@ -157,31 +157,14 @@ function MountainRangeBackground() {
   );
 }
 
-/** Ocean Waves - Animated water plane */
+/** Ocean Waves - Static water plane for deterministic rendering */
 function OceanWavesBackground() {
-  const waterRef = useRef<THREE.Mesh>(null);
-  const time = useRef(0);
-  
-  useFrame((state) => {
-    time.current = state.clock.elapsedTime;
-    if (waterRef.current) {
-      const geometry = waterRef.current.geometry;
-      const position = geometry.attributes.position;
-      for (let i = 0; i < position.count; i++) {
-        const x = position.getX(i);
-        const y = position.getY(i);
-        const wave = Math.sin(x * 0.1 + time.current) * 0.5 + Math.sin(y * 0.1 + time.current * 0.8) * 0.3;
-        position.setZ(i, wave);
-      }
-      position.needsUpdate = true;
-    }
-  });
-  
+  // Static water - no time-based animation for GPU rendering consistency
   return (
     <group>
-      {/* Animated water surface */}
-      <mesh ref={waterRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]}>
-        <planeGeometry args={[300, 300, 50, 50]} />
+      {/* Static water surface */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]}>
+        <planeGeometry args={[300, 300]} />
         <meshStandardMaterial 
           color="#0a4a6e" 
           metalness={0.8} 
@@ -312,30 +295,13 @@ function CitySkylineBackground() {
   );
 }
 
-/** Abstract Waves - Wave/mesh terrain */
+/** Abstract Waves - Static wave/mesh terrain for deterministic rendering */
 function AbstractWavesBackground() {
-  const terrainRef = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (terrainRef.current) {
-      const geometry = terrainRef.current.geometry;
-      const position = geometry.attributes.position;
-      const time = state.clock.elapsedTime;
-      
-      for (let i = 0; i < position.count; i++) {
-        const x = position.getX(i);
-        const y = position.getY(i);
-        const wave = Math.sin(x * 0.05 + time * 0.5) * 3 + Math.sin(y * 0.05 + time * 0.3) * 2;
-        position.setZ(i, wave);
-      }
-      position.needsUpdate = true;
-    }
-  });
-  
+  // Static terrain - no time-based animation for GPU rendering consistency
   return (
     <group>
-      {/* Animated terrain */}
-      <mesh ref={terrainRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -5, 0]}>
+      {/* Static terrain */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -5, 0]}>
         <planeGeometry args={[300, 300, 60, 60]} />
         <meshStandardMaterial 
           color="#2a1a4a" 
@@ -369,16 +335,9 @@ function AbstractWavesBackground() {
   );
 }
 
-/** Space Station - Sci-fi interior feel */
+/** Space Station - Static sci-fi interior for deterministic rendering */
 function SpaceStationBackground() {
-  const ringRef = useRef<THREE.Group>(null);
-  
-  useFrame((state) => {
-    if (ringRef.current) {
-      ringRef.current.rotation.z = state.clock.elapsedTime * 0.1;
-    }
-  });
-  
+  // Static ring - no time-based animation for GPU rendering consistency
   return (
     <group>
       {/* Station floor with panels */}
@@ -390,8 +349,8 @@ function SpaceStationBackground() {
       {/* Panel lines */}
       <gridHelper args={[400, 40, '#3a3a5a', '#2a2a4a']} position={[0, -0.4, 0]} />
       
-      {/* Rotating ring structure */}
-      <group ref={ringRef} position={[0, 40, -100]}>
+      {/* Static ring structure */}
+      <group position={[0, 40, -100]}>
         <torus args={[30, 1, 8, 32]}>
           <meshStandardMaterial color="#4a4a6a" metalness={0.8} roughness={0.2} emissive="#3B82F6" emissiveIntensity={0.2} />
         </torus>
@@ -425,29 +384,9 @@ function SpaceStationBackground() {
 // ADVANCED PRESET BACKGROUND COMPONENTS
 // ============================================================================
 
-/** Aurora Borealis - Northern lights effect */
+/** Aurora Borealis - Static northern lights for deterministic rendering */
 function AuroraBorealisBackground() {
-  const auroraRef = useRef<THREE.Group>(null);
-  const curtainsRef = useRef<THREE.Mesh[]>([]);
-  
-  useFrame((state) => {
-    const time = state.clock.elapsedTime;
-    curtainsRef.current.forEach((mesh, i) => {
-      if (mesh) {
-        const geometry = mesh.geometry;
-        const position = geometry.attributes.position;
-        for (let j = 0; j < position.count; j++) {
-          const x = position.getX(j);
-          const y = position.getY(j);
-          const wave = Math.sin(x * 0.1 + time * (0.3 + i * 0.1)) * 3 + 
-                       Math.sin(y * 0.2 + time * 0.5) * 2;
-          position.setZ(j, wave);
-        }
-        position.needsUpdate = true;
-      }
-    });
-  });
-  
+  // Static aurora - no time-based animation for GPU rendering consistency
   return (
     <group>
       {/* Dark ground */}
@@ -456,16 +395,15 @@ function AuroraBorealisBackground() {
         <meshStandardMaterial color="#0a0a1a" metalness={0.2} roughness={0.8} />
       </mesh>
       
-      {/* Aurora curtains */}
-      <group ref={auroraRef} position={[0, 40, -80]}>
+      {/* Static aurora curtains */}
+      <group position={[0, 40, -80]}>
         {[...Array(5)].map((_, i) => (
           <mesh
             key={i}
-            ref={(el) => { if (el) curtainsRef.current[i] = el; }}
             position={[i * 25 - 50, 0, -i * 10]}
             rotation={[0, 0, Math.PI / 12 * (i - 2)]}
           >
-            <planeGeometry args={[40, 60, 30, 30]} />
+            <planeGeometry args={[40, 60]} />
             <meshBasicMaterial
               color={['#00ff88', '#00ffaa', '#00ffcc', '#88ff00', '#aaff00'][i]}
               transparent
@@ -497,30 +435,9 @@ function AuroraBorealisBackground() {
   );
 }
 
-/** Volcanic Inferno - Lava pools and volcanic environment */
+/** Volcanic Inferno - Static lava pools for deterministic rendering */
 function VolcanicInfernoBackground() {
-  const lavaRef = useRef<THREE.Mesh>(null);
-  const fireRef = useRef<THREE.PointLight>(null);
-  
-  useFrame((state) => {
-    const time = state.clock.elapsedTime;
-    if (lavaRef.current) {
-      const geometry = lavaRef.current.geometry;
-      const position = geometry.attributes.position;
-      for (let i = 0; i < position.count; i++) {
-        const x = position.getX(i);
-        const y = position.getY(i);
-        const wave = Math.sin(x * 0.15 + time * 2) * 0.8 + 
-                     Math.sin(y * 0.1 + time * 1.5) * 0.6;
-        position.setZ(i, wave);
-      }
-      position.needsUpdate = true;
-    }
-    if (fireRef.current) {
-      fireRef.current.intensity = 2 + Math.sin(time * 5) * 0.5;
-    }
-  });
-  
+  // Static lava - no time-based animation for GPU rendering consistency
   const rocks = useMemo(() => {
     const result = [];
     for (let i = 0; i < 25; i++) {
@@ -536,9 +453,9 @@ function VolcanicInfernoBackground() {
   
   return (
     <group>
-      {/* Lava ground */}
-      <mesh ref={lavaRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
-        <planeGeometry args={[300, 300, 40, 40]} />
+      {/* Static lava ground */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
+        <planeGeometry args={[300, 300]} />
         <meshStandardMaterial 
           color="#ff3300" 
           emissive="#ff2200" 
@@ -589,7 +506,7 @@ function VolcanicInfernoBackground() {
       </Cone>
       
       {/* Fire light */}
-      <pointLight ref={fireRef} position={[0, 50, -100]} intensity={2} color="#ff4400" distance={200} />
+      <pointLight position={[0, 50, -100]} intensity={2} color="#ff4400" distance={200} />
       
       {/* Smoke/ash layer */}
       <mesh position={[0, 35, -80]}>
@@ -600,7 +517,7 @@ function VolcanicInfernoBackground() {
   );
 }
 
-/** Crystal Caves - Crystalline formations with reflections */
+/** Crystal Caves - Static crystalline formations for deterministic rendering */
 function CrystalCavesBackground() {
   const crystals = useMemo(() => {
     const result = [];
@@ -617,16 +534,7 @@ function CrystalCavesBackground() {
     return result;
   }, []);
   
-  const crystalRefs = useRef<THREE.Mesh[]>([]);
-  
-  useFrame((state) => {
-    crystalRefs.current.forEach((crystal, i) => {
-      if (crystal) {
-        crystal.rotation.y = state.clock.elapsedTime * 0.1 + i * 0.5;
-      }
-    });
-  });
-  
+  // Static crystals - no time-based animation for GPU rendering consistency
   return (
     <group>
       {/* Cave floor */}
@@ -635,11 +543,10 @@ function CrystalCavesBackground() {
         <meshStandardMaterial color="#0a0a1a" metalness={0.3} roughness={0.7} />
       </mesh>
       
-      {/* Crystal formations */}
+      {/* Static crystal formations */}
       {crystals.map((crystal, i) => (
         <group key={i} position={[crystal.x, 0, crystal.z]}>
           <Cone
-            ref={(el) => { if (el) crystalRefs.current[i] = el; }}
             args={[crystal.radius, crystal.height, 6]}
             position={[0, crystal.height / 2, 0]}
             rotation={[Math.random() * 0.3 - 0.15, crystal.rotation, Math.random() * 0.3 - 0.15]}
@@ -679,9 +586,9 @@ function CrystalCavesBackground() {
         ))}
       </group>
       
-      {/* Glowing orbs */}
+      {/* Static glowing orbs */}
       {Array.from({ length: 12 }).map((_, i) => (
-        <Float key={i} speed={1 + i * 0.2} rotationIntensity={0.2} floatIntensity={0.5}>
+        <group key={i}>
           <Sphere
             args={[0.8, 16, 16]}
             position={[
@@ -692,33 +599,15 @@ function CrystalCavesBackground() {
           >
             <meshBasicMaterial color={['#8b5cf6', '#3b82f6', '#ec4899'][i % 3]} transparent opacity={0.6} />
           </Sphere>
-        </Float>
+        </group>
       ))}
     </group>
   );
 }
 
-/** Desert Dunes - Sand dunes with heat shimmer effect */
+/** Desert Dunes - Static sand dunes for deterministic rendering */
 function DesertDunesBackground() {
-  const dunesRef = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (dunesRef.current) {
-      const geometry = dunesRef.current.geometry;
-      const position = geometry.attributes.position;
-      const time = state.clock.elapsedTime;
-      
-      for (let i = 0; i < position.count; i++) {
-        const x = position.getX(i);
-        const y = position.getY(i);
-        const wave = Math.sin(x * 0.02 + time * 0.3) * 2 + 
-                     Math.sin(y * 0.03) * 3;
-        position.setZ(i, wave);
-      }
-      position.needsUpdate = true;
-    }
-  });
-  
+  // Static dunes - no time-based animation for GPU rendering consistency
   const dunes = useMemo(() => {
     const result = [];
     for (let i = 0; i < 15; i++) {
@@ -734,9 +623,9 @@ function DesertDunesBackground() {
   
   return (
     <group>
-      {/* Main sand terrain */}
-      <mesh ref={dunesRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
-        <planeGeometry args={[400, 300, 60, 60]} />
+      {/* Static sand terrain */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
+        <planeGeometry args={[400, 300]} />
         <meshStandardMaterial color="#c4a35a" metalness={0.1} roughness={0.9} />
       </mesh>
       
@@ -783,7 +672,7 @@ function DesertDunesBackground() {
   );
 }
 
-/** Neon Tokyo - Cyberpunk Japanese city aesthetic */
+/** Neon Tokyo - Static cyberpunk Japanese city for deterministic rendering */
 function NeonTokyoBackground() {
   const buildings = useMemo(() => {
     const result = [];
@@ -800,18 +689,7 @@ function NeonTokyoBackground() {
     return result;
   }, []);
   
-  const neonRefs = useRef<THREE.Mesh[]>([]);
-  
-  useFrame((state) => {
-    const time = state.clock.elapsedTime;
-    neonRefs.current.forEach((neon, i) => {
-      if (neon) {
-        const material = neon.material as THREE.MeshBasicMaterial;
-        material.opacity = 0.6 + Math.sin(time * 3 + i) * 0.3;
-      }
-    });
-  });
-  
+  // Static neon - no time-based animation for GPU rendering consistency
   return (
     <group>
       {/* Wet street */}
@@ -835,9 +713,8 @@ function NeonTokyoBackground() {
             <meshStandardMaterial color="#0a0a15" metalness={0.5} roughness={0.5} />
           </Box>
           
-          {/* Neon strips */}
+          {/* Static neon strips */}
           <mesh
-            ref={(el) => { if (el) neonRefs.current[i] = el; }}
             position={[b.width / 2 + 0.1, b.height * 0.6, 0]}
           >
             <planeGeometry args={[0.1, b.height * 0.4]} />
@@ -896,7 +773,7 @@ function NeonTokyoBackground() {
   );
 }
 
-/** Floating Islands - Sky islands with waterfalls */
+/** Floating Islands - Static sky islands for deterministic rendering */
 function FloatingIslandsBackground() {
   const islands = useMemo(() => {
     const result = [];
@@ -912,24 +789,7 @@ function FloatingIslandsBackground() {
     return result;
   }, []);
   
-  const waterfallRefs = useRef<THREE.Points[]>([]);
-  
-  useFrame((state) => {
-    const time = state.clock.elapsedTime;
-    waterfallRefs.current.forEach((wf) => {
-      if (wf) {
-        const positions = wf.geometry.attributes.position.array as Float32Array;
-        for (let i = 0; i < positions.length; i += 3) {
-          positions[i + 1] -= 0.3;
-          if (positions[i + 1] < 0) {
-            positions[i + 1] = 30 + Math.random() * 10;
-          }
-        }
-        wf.geometry.attributes.position.needsUpdate = true;
-      }
-    });
-  });
-  
+  // Static islands - no time-based animation for GPU rendering consistency
   return (
     <group>
       {/* Cloud layer below */}
@@ -953,55 +813,50 @@ function FloatingIslandsBackground() {
         </Sphere>
       ))}
       
-      {/* Floating islands */}
+      {/* Static floating islands */}
       {islands.map((island, i) => (
-        <Float key={i} speed={0.5 + i * 0.1} rotationIntensity={0.1} floatIntensity={0.3}>
-          <group position={[island.x, island.y, island.z]}>
-            {/* Island base */}
-            <Cylinder args={[island.radius, island.radius * 0.7, island.thickness, 8]}>
-              <meshStandardMaterial color="#5a4a3a" metalness={0.1} roughness={0.9} />
-            </Cylinder>
-            
-            {/* Grass top */}
-            <Cylinder args={[island.radius * 0.9, island.radius, 1, 8]} position={[0, island.thickness / 2 + 0.5, 0]}>
-              <meshStandardMaterial color="#3a7a3a" metalness={0.1} roughness={0.8} />
-            </Cylinder>
-            
-            {/* Trees on island */}
-            {island.radius > 10 && Array.from({ length: 3 }).map((_, t) => (
-              <group key={t} position={[(Math.random() - 0.5) * island.radius, island.thickness / 2 + 1, (Math.random() - 0.5) * island.radius]}>
-                <Cylinder args={[0.3, 0.4, 3, 6]} position={[0, 1.5, 0]}>
-                  <meshStandardMaterial color="#4a3a2a" />
-                </Cylinder>
-                <Cone args={[1.5, 4, 6]} position={[0, 4.5, 0]}>
-                  <meshStandardMaterial color="#2a6a3a" />
-                </Cone>
-              </group>
-            ))}
-            
-            {/* Waterfall */}
-            {island.radius > 12 && (
-              <points
-                ref={(el) => { if (el) waterfallRefs.current.push(el); }}
-                position={[island.radius * 0.5, 0, 0]}
-              >
-                <bufferGeometry>
-                  <bufferAttribute
-                    attach="attributes-position"
-                    count={50}
-                    array={new Float32Array(50 * 3).map((_, idx) =>
-                      idx % 3 === 0 ? Math.random() * 2 :
-                      idx % 3 === 1 ? Math.random() * 30 :
-                      Math.random() * 2
-                    )}
-                    itemSize={3}
-                  />
-                </bufferGeometry>
-                <pointsMaterial size={0.3} color="#4fc3f7" transparent opacity={0.6} />
-              </points>
-            )}
-          </group>
-        </Float>
+        <group key={i} position={[island.x, island.y, island.z]}>
+          {/* Island base */}
+          <Cylinder args={[island.radius, island.radius * 0.7, island.thickness, 8]}>
+            <meshStandardMaterial color="#5a4a3a" metalness={0.1} roughness={0.9} />
+          </Cylinder>
+          
+          {/* Grass top */}
+          <Cylinder args={[island.radius * 0.9, island.radius, 1, 8]} position={[0, island.thickness / 2 + 0.5, 0]}>
+            <meshStandardMaterial color="#3a7a3a" metalness={0.1} roughness={0.8} />
+          </Cylinder>
+          
+          {/* Trees on island */}
+          {island.radius > 10 && Array.from({ length: 3 }).map((_, t) => (
+            <group key={t} position={[(Math.random() - 0.5) * island.radius, island.thickness / 2 + 1, (Math.random() - 0.5) * island.radius]}>
+              <Cylinder args={[0.3, 0.4, 3, 6]} position={[0, 1.5, 0]}>
+                <meshStandardMaterial color="#4a3a2a" />
+              </Cylinder>
+              <Cone args={[1.5, 4, 6]} position={[0, 4.5, 0]}>
+                <meshStandardMaterial color="#2a6a3a" />
+              </Cone>
+            </group>
+          ))}
+          
+          {/* Static waterfall particles */}
+          {island.radius > 12 && (
+            <points position={[island.radius * 0.5, 0, 0]}>
+              <bufferGeometry>
+                <bufferAttribute
+                  attach="attributes-position"
+                  count={50}
+                  array={new Float32Array(50 * 3).map((_, idx) =>
+                    idx % 3 === 0 ? Math.random() * 2 :
+                    idx % 3 === 1 ? Math.random() * 30 :
+                    Math.random() * 2
+                  )}
+                  itemSize={3}
+                />
+              </bufferGeometry>
+              <pointsMaterial size={0.3} color="#4fc3f7" transparent opacity={0.6} />
+            </points>
+          )}
+        </group>
       ))}
       
       {/* Sun rays */}
@@ -1013,11 +868,8 @@ function FloatingIslandsBackground() {
   );
 }
 
-/** Deep Ocean - Underwater environment with bubbles */
+/** Deep Ocean - Static underwater environment for deterministic rendering */
 function DeepOceanBackground() {
-  const bubblesRef = useRef<THREE.Points>(null);
-  const causticsRef = useRef<THREE.Mesh>(null);
-  
   const bubblePositions = useMemo(() => {
     const pos = new Float32Array(150 * 3);
     for (let i = 0; i < 150; i++) {
@@ -1028,36 +880,7 @@ function DeepOceanBackground() {
     return pos;
   }, []);
   
-  useFrame((state) => {
-    const time = state.clock.elapsedTime;
-    
-    // Bubbles rising
-    if (bubblesRef.current) {
-      const positions = bubblesRef.current.geometry.attributes.position.array as Float32Array;
-      for (let i = 0; i < 150; i++) {
-        positions[i * 3 + 1] += 0.05 + Math.random() * 0.02;
-        positions[i * 3] += Math.sin(time + i) * 0.01;
-        if (positions[i * 3 + 1] > 80) {
-          positions[i * 3 + 1] = 0;
-        }
-      }
-      bubblesRef.current.geometry.attributes.position.needsUpdate = true;
-    }
-    
-    // Caustics animation
-    if (causticsRef.current) {
-      const geometry = causticsRef.current.geometry;
-      const position = geometry.attributes.position;
-      for (let i = 0; i < position.count; i++) {
-        const x = position.getX(i);
-        const y = position.getY(i);
-        const wave = Math.sin(x * 0.1 + time) * 0.5 + Math.sin(y * 0.1 + time * 0.8) * 0.3;
-        position.setZ(i, wave);
-      }
-      position.needsUpdate = true;
-    }
-  });
-  
+  // Static ocean - no time-based animation for GPU rendering consistency
   const coral = useMemo(() => {
     const result = [];
     for (let i = 0; i < 30; i++) {
@@ -1074,9 +897,9 @@ function DeepOceanBackground() {
   
   return (
     <group>
-      {/* Ocean floor */}
-      <mesh ref={causticsRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]}>
-        <planeGeometry args={[300, 300, 40, 40]} />
+      {/* Static ocean floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]}>
+        <planeGeometry args={[300, 300]} />
         <meshStandardMaterial color="#1a3a4a" metalness={0.3} roughness={0.7} />
       </mesh>
       
@@ -1117,8 +940,8 @@ function DeepOceanBackground() {
         </Cylinder>
       ))}
       
-      {/* Bubbles */}
-      <points ref={bubblesRef}>
+      {/* Static bubbles */}
+      <points>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" count={150} array={bubblePositions} itemSize={3} />
         </bufferGeometry>
@@ -1155,15 +978,7 @@ function DeepOceanBackground() {
 
 /** Galaxy Nebula - Colorful space clouds */
 function GalaxyNebulaBackground() {
-  const nebulaRef = useRef<THREE.Group>(null);
-  
-  useFrame((state) => {
-    if (nebulaRef.current) {
-      nebulaRef.current.rotation.y = state.clock.elapsedTime * 0.02;
-      nebulaRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.01) * 0.1;
-    }
-  });
-  
+  // Static nebula - no time-based animation for GPU rendering consistency
   const nebulaClouds = useMemo(() => {
     const result = [];
     const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dfe6e9', '#fd79a8'];
@@ -1253,8 +1068,7 @@ function GalaxyNebulaBackground() {
 
 /** Matrix Rain - Digital rain effect */
 function MatrixRainBackground() {
-  const rainRefs = useRef<THREE.Points[]>([]);
-  
+  // Static matrix rain - no time-based animation for GPU rendering consistency
   const columns = useMemo(() => {
     const result = [];
     for (let i = 0; i < 40; i++) {
@@ -1267,22 +1081,6 @@ function MatrixRainBackground() {
     return result;
   }, []);
   
-  useFrame(() => {
-    rainRefs.current.forEach((rain, i) => {
-      if (rain && rain.geometry.attributes.position) {
-        const positions = rain.geometry.attributes.position.array as Float32Array;
-        const speed = columns[i]?.speed || 0.5;
-        for (let j = 0; j < positions.length; j += 3) {
-          positions[j + 1] -= speed;
-          if (positions[j + 1] < 0) {
-            positions[j + 1] = 80 + Math.random() * 20;
-          }
-        }
-        rain.geometry.attributes.position.needsUpdate = true;
-      }
-    });
-  });
-  
   return (
     <group>
       {/* Dark ground */}
@@ -1294,11 +1092,10 @@ function MatrixRainBackground() {
       {/* Ground grid reflection */}
       <gridHelper args={[400, 40, '#003300', '#001a00']} position={[0, 0.01, 0]} />
       
-      {/* Matrix rain columns */}
+      {/* Static matrix rain columns */}
       {columns.map((col, i) => (
         <points
           key={i}
-          ref={(el) => { if (el) rainRefs.current[i] = el; }}
           position={[col.x, 0, 0]}
         >
           <bufferGeometry>
@@ -1334,24 +1131,7 @@ function MatrixRainBackground() {
 
 /** Ice Glacier - Frozen environment with ice formations */
 function IceGlacierBackground() {
-  const iceRefs = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (iceRefs.current) {
-      const geometry = iceRefs.current.geometry;
-      const position = geometry.attributes.position;
-      const time = state.clock.elapsedTime;
-      
-      for (let i = 0; i < position.count; i++) {
-        const x = position.getX(i);
-        const y = position.getY(i);
-        const wave = Math.sin(x * 0.05 + time * 0.3) * 0.3;
-        position.setZ(i, wave);
-      }
-      position.needsUpdate = true;
-    }
-  });
-  
+  // Static ice - no time-based animation for GPU rendering consistency
   const icebergs = useMemo(() => {
     const result = [];
     for (let i = 0; i < 15; i++) {
@@ -1367,9 +1147,9 @@ function IceGlacierBackground() {
   
   return (
     <group>
-      {/* Frozen ocean/ice sheet */}
-      <mesh ref={iceRefs} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
-        <planeGeometry args={[300, 300, 50, 50]} />
+      {/* Static frozen ocean/ice sheet */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
+        <planeGeometry args={[300, 300]} />
         <meshPhysicalMaterial 
           color="#a8d8ea" 
           metalness={0.1}
@@ -1451,17 +1231,7 @@ function IceGlacierBackground() {
 
 /** Steampunk Gears - Industrial Victorian machinery */
 function SteampunkGearsBackground() {
-  const gearRefs = useRef<THREE.Group>(null);
-  
-  useFrame((state) => {
-    const time = state.clock.elapsedTime;
-    if (gearRefs.current) {
-      gearRefs.current.children.forEach((child, i) => {
-        child.rotation.z = time * (0.2 + i * 0.1) * (i % 2 === 0 ? 1 : -1);
-      });
-    }
-  });
-  
+  // Static gears - no time-based animation for GPU rendering consistency
   const pipes = useMemo(() => {
     const result = [];
     for (let i = 0; i < 15; i++) {
@@ -1485,8 +1255,8 @@ function SteampunkGearsBackground() {
       {/* Floor rivets pattern */}
       <gridHelper args={[400, 20, '#5a4a3a', '#4a3a2a']} position={[0, 0.01, 0]} />
       
-      {/* Rotating gears */}
-      <group ref={gearRefs} position={[0, 25, -80]}>
+      {/* Static gears */}
+      <group position={[0, 25, -80]}>
         {[...Array(8)].map((_, i) => (
           <group key={i} position={[(i - 4) * 20, (i % 2) * 15, -i * 5]}>
             {/* Gear body */}
@@ -1568,18 +1338,7 @@ function SteampunkGearsBackground() {
 
 /** Alien Planet - Extraterrestrial landscape */
 function AlienPlanetBackground() {
-  const tentaclesRef = useRef<THREE.Group>(null);
-  
-  useFrame((state) => {
-    const time = state.clock.elapsedTime;
-    if (tentaclesRef.current) {
-      tentaclesRef.current.children.forEach((child, i) => {
-        child.rotation.x = Math.sin(time * 0.5 + i) * 0.1;
-        child.rotation.z = Math.cos(time * 0.3 + i) * 0.1;
-      });
-    }
-  });
-  
+  // Static alien planet - no time-based animation for GPU rendering consistency
   const alienFlora = useMemo(() => {
     const result = [];
     for (let i = 0; i < 25; i++) {
@@ -1614,8 +1373,8 @@ function AlienPlanetBackground() {
         </mesh>
       ))}
       
-      {/* Alien tentacles/flora */}
-      <group ref={tentaclesRef}>
+      {/* Static alien tentacles/flora */}
+      <group>
         {alienFlora.map((flora, i) => (
           <group key={i} position={[flora.x, 0, flora.z]}>
             <Cylinder
@@ -1638,9 +1397,9 @@ function AlienPlanetBackground() {
         ))}
       </group>
       
-      {/* Floating rocks */}
+      {/* Static floating rocks */}
       {Array.from({ length: 10 }).map((_, i) => (
-        <Float key={i} speed={0.5 + i * 0.1} rotationIntensity={0.2} floatIntensity={0.5}>
+        <group key={i}>
           <mesh position={[
             (Math.random() - 0.5) * 200,
             15 + Math.random() * 30,
@@ -1649,7 +1408,7 @@ function AlienPlanetBackground() {
             <icosahedronGeometry args={[3 + Math.random() * 5, 0]} />
             <meshStandardMaterial color="#4a3a5a" metalness={0.4} roughness={0.6} />
           </mesh>
-        </Float>
+        </group>
       ))}
       
       {/* Alien sky with multiple moons */}
@@ -1681,22 +1440,7 @@ function AlienPlanetBackground() {
 
 /** Tron Grid - Iconic Tron-style light grid */
 function TronGridBackground() {
-  const gridRef = useRef<THREE.Group>(null);
-  const lightRefs = useRef<THREE.Mesh[]>([]);
-  
-  useFrame((state) => {
-    const time = state.clock.elapsedTime;
-    if (gridRef.current) {
-      gridRef.current.position.z = (time * 5) % 20;
-    }
-    lightRefs.current.forEach((light, i) => {
-      if (light) {
-        const material = light.material as THREE.MeshBasicMaterial;
-        material.opacity = 0.5 + Math.sin(time * 3 + i * 0.5) * 0.3;
-      }
-    });
-  });
-  
+  // Static tron grid - no time-based animation for GPU rendering consistency
   return (
     <group>
       {/* Main grid floor */}
@@ -1705,8 +1449,8 @@ function TronGridBackground() {
         <meshStandardMaterial color="#000000" metalness={0.9} roughness={0.1} />
       </mesh>
       
-      {/* Light grid lines */}
-      <group ref={gridRef}>
+      {/* Static light grid lines */}
+      <group>
         {Array.from({ length: 40 }).map((_, i) => (
           <mesh key={`x-${i}`} position={[-200 + i * 10, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
             <planeGeometry args={[400, 0.15]} />
@@ -1727,12 +1471,12 @@ function TronGridBackground() {
           <Box args={[4, 40, 4]} position={[0, 20, 0]}>
             <meshStandardMaterial color="#000000" metalness={0.9} roughness={0.1} />
           </Box>
-          {/* Glowing edges */}
-          <mesh ref={(el) => { if (el) lightRefs.current[i] = el; }} position={[2.1, 20, 0]}>
+          {/* Static glowing edges */}
+          <mesh position={[2.1, 20, 0]}>
             <planeGeometry args={[0.2, 40]} />
             <meshBasicMaterial color="#00ffff" transparent opacity={0.8} />
           </mesh>
-          <mesh ref={(el) => { if (el) lightRefs.current[i + 5] = el; }} position={[-2.1, 20, 0]}>
+          <mesh position={[-2.1, 20, 0]}>
             <planeGeometry args={[0.2, 40]} />
             <meshBasicMaterial color="#00ffff" transparent opacity={0.8} />
           </mesh>
@@ -1982,17 +1726,7 @@ function RaceTrackBackground() {
 
 /** Concert Stage - Music festival with stage and crowd */
 function ConcertStageBackground() {
-  const lightRefs = useRef<THREE.SpotLight[]>([]);
-  
-  useFrame((state) => {
-    const time = state.clock.elapsedTime;
-    lightRefs.current.forEach((light, i) => {
-      if (light) {
-        light.color.setHSL((time * 0.1 + i * 0.2) % 1, 1, 0.5);
-      }
-    });
-  });
-  
+  // Static concert stage - no time-based animation for GPU rendering consistency
   return (
     <group>
       {/* Main stage floor */}
@@ -2016,19 +1750,19 @@ function ConcertStageBackground() {
         <meshStandardMaterial color="#333333" metalness={0.6} roughness={0.4} />
       </Box>
       
-      {/* Spotlights */}
+      {/* Static spotlights */}
       {[-20, -10, 0, 10, 20].map((x, i) => (
         <group key={i} position={[x, 25, -15]}>
           <Cylinder args={[0.3, 0.5, 2, 8]} position={[0, 0, 0]} rotation={[Math.PI, 0, 0]}>
             <meshStandardMaterial color="#444444" metalness={0.7} roughness={0.3} />
           </Cylinder>
           <spotLight
-            ref={(el) => { if (el) lightRefs.current[i] = el; }}
             position={[0, 0, 0]}
             angle={0.4}
             penumbra={0.5}
             intensity={2}
             distance={40}
+            color={['#ff0066', '#00ffff', '#ff6600', '#6600ff', '#00ff66'][i % 5]}
           />
         </group>
       ))}
@@ -2176,14 +1910,7 @@ function CastleGroundsBackground() {
 
 /** Airport Runway - Planes and terminal */
 function AirportRunwayBackground() {
-  const planeRefs = useRef<THREE.Group>(null);
-  
-  useFrame((state) => {
-    if (planeRefs.current) {
-      planeRefs.current.position.z = -100 + Math.sin(state.clock.elapsedTime * 0.1) * 50;
-    }
-  });
-  
+  // Static airport - no time-based animation for GPU rendering consistency
   return (
     <group>
       {/* Main runway */}
@@ -2245,8 +1972,8 @@ function AirportRunwayBackground() {
         <meshStandardMaterial color="#5a5a5a" metalness={0.3} roughness={0.7} />
       </Box>
       
-      {/* Airplane (simplified) */}
-      <group ref={planeRefs} position={[0, 5, -100]}>
+      {/* Static airplane (simplified) */}
+      <group position={[0, 5, -100]}>
         {/* Fuselage */}
         <Cylinder args={[3, 3, 40, 12]} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
           <meshStandardMaterial color="#f0f0f0" metalness={0.5} roughness={0.3} />
@@ -2288,14 +2015,7 @@ function AirportRunwayBackground() {
 
 /** Theme Park - Amusement park with rides */
 function ThemeParkBackground() {
-  const ferrisRef = useRef<THREE.Group>(null);
-  
-  useFrame((state) => {
-    if (ferrisRef.current) {
-      ferrisRef.current.rotation.z = state.clock.elapsedTime * 0.1;
-    }
-  });
-  
+  // Static theme park - no time-based animation for GPU rendering consistency
   return (
     <group>
       {/* Park ground */}
@@ -2319,8 +2039,8 @@ function ThemeParkBackground() {
         <Box args={[2, 40, 2]} position={[8, 20, 0]}>
           <meshStandardMaterial color="#cc0000" metalness={0.5} roughness={0.5} />
         </Box>
-        {/* Wheel */}
-        <group ref={ferrisRef} position={[0, 35, 0]}>
+        {/* Static wheel */}
+        <group position={[0, 35, 0]}>
           <Torus args={[15, 0.5, 8, 32]}>
             <meshStandardMaterial color="#ff6600" metalness={0.6} roughness={0.4} />
           </Torus>
@@ -2400,9 +2120,9 @@ function ThemeParkBackground() {
         <meshStandardMaterial color="#00ffff" metalness={0.3} roughness={0.7} />
       </Box>
       
-      {/* Balloons */}
+      {/* Static balloons */}
       {Array.from({ length: 20 }).map((_, i) => (
-        <Float key={i} speed={1 + Math.random()} floatIntensity={0.5}>
+        <group key={i}>
           <Sphere args={[0.8, 8, 8]} position={[
             (Math.random() - 0.5) * 100,
             10 + Math.random() * 20,
@@ -2410,7 +2130,7 @@ function ThemeParkBackground() {
           ]}>
             <meshStandardMaterial color={['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'][i % 5]} metalness={0.2} roughness={0.8} />
           </Sphere>
-        </Float>
+        </group>
       ))}
       
       {/* Night sky with stars */}
@@ -2541,29 +2261,12 @@ function AncientRuinsBackground() {
 
 /** Zen Garden - Japanese peaceful garden */
 function ZenGardenBackground() {
-  const sandRef = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (sandRef.current) {
-      const geometry = sandRef.current.geometry;
-      const position = geometry.attributes.position;
-      const time = state.clock.elapsedTime * 0.1;
-      
-      for (let i = 0; i < position.count; i++) {
-        const x = position.getX(i);
-        const y = position.getY(i);
-        const wave = Math.sin(x * 0.1 + time) * 0.1 + Math.sin(y * 0.15 + time * 0.7) * 0.08;
-        position.setZ(i, wave);
-      }
-      position.needsUpdate = true;
-    }
-  });
-  
+  // Static zen garden - no time-based animation for GPU rendering consistency
   return (
     <group>
-      {/* Zen sand garden */}
-      <mesh ref={sandRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-        <planeGeometry args={[100, 100, 40, 40]} />
+      {/* Static zen sand garden */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+        <planeGeometry args={[100, 100]} />
         <meshStandardMaterial color="#d4c4a8" metalness={0.0} roughness={1} />
       </mesh>
       
@@ -2670,21 +2373,7 @@ function ZenGardenBackground() {
 
 /** Ski Resort - Snowy mountain slopes */
 function SkiResortBackground() {
-  const snowfallRef = useRef<THREE.Points>(null);
-  
-  useFrame(() => {
-    if (snowfallRef.current) {
-      const positions = snowfallRef.current.geometry.attributes.position.array as Float32Array;
-      for (let i = 0; i < positions.length; i += 3) {
-        positions[i + 1] -= 0.05;
-        if (positions[i + 1] < 0) {
-          positions[i + 1] = 60;
-        }
-      }
-      snowfallRef.current.geometry.attributes.position.needsUpdate = true;
-    }
-  });
-  
+  // Static ski resort - no time-based animation for GPU rendering consistency
   return (
     <group>
       {/* Snowy mountain slope */}
@@ -2782,8 +2471,8 @@ function SkiResortBackground() {
         <pointLight position={[0, 5, 8]} intensity={0.5} color="#ffcc66" distance={20} />
       </group>
       
-      {/* Falling snow */}
-      <points ref={snowfallRef}>
+      {/* Static snow particles */}
+      <points>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
@@ -3091,12 +2780,23 @@ function CameraController({ towers, currentIndex, progress, distance, angle }: {
   angle: number;
 }) {
   const { camera } = useThree();
+  const initializedRef = useRef(false);
   
-  // Deterministic camera position - no lerp, no refs, fully frame-based
-  // This ensures consistent rendering regardless of GPU speed
-  useEffect(() => {
-    if (towers.length === 0) return;
-    
+  // Initialize camera on first render
+  if (!initializedRef.current && towers.length > 0) {
+    const angleRad = (angle * Math.PI) / 180;
+    camera.position.set(
+      Math.sin(angleRad) * distance,
+      18,
+      towers[0].position[2] + Math.cos(angleRad) * distance
+    );
+    camera.lookAt(0, 10, towers[0].position[2]);
+    initializedRef.current = true;
+  }
+  
+  // Update camera position SYNCHRONOUSLY during render (not in useEffect)
+  // This ensures the camera is in the right position BEFORE the frame is captured
+  if (towers.length > 0) {
     const currentTower = towers[Math.min(currentIndex, towers.length - 1)];
     const nextIndex = Math.min(currentIndex + 1, towers.length - 1);
     const nextTower = towers[nextIndex];
@@ -3119,14 +2819,13 @@ function CameraController({ towers, currentIndex, progress, distance, angle }: {
     const camY = avgHeight + 15;
     const camZ = targetZ + Math.cos(angleRad) * distance;
     
-    // Set camera position directly - no smoothing, fully deterministic
+    // Set camera position SYNCHRONOUSLY - this happens before frame capture
     camera.position.set(camX, camY, camZ);
     
     // Look at target - also deterministic
     const lookY = avgHeight + 6;
     camera.lookAt(0, lookY, targetZ);
-    
-  }, [towers, currentIndex, progress, distance, angle, camera]);
+  }
   
   return null;
 }
@@ -3344,6 +3043,7 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
         style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
         gl={{ antialias: false, alpha: false, preserveDrawingBuffer: true, powerPreference: 'high-performance' }}
         dpr={1}
+        frameloop="demand"
       >
         <TowerChartScene data={data} frame={frame} fps={fps} />
       </Canvas>
