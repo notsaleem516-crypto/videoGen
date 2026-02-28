@@ -138,7 +138,7 @@ export function VideoPreview() {
           </div>
           <Button
             size="sm"
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 shadow-lg shadow-purple-500/25"
+            className="bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-700 hover:to-indigo-700 text-white border-0 shadow-lg shadow-cyan-500/25"
             onClick={handleExport}
             disabled={isExporting || videoInput.contentBlocks.length === 0}
           >
@@ -191,7 +191,7 @@ export function VideoPreview() {
               className="relative z-10"
             >
               {/* Glow Effect */}
-              <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-blue-500/20 blur-2xl opacity-50" />
+              <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/20 via-indigo-500/20 to-cyan-500/20 blur-2xl opacity-50" />
               
               {/* Player Container */}
               <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-700/50 bg-black">
@@ -223,7 +223,7 @@ export function VideoPreview() {
       <div className="h-10 bg-gray-900/50 backdrop-blur border-t border-gray-800/50 flex items-center justify-center flex-shrink-0">
         <div className="flex items-center gap-4 text-xs text-gray-500">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
             {videoInput.videoMeta.theme}
           </span>
           <span>{videoInput.videoMeta.fps} FPS</span>
