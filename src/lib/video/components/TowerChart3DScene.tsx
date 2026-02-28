@@ -333,7 +333,7 @@ function TowerChartScene({
       )}
       
       {/* Synchronized camera - no useFrame, sets immediately */}
-      <SynchronizedCamera position={cameraPosition} lookAt={lookAt} />
+      <SynchronizedCamera cameraPosition={cameraPosition} lookAt={lookAt} />
       
       {towers.map((tower, index) => {
         const inVisibleRange = index >= visibleStart && index <= visibleEnd;

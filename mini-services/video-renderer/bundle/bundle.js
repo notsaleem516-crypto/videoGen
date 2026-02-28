@@ -101624,7 +101624,7 @@ function TowerChartScene({
         rotation: customModelRotation
       }
     ) }),
-    /* @__PURE__ */ (0,jsx_runtime.jsx)(SynchronizedCamera, { position: cameraPosition, lookAt }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SynchronizedCamera, { cameraPosition, lookAt }),
     towers.map((tower, index) => {
       const inVisibleRange = index >= visibleStart && index <= visibleEnd;
       const itemReveal = Math.max(0, Math.min(1, revealProgress * totalItems * 1.2 - index * 0.12));
