@@ -167,10 +167,15 @@ function getChromiumOptions(useGPU: boolean) {
     '--disable-renderer-backgrounding',
     '--disable-frame-rate-limit',
     '--disable-gpu-sandbox',
+    // Deterministic rendering options
+    '--disable-threaded-animation',
+    '--disable-threaded-scrolling',
+    '--disable-checker-imaging',
+    '--disable-new-content-rendering-timeout',
   ];
   
   if (useGPU) {
-    // GPU-enabled options
+    // GPU-enabled options with deterministic rendering
     console.log('[GPU] Using GPU acceleration');
     return {
       args: [
@@ -178,14 +183,18 @@ function getChromiumOptions(useGPU: boolean) {
         '--enable-gpu-rasterization',
         '--enable-zero-copy',
         '--enable-native-gpu-memory-buffers',
-        '--use-gl=egl', // Use EGL for better GPU support
-        '--disable-software-rasterizer', // Force GPU
-        '--disable-gpu-vsync', // Disable vsync for consistent frame timing
+        '--use-gl=egl',
+        '--use-angle=egl',
+        '--disable-software-rasterizer',
+        '--disable-gpu-vsync',
+        // Additional GPU sync options
+        '--disable-gl-error-limiting',
+        '--enable-webgl-draft-extensions',
       ],
       gl: 'egl' as const,
     };
   } else {
-    // CPU-only options (SwiftShader)
+    // CPU-only options (SwiftShader) - most deterministic
     console.log('[GPU] Using software rendering (SwiftShader)');
     return {
       args: [
@@ -193,6 +202,7 @@ function getChromiumOptions(useGPU: boolean) {
         '--use-gl=swiftshader',
         '--use-angle=swiftshader',
         '--disable-gpu',
+        '--disable-gpu-compositing',
       ],
       gl: 'swiftshader' as const,
     };

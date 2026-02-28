@@ -1,17 +1,18 @@
 // ============================================================================
 // TOWER CHART 3D SCENE - 3D Ranking visualization with Three.js
+// GPU-SAFE: No useFrame, all calculations done BEFORE Canvas
 // ============================================================================
 
 import React, { useMemo, useEffect, useState, Suspense, useRef } from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, delayRender, continueRender } from 'remotion';
-import { Canvas, useThree, useFrame, invalidate } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import { Text, Box, Plane, Billboard, Stars, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import type { TowerChart3DBlock, AnimationPhase } from '../schemas';
 import type { MotionProfileType } from '../utils/animations';
 
 // ============================================================================
-// MODEL PRELOADER - Preload GLB files for better performance
+// MODEL PRELOADER
 // ============================================================================
 
 const preloadedModels = new Set<string>();
@@ -42,7 +43,7 @@ function formatValue(value: number): string {
 }
 
 // ============================================================================
-// CALCULATE CAMERA POSITION - Done OUTSIDE Canvas for determinism
+// CALCULATE CAMERA STATE - Pure function
 // ============================================================================
 
 function calculateCameraState(
@@ -60,7 +61,7 @@ function calculateCameraState(
   const nextIndex = Math.min(currentIndex + 1, towers.length - 1);
   const nextTower = towers[nextIndex];
   
-  // Ease-in-out for smooth movement
+  // Ease-in-out
   const easedProgress = progress < 0.5 
     ? 2 * progress * progress 
     : 1 - Math.pow(-2 * progress + 2, 2) / 2;
@@ -80,7 +81,7 @@ function calculateCameraState(
 }
 
 // ============================================================================
-// 3D SCENE COMPONENTS
+// 3D SCENE COMPONENTS - All STATIC, no animations
 // ============================================================================
 
 function StarField() {
@@ -98,13 +99,20 @@ function StarField() {
 }
 
 function FloatingParticles() {
+  // Use seeded random for deterministic positions
   const count = 30;
   const positions = useMemo(() => {
     const pos = new Float32Array(count * 3);
+    // Use a seed for reproducible random positions
+    let seed = 12345;
+    const seededRandom = () => {
+      seed = (seed * 16807) % 2147483647;
+      return (seed - 1) / 2147483646;
+    };
     for (let i = 0; i < count; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 120;
-      pos[i * 3 + 1] = Math.random() * 60;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 200;
+      pos[i * 3] = (seededRandom() - 0.5) * 120;
+      pos[i * 3 + 1] = seededRandom() * 60;
+      pos[i * 3 + 2] = (seededRandom() - 0.5) * 200;
     }
     return pos;
   }, []);
@@ -215,36 +223,31 @@ function Ground({ color }: { color: string }) {
 }
 
 // ============================================================================
-// FRAME SYNCHRONIZER - Ensures GPU completes before frame capture
+// CAMERA SETTER - Sets camera SYNCHRONOUSLY during render (no useFrame)
 // ============================================================================
 
-function FrameSynchronizer({ cameraPosition, lookAt }: { 
-  cameraPosition: [number, number, number]; 
+function CameraSetter({ position, lookAt }: { 
+  position: [number, number, number]; 
   lookAt: [number, number, number];
 }) {
   const { camera, gl } = useThree();
-  const hasSynced = useRef(false);
   
-  // Update camera and sync GPU on every frame
-  useFrame(() => {
-    // Set camera position and lookAt
-    camera.position.set(...cameraPosition);
-    camera.lookAt(...lookAt);
-    
-    // Force WebGL to complete all commands before Remotion captures
-    const ctx = gl.getContext();
-    if (ctx) {
-      ctx.finish();
-    }
-    
-    hasSynced.current = true;
-  });
+  // Set camera IMMEDIATELY during render - not in useFrame
+  // This happens synchronously before the frame is captured
+  camera.position.set(...position);
+  camera.lookAt(...lookAt);
+  
+  // Force WebGL to finish - call synchronously
+  const ctx = gl.getContext();
+  if (ctx) {
+    ctx.finish();
+  }
   
   return null;
 }
 
 // ============================================================================
-// SCENE COMPONENT - Receives pre-calculated values as props
+// SCENE COMPONENT
 // ============================================================================
 
 function TowerChartScene({ 
@@ -313,8 +316,8 @@ function TowerChartScene({
         </Suspense>
       )}
       
-      {/* Frame synchronizer - updates camera and syncs GPU */}
-      <FrameSynchronizer cameraPosition={cameraPosition} lookAt={lookAt} />
+      {/* Camera setter - SYNCHRONOUS, no useFrame */}
+      <CameraSetter position={cameraPosition} lookAt={lookAt} />
       
       {towers.map((tower, index) => {
         const inVisibleRange = index >= visibleStart && index <= visibleEnd;
@@ -366,7 +369,7 @@ function CustomModel({ modelPath, position, scale, rotation }: {
 }
 
 // ============================================================================
-// CALCULATE TOWERS - Pure function, no side effects
+// CALCULATE TOWERS - Pure function
 // ============================================================================
 
 function calculateTowers(
@@ -407,7 +410,7 @@ function calculateTowers(
 }
 
 // ============================================================================
-// MAIN COMPONENT - All calculations done BEFORE Canvas
+// MAIN COMPONENT
 // ============================================================================
 
 export interface TowerChart3DSceneProps {
@@ -420,8 +423,9 @@ export interface TowerChart3DSceneProps {
 export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.ReactElement {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
-  const [glContext, setGlContext] = useState<WebGLRenderingContext | null>(null);
+  const glRef = useRef<WebGLRenderingContext | null>(null);
   const [renderHandle] = useState(() => delayRender('Initializing 3D scene'));
+  const hasInitialized = useRef(false);
   
   const {
     title = 'Rankings',
@@ -457,7 +461,8 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
     }
   }, [customModelPath]);
   
-  // Calculate ALL scene state BEFORE Canvas - fully deterministic
+  // ========== ALL CALCULATIONS BEFORE CANVAS ==========
+  
   const introDuration = 40;
   const totalItems = items.length;
   const pauseFrames = cameraPauseDuration * fps;
@@ -465,7 +470,7 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
   const totalAnimFrames = totalItems * (pauseFrames + moveFrames);
   
   const animFrame = Math.max(0, frame - introDuration);
-  const animProgress = Math.min(animFrame / totalAnimFrames, 1);
+  const animProgress = totalAnimFrames > 0 ? Math.min(animFrame / totalAnimFrames, 1) : 0;
   const currentIndex = Math.min(Math.floor(animProgress * totalItems), totalItems - 1);
   const itemProgress = (animProgress * totalItems) % 1;
   
@@ -475,13 +480,13 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
   const visibleStart = Math.max(0, currentIndex - 1);
   const visibleEnd = Math.min(items.length - 1, currentIndex + 4);
   
-  // Calculate towers - pure computation
+  // Calculate towers
   const towers = useMemo(() => 
     calculateTowers(items, towerSpacing, baseHeight, maxHeight, gradientStart, gradientEnd, useGradientByRank, animationDirection),
     [items, towerSpacing, baseHeight, maxHeight, gradientStart, gradientEnd, useGradientByRank, animationDirection]
   );
   
-  // Calculate camera state - pure computation
+  // Calculate camera state
   const cameraState = useMemo(() => 
     calculateCameraState(
       towers.map(t => ({ position: t.position, height: t.height })),
@@ -493,25 +498,25 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
     [towers, currentIndex, itemProgress, cameraDistance, cameraAngle]
   );
   
-  // Model position with defaults
   const modelPos: [number, number, number] = customModelPosition 
     ? [customModelPosition.x, customModelPosition.y, customModelPosition.z] 
     : [0, 35, -60];
   
-  // Continue render when GL context is ready
+  // Continue render after GL context is ready
   useEffect(() => {
-    if (glContext) {
-      glContext.finish();
+    if (glRef.current && !hasInitialized.current) {
+      hasInitialized.current = true;
       continueRender(renderHandle);
     }
-  }, [glContext, renderHandle, frame]);
+  }, [glRef.current, renderHandle]);
   
-  // Callback to get GL context
+  // Callback when Canvas is created
   const onCreated = ({ gl }: { gl: THREE.WebGLRenderer }) => {
     const ctx = gl.getContext();
     if (ctx) {
+      glRef.current = ctx;
+      // Finish any pending operations
       ctx.finish();
-      setGlContext(ctx);
     }
   };
   
@@ -533,8 +538,6 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
           alpha: false, 
           preserveDrawingBuffer: true, 
           powerPreference: 'high-performance',
-          // Ensure consistent rendering
-          toneMapping: THREE.ACESFilmicToneMapping,
         }}
         dpr={1}
         frameloop="demand"
