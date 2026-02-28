@@ -1,12 +1,10 @@
 // ============================================================================
 // TOWER CHART 3D SCENE - 3D Ranking visualization with Three.js
-// FIX: Use delayRender/continueRender pattern from Remotion docs
-// https://www.remotion.dev/docs/flickering
 // ============================================================================
 
 import React, { useMemo, useEffect, useState, Suspense, useRef, useCallback } from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, delayRender, continueRender, cancelRender } from 'remotion';
-import { Canvas, useThree, useFrame } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import { Text, Box, Plane, Billboard, Stars, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import type { TowerChart3DBlock, AnimationPhase } from '../schemas';
@@ -146,14 +144,12 @@ function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, ran
   const loadedRef = useRef(false);
   
   useEffect(() => {
-    // Skip delayRender if no image - texture loading is instant
     if (!image) {
       setTexture(null);
       setLoaded(true);
       return;
     }
     
-    // Only use delayRender for actual async loading
     const handle = delayRender('Loading tower texture: ' + image);
     let cancelled = false;
     
@@ -175,14 +171,12 @@ function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, ran
     
     return () => {
       cancelled = true;
-      // Only cancel if not yet loaded
       if (!loadedRef.current) {
         cancelRender(handle);
       }
     };
   }, [image]);
   
-  // Wait for texture to load
   if (!loaded) return null;
   if (!visible) return null;
   
@@ -250,7 +244,7 @@ function Ground({ color }: { color: string }) {
 }
 
 // ============================================================================
-// SYNCHRONIZED CAMERA - Uses delayRender/continueRender pattern
+// SYNCHRONIZED CAMERA
 // ============================================================================
 
 function SynchronizedCamera({ 
@@ -262,12 +256,10 @@ function SynchronizedCamera({
 }) {
   const { camera, gl } = useThree();
   
-  // Set camera IMMEDIATELY on every render
   camera.position.set(...cameraPosition);
   camera.lookAt(...lookAt);
   camera.updateProjectionMatrix();
   
-  // Force WebGL to finish before Remotion captures
   const ctx = gl.getContext();
   if (ctx) {
     ctx.finish();
@@ -346,7 +338,6 @@ function TowerChartScene({
         </Suspense>
       )}
       
-      {/* Synchronized camera - no useFrame, sets immediately */}
       <SynchronizedCamera cameraPosition={cameraPosition} lookAt={lookAt} />
       
       {towers.map((tower, index) => {
@@ -454,8 +445,7 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   
-  // Use delayRender/continueRender pattern from Remotion docs
-  const [handle] = useState(() => delayRender("Initializing 3D scene"));
+  const [handle] = useState(() => delayRender('Initializing 3D scene'));
   const [glReady, setGlReady] = useState(false);
   
   const {
@@ -485,14 +475,11 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
     animationDirection = 'top-to-bottom',
   } = data;
   
-  // Preload model
   useEffect(() => {
     if (customModelPath) {
       preloadModel(customModelPath);
     }
   }, [customModelPath]);
-  
-  // ========== CALCULATIONS ==========
   
   const introDuration = 40;
   const totalItems = items.length;
@@ -516,7 +503,6 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
     [items, towerSpacing, baseHeight, maxHeight, gradientStart, gradientEnd, useGradientByRank, animationDirection]
   );
   
-  // Camera state - calculated from frame, deterministic
   const cameraState = useMemo(() => 
     calculateCameraState(
       towers.map(t => ({ position: t.position, height: t.height })),
@@ -532,14 +518,12 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
     ? [customModelPosition.x, customModelPosition.y, customModelPosition.z] 
     : [0, 35, -60];
   
-  // Continue render when ready
   useEffect(() => {
     if (glReady) {
       continueRender(handle);
     }
   }, [glReady, handle]);
   
-  // Canvas ready callback
   const onCreated = useCallback(({ gl }: { gl: THREE.WebGLRenderer }) => {
     const ctx = gl.getContext();
     if (ctx) {
@@ -593,7 +577,6 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
         />
       </Canvas>
       
-      {/* Title Overlay */}
       <div
         style={{
           position: 'absolute',
@@ -632,7 +615,6 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
         )}
       </div>
       
-      {/* Progress dots */}
       <div
         style={{
           position: 'absolute',
