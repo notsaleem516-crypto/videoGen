@@ -15,6 +15,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { ChevronDown, ChevronUp, PanelLeft, PanelRight, SlidersHorizontal } from 'lucide-react';
 import { useState } from 'react';
