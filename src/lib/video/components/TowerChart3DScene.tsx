@@ -253,72 +253,86 @@ function Ground({ color }: { color: string }) {
 // BACKGROUND ENVIRONMENT PRESETS - Immersive 3D environments
 // ============================================================================
 
-function BackgroundEnvironment({ preset }: { preset: string }) {
+function BackgroundEnvironment({ preset, totalLength }: { preset: string; totalLength: number }) {
+  // Ensure minimum length for environments
+  const envLength = Math.max(totalLength, 100);
+  
   switch (preset) {
     case 'none':
       return null;
       
     case 'cyber-grid':
-      return <CyberGridEnvironment />;
+      return <CyberGridEnvironment totalLength={envLength} />;
     case 'mountain-range':
-      return <MountainRangeEnvironment />;
+      return <MountainRangeEnvironment totalLength={envLength} />;
     case 'ocean-waves':
-      return <OceanWavesEnvironment />;
+      return <OceanWavesEnvironment totalLength={envLength} />;
     case 'forest-trees':
-      return <ForestTreesEnvironment />;
+      return <ForestTreesEnvironment totalLength={envLength} />;
     case 'city-skyline':
-      return <CitySkylineEnvironment />;
+      return <CitySkylineEnvironment totalLength={envLength} />;
     case 'abstract-waves':
-      return <AbstractWavesEnvironment />;
+      return <AbstractWavesEnvironment totalLength={envLength} />;
     case 'space-station':
-      return <SpaceStationEnvironment />;
+      return <SpaceStationEnvironment totalLength={envLength} />;
     case 'aurora-borealis':
-      return <AuroraBorealisEnvironment />;
+      return <AuroraBorealisEnvironment totalLength={envLength} />;
     case 'volcanic-inferno':
-      return <VolcanicInfernoEnvironment />;
+      return <VolcanicInfernoEnvironment totalLength={envLength} />;
     case 'crystal-caves':
-      return <CrystalCavesEnvironment />;
+      return <CrystalCavesEnvironment totalLength={envLength} />;
     case 'desert-dunes':
-      return <DesertDunesEnvironment />;
+      return <DesertDunesEnvironment totalLength={envLength} />;
     case 'neon-tokyo':
-      return <NeonTokyoEnvironment />;
+      return <NeonTokyoEnvironment totalLength={envLength} />;
     case 'floating-islands':
-      return <FloatingIslandsEnvironment />;
+      return <FloatingIslandsEnvironment totalLength={envLength} />;
     case 'deep-ocean':
-      return <DeepOceanEnvironment />;
+      return <DeepOceanEnvironment totalLength={envLength} />;
     case 'galaxy-nebula':
-      return <GalaxyNebulaEnvironment />;
+      return <GalaxyNebulaEnvironment totalLength={envLength} />;
     case 'matrix-rain':
-      return <MatrixRainEnvironment />;
+      return <MatrixRainEnvironment totalLength={envLength} />;
     case 'ice-glacier':
-      return <IceGlacierEnvironment />;
+      return <IceGlacierEnvironment totalLength={envLength} />;
     case 'steampunk-gears':
-      return <SteampunkGearsEnvironment />;
+      return <SteampunkGearsEnvironment totalLength={envLength} />;
     case 'alien-planet':
-      return <AlienPlanetEnvironment />;
+      return <AlienPlanetEnvironment totalLength={envLength} />;
     case 'tron-grid':
-      return <TronGridEnvironment />;
+      return <TronGridEnvironment totalLength={envLength} />;
     // Immersive Environments
     case 'football-stadium':
-      return <FootballStadiumEnvironment />;
+      return <FootballStadiumEnvironment totalLength={envLength} />;
     case 'race-track':
-      return <RaceTrackEnvironment />;
+      return <RaceTrackEnvironment totalLength={envLength} />;
     case 'concert-stage':
-      return <ConcertStageEnvironment />;
+      return <ConcertStageEnvironment totalLength={envLength} />;
     case 'castle-grounds':
-      return <CastleGroundsEnvironment />;
+      return <CastleGroundsEnvironment totalLength={envLength} />;
     case 'airport-runway':
-      return <AirportRunwayEnvironment />;
+      return <AirportRunwayEnvironment totalLength={envLength} />;
     case 'theme-park':
-      return <ThemeParkEnvironment />;
+      return <ThemeParkEnvironment totalLength={envLength} />;
     case 'ancient-ruins':
-      return <AncientRuinsEnvironment />;
+      return <AncientRuinsEnvironment totalLength={envLength} />;
     case 'zen-garden':
-      return <ZenGardenEnvironment />;
+      return <ZenGardenEnvironment totalLength={envLength} />;
     case 'ski-resort':
-      return <SkiResortEnvironment />;
+      return <SkiResortEnvironment totalLength={envLength} />;
+    // New Advanced Immersive Environments
+    case 'underwater-kingdom':
+      return <UnderwaterKingdomEnvironment totalLength={envLength} />;
+    case 'cyberpunk-city':
+      return <CyberpunkCityEnvironment totalLength={envLength} />;
+    case 'medieval-arena':
+      return <MedievalArenaEnvironment totalLength={envLength} />;
+    case 'space-colony':
+      return <SpaceColonyEnvironment totalLength={envLength} />;
+    case 'tropical-beach':
+      return <TropicalBeachEnvironment totalLength={envLength} />;
     default:
-      return <CyberGridEnvironment />;
+      return <CyberGridEnvironment totalLength={envLength} />;
   }
 }
 
@@ -326,15 +340,18 @@ function BackgroundEnvironment({ preset }: { preset: string }) {
 // BASIC ENVIRONMENT PRESETS
 // ============================================================================
 
-function CyberGridEnvironment() {
+function CyberGridEnvironment({ totalLength }: { totalLength: number }) {
+  const gridLength = Math.max(totalLength + 100, 200);
+  const lineCount = Math.ceil(gridLength / 16);
+  
   return (
     <group>
       {/* Neon grid floor */}
-      <gridHelper args={[200, 50, '#00ffff', '#ff00ff']} position={[0, 0.1, 0]} />
-      {/* Glowing lines */}
-      {[...Array(10)].map((_, i) => (
-        <mesh key={i} position={[0, 0.05, -80 + i * 16]}>
-          <boxGeometry args={[200, 0.1, 0.2]} />
+      <gridHelper args={[gridLength, Math.floor(gridLength / 4), '#00ffff', '#ff00ff']} position={[0, 0.1, totalLength / 2]} />
+      {/* Glowing lines extending full length */}
+      {[...Array(lineCount)].map((_, i) => (
+        <mesh key={i} position={[0, 0.05, -40 + i * 16]}>
+          <boxGeometry args={[gridLength, 0.1, 0.2]} />
           <meshBasicMaterial color="#00ffff" transparent opacity={0.6} />
         </mesh>
       ))}
@@ -342,26 +359,27 @@ function CyberGridEnvironment() {
   );
 }
 
-function MountainRangeEnvironment() {
+function MountainRangeEnvironment({ totalLength }: { totalLength: number }) {
+  const mountainCount = Math.max(Math.ceil(totalLength / 20), 12);
   const mountains = useMemo(() => {
-    return [...Array(12)].map((_, i) => ({
+    return [...Array(mountainCount)].map((_, i) => ({
       x: -150 + i * 25,
-      height: 20 + Math.random() * 40,
-      width: 15 + Math.random() * 20,
+      height: 20 + (i * 7 % 40),
+      width: 15 + (i * 11 % 20),
     }));
-  }, []);
+  }, [mountainCount]);
   
   return (
-    <group position={[0, 0, -120]}>
+    <group position={[0, 0, -totalLength * 0.3]}>
       {mountains.map((m, i) => (
-        <mesh key={i} position={[m.x, m.height / 2, 0]}>
+        <mesh key={i} position={[m.x, m.height / 2, i * (totalLength / mountainCount)]}>
           <coneGeometry args={[m.width, m.height, 4]} />
           <meshStandardMaterial color="#1a1a2e" flatShading />
         </mesh>
       ))}
       {/* Snow caps */}
       {mountains.filter(m => m.height > 35).map((m, i) => (
-        <mesh key={`snow-${i}`} position={[m.x, m.height - 5, 0]}>
+        <mesh key={`snow-${i}`} position={[m.x, m.height - 5, i * (totalLength / mountainCount)]}>
           <coneGeometry args={[m.width * 0.3, 10, 4]} />
           <meshStandardMaterial color="#ffffff" flatShading />
         </mesh>
@@ -370,16 +388,18 @@ function MountainRangeEnvironment() {
   );
 }
 
-function OceanWavesEnvironment() {
+function OceanWavesEnvironment({ totalLength }: { totalLength: number }) {
+  const waveCount = Math.max(Math.ceil(totalLength / 15), 20);
+  
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]}>
-        <planeGeometry args={[300, 300, 50, 50]} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, totalLength / 2]}>
+        <planeGeometry args={[300, totalLength + 100, 50, 50]} />
         <meshStandardMaterial color="#006994" transparent opacity={0.8} metalness={0.3} roughness={0.7} />
       </mesh>
-      {/* Wave particles */}
-      {[...Array(20)].map((_, i) => (
-        <mesh key={i} position={[-100 + i * 10, 0, -50 + Math.sin(i) * 30]}>
+      {/* Wave particles along full length */}
+      {[...Array(waveCount)].map((_, i) => (
+        <mesh key={i} position={[-100 + (i % 10) * 10, 0, i * (totalLength / waveCount)]}>
           <sphereGeometry args={[1, 8, 8]} />
           <meshBasicMaterial color="#00bfff" transparent opacity={0.5} />
         </mesh>
@@ -388,14 +408,15 @@ function OceanWavesEnvironment() {
   );
 }
 
-function ForestTreesEnvironment() {
+function ForestTreesEnvironment({ totalLength }: { totalLength: number }) {
+  const treeCount = Math.max(Math.ceil(totalLength / 5), 30);
   const trees = useMemo(() => {
-    return [...Array(30)].map(() => ({
-      x: (Math.random() - 0.5) * 150,
-      z: -50 - Math.random() * 100,
-      height: 8 + Math.random() * 15,
+    return [...Array(treeCount)].map((_, i) => ({
+      x: (i % 2 === 0 ? -1 : 1) * (30 + (i * 17 % 50)),
+      z: i * (totalLength / treeCount),
+      height: 8 + (i * 13 % 15),
     }));
-  }, []);
+  }, [treeCount, totalLength]);
   
   return (
     <group>
@@ -417,16 +438,17 @@ function ForestTreesEnvironment() {
   );
 }
 
-function CitySkylineEnvironment() {
+function CitySkylineEnvironment({ totalLength }: { totalLength: number }) {
+  const buildingCount = Math.max(Math.ceil(totalLength / 8), 25);
   const buildings = useMemo(() => {
-    return [...Array(25)].map(() => ({
-      x: (Math.random() - 0.5) * 200,
-      z: -60 - Math.random() * 80,
-      height: 15 + Math.random() * 50,
-      width: 5 + Math.random() * 10,
-      depth: 5 + Math.random() * 10,
+    return [...Array(buildingCount)].map((_, i) => ({
+      x: (i % 2 === 0 ? -1 : 1) * (40 + (i * 23 % 60)),
+      z: i * (totalLength / buildingCount),
+      height: 15 + (i * 17 % 50),
+      width: 5 + (i * 7 % 10),
+      depth: 5 + (i * 11 % 10),
     }));
-  }, []);
+  }, [buildingCount, totalLength]);
   
   return (
     <group>
@@ -437,7 +459,7 @@ function CitySkylineEnvironment() {
         </mesh>
       ))}
       {/* Window lights */}
-      {buildings.slice(0, 15).map((b, i) => (
+      {buildings.slice(0, Math.min(15, buildingCount)).map((b, i) => (
         [...Array(Math.floor(b.height / 5))].map((_, j) => (
           <mesh key={`light-${i}-${j}`} position={[b.x, 5 + j * 5, b.z + b.depth / 2 + 0.1]}>
             <planeGeometry args={[b.width * 0.8, 2]} />
@@ -449,11 +471,13 @@ function CitySkylineEnvironment() {
   );
 }
 
-function AbstractWavesEnvironment() {
+function AbstractWavesEnvironment({ totalLength }: { totalLength: number }) {
+  const waveCount = Math.max(Math.ceil(totalLength / 25), 8);
+  
   return (
-    <group position={[0, -5, -50]}>
-      {[...Array(8)].map((_, i) => (
-        <mesh key={i} position={[0, i * 2, i * -10]} rotation={[0, 0, i * 0.1]}>
+    <group position={[0, -5, totalLength / 4]}>
+      {[...Array(waveCount)].map((_, i) => (
+        <mesh key={i} position={[0, i * 2, i * -(totalLength / waveCount)]} rotation={[0, 0, i * 0.1]}>
           <torusGeometry args={[40 - i * 3, 0.5, 8, 64, Math.PI * 2]} />
           <meshStandardMaterial 
             color={`hsl(${200 + i * 20}, 70%, 50%)`} 
@@ -467,28 +491,34 @@ function AbstractWavesEnvironment() {
   );
 }
 
-function SpaceStationEnvironment() {
+function SpaceStationEnvironment({ totalLength }: { totalLength: number }) {
+  const stationCount = Math.max(Math.ceil(totalLength / 150), 1);
+  
   return (
-    <group position={[0, 20, -80]}>
-      {/* Station ring */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[30, 3, 8, 32]} />
-        <meshStandardMaterial color="#555555" metalness={0.8} roughness={0.2} />
-      </mesh>
-      {/* Central hub */}
-      <mesh>
-        <sphereGeometry args={[8, 16, 16]} />
-        <meshStandardMaterial color="#666666" metalness={0.7} roughness={0.3} />
-      </mesh>
-      {/* Solar panels */}
-      <mesh position={[-40, 0, 0]} rotation={[0, 0, Math.PI / 4]}>
-        <boxGeometry args={[20, 0.5, 8]} />
-        <meshStandardMaterial color="#1a237e" metalness={0.3} roughness={0.5} />
-      </mesh>
-      <mesh position={[40, 0, 0]} rotation={[0, 0, -Math.PI / 4]}>
-        <boxGeometry args={[20, 0.5, 8]} />
-        <meshStandardMaterial color="#1a237e" metalness={0.3} roughness={0.5} />
-      </mesh>
+    <group position={[0, 20, totalLength / 2]}>
+      {[...Array(stationCount)].map((_, s) => (
+        <group key={s} position={[0, 0, s * 150 - totalLength / 2]}>
+          {/* Station ring */}
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[30, 3, 8, 32]} />
+            <meshStandardMaterial color="#555555" metalness={0.8} roughness={0.2} />
+          </mesh>
+          {/* Central hub */}
+          <mesh>
+            <sphereGeometry args={[8, 16, 16]} />
+            <meshStandardMaterial color="#666666" metalness={0.7} roughness={0.3} />
+          </mesh>
+          {/* Solar panels */}
+          <mesh position={[-40, 0, 0]} rotation={[0, 0, Math.PI / 4]}>
+            <boxGeometry args={[20, 0.5, 8]} />
+            <meshStandardMaterial color="#1a237e" metalness={0.3} roughness={0.5} />
+          </mesh>
+          <mesh position={[40, 0, 0]} rotation={[0, 0, -Math.PI / 4]}>
+            <boxGeometry args={[20, 0.5, 8]} />
+            <meshStandardMaterial color="#1a237e" metalness={0.3} roughness={0.5} />
+          </mesh>
+        </group>
+      ))}
     </group>
   );
 }
@@ -811,74 +841,87 @@ function TronGridEnvironment() {
 // IMMERSIVE ENVIRONMENT PRESETS - Towers appear WITHIN these scenes
 // ============================================================================
 
-function FootballStadiumEnvironment() {
+function FootballStadiumEnvironment({ totalLength }: { totalLength: number }) {
+  const stadiumLength = Math.max(totalLength + 80, 150);
+  const numSeats = Math.ceil(stadiumLength / 15);
+  
   return (
-    <group position={[0, 0, -40]}>
-      {/* Stadium bowl */}
-      <mesh rotation={[0, 0, Math.PI]} position={[0, 15, 0]}>
-        <torusGeometry args={[60, 20, 8, 32, Math.PI]} />
-        <meshStandardMaterial color="#1a1a2e" metalness={0.3} roughness={0.7} />
-      </mesh>
-      {/* Seats sections */}
-      {[...Array(10)].map((_, i) => (
-        <mesh key={i} position={[Math.cos(i * 0.314) * 55, 10 + i * 0.5, Math.sin(i * 0.314) * 55]} rotation={[0, -i * 0.314, 0.3]}>
-          <boxGeometry args={[15, 8, 5]} />
-          <meshStandardMaterial color={i % 2 === 0 ? '#cc0000' : '#0066cc'} />
+    <group position={[0, 0, stadiumLength / 2 - 40]}>
+      {/* Stadium walls on both sides - wrapping all towers */}
+      {[-60, 60].map((x, side) => (
+        <mesh key={`wall-${side}`} position={[x, 15, 0]}>
+          <boxGeometry args={[20, 35, stadiumLength]} />
+          <meshStandardMaterial color="#1a1a2e" metalness={0.3} roughness={0.7} />
         </mesh>
       ))}
-      {/* Field lines */}
-      {[...Array(10)].map((_, i) => (
-        <mesh key={`line-${i}`} position={[0, 0.1, -40 + i * 8]} rotation={[-Math.PI / 2, 0, 0]}>
+      {/* Seats sections along full length */}
+      {[...Array(numSeats)].map((_, i) => (
+        <group key={`seat-row-${i}`}>
+          <mesh position={[-48, 8 + (i % 2) * 2, -stadiumLength / 2 + i * 15]} rotation={[0, 0, 0.2]}>
+            <boxGeometry args={[12, 10, 12]} />
+            <meshStandardMaterial color={i % 2 === 0 ? '#cc0000' : '#ffffff'} />
+          </mesh>
+          <mesh position={[48, 8 + (i % 2) * 2, -stadiumLength / 2 + i * 15]} rotation={[0, 0, -0.2]}>
+            <boxGeometry args={[12, 10, 12]} />
+            <meshStandardMaterial color={i % 2 === 0 ? '#0066cc' : '#ffffff'} />
+          </mesh>
+        </group>
+      ))}
+      {/* Field lines along full length */}
+      {[...Array(Math.ceil(stadiumLength / 15))].map((_, i) => (
+        <mesh key={`line-${i}`} position={[0, 0.1, -stadiumLength / 2 + i * 15]} rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[80, 0.5]} />
           <meshBasicMaterial color="#ffffff" />
         </mesh>
       ))}
-      {/* Goal posts */}
-      <group position={[0, 8, 40]}>
-        <mesh position={[-5, 0, 0]}><boxGeometry args={[1, 10, 1]} /><meshStandardMaterial color="#ffffff" /></mesh>
-        <mesh position={[5, 0, 0]}><boxGeometry args={[1, 10, 1]} /><meshStandardMaterial color="#ffffff" /></mesh>
-        <mesh position={[0, 5, 0]}><boxGeometry args={[11, 1, 1]} /><meshStandardMaterial color="#ffffff" /></mesh>
-      </group>
-      {/* Stadium lights */}
-      {[[-50, 30, 50], [50, 30, 50], [-50, 30, -50], [50, 30, -50]].map((pos, i) => (
-        <group key={`light-${i}`} position={pos as [number, number, number]}>
-          <mesh position={[0, 0, 0]}><boxGeometry args={[3, 15, 3]} /><meshStandardMaterial color="#444444" /></mesh>
-          <pointLight position={[0, -5, 0]} intensity={1.5} color="#ffffcc" distance={80} />
-        </group>
+      {/* Stadium lights distributed along */}
+      {[-55, 55].map((x, side) => (
+        [...Array(Math.ceil(stadiumLength / 80))].map((_, i) => (
+          <group key={`light-${side}-${i}`} position={[x, 40, 40 + i * 80]}>
+            <mesh><boxGeometry args={[4, 25, 4]} /><meshStandardMaterial color="#444444" /></mesh>
+            <pointLight position={[0, -10, 0]} intensity={2} color="#ffffcc" distance={100} />
+          </group>
+        ))
       ))}
     </group>
   );
 }
 
-function RaceTrackEnvironment() {
+function RaceTrackEnvironment({ totalLength }: { totalLength: number }) {
+  const trackLength = Math.max(totalLength + 100, 200);
+  
   return (
-    <group position={[0, 0, -50]}>
-      {/* Track oval */}
+    <group position={[0, 0, trackLength / 2]}>
+      {/* Track surface - full length */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.1, 0]}>
-        <ringGeometry args={[40, 60, 32]} />
-        <meshStandardMaterial color="#333333" roughness={0.9} />
+        <planeGeometry args={[80, trackLength]} />
+        <meshStandardMaterial color="#333333" roughness={0.95} />
       </mesh>
-      {/* Track markings */}
-      {[...Array(20)].map((_, i) => (
-        <mesh key={i} position={[Math.cos(i * 0.314) * 50, 0.2, Math.sin(i * 0.314) * 50]} rotation={[-Math.PI / 2, 0, i * 0.314]}>
-          <planeGeometry args={[5, 1]} />
+      {/* Track edges */}
+      {[-35, 35].map((x, side) => (
+        <mesh key={`edge-${side}`} position={[x, 0.3, 0]}>
+          <boxGeometry args={[2, 0.5, trackLength]} />
           <meshBasicMaterial color="#ffffff" />
         </mesh>
       ))}
-      {/* Grandstand */}
-      <mesh position={[0, 10, 70]}>
-        <boxGeometry args={[100, 20, 15]} />
-        <meshStandardMaterial color="#1a1a2e" metalness={0.3} />
-      </mesh>
-      {/* Start/finish line */}
-      <mesh position={[0, 0.15, 50]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[25, 2]} />
-        <meshBasicMaterial color="#ffffff" />
-      </mesh>
-      {/* Checkered pattern */}
-      {[...Array(6)].map((_, i) => (
-        <mesh key={`check-${i}`} position={[-5 + i * 2, 0.16, 50]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[i % 2 === 0 ? 1.5 : 1, 1]} />
+      {/* Track markings along full length */}
+      {[...Array(Math.ceil(trackLength / 20))].map((_, i) => (
+        <mesh key={`mark-${i}`} position={[0, 0.15, -trackLength / 2 + i * 20]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[60, 1]} />
+          <meshBasicMaterial color="#ffffff" />
+        </mesh>
+      ))}
+      {/* Grandstands on both sides */}
+      {[-55, 55].map((x, side) => (
+        <mesh key={`stand-${side}`} position={[x, 12, 0]}>
+          <boxGeometry args={[20, 24, trackLength * 0.9]} />
+          <meshStandardMaterial color="#1a1a2e" metalness={0.3} />
+        </mesh>
+      ))}
+      {/* Checkered start/finish */}
+      {[...Array(8)].map((_, i) => (
+        <mesh key={`check-${i}`} position={[-10 + i * 3, 0.16, trackLength / 2 - 30]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[i % 2 === 0 ? 2 : 2, 2]} />
           <meshBasicMaterial color={i % 2 === 0 ? '#000000' : '#ffffff'} />
         </mesh>
       ))}
@@ -886,267 +929,462 @@ function RaceTrackEnvironment() {
   );
 }
 
-function ConcertStageEnvironment() {
+function ConcertStageEnvironment({ totalLength }: { totalLength: number }) {
+  const stageLength = Math.max(totalLength + 60, 120);
+  
   return (
-    <group position={[0, 0, -40]}>
-      {/* Main stage */}
-      <mesh position={[0, 1, 20]}>
-        <boxGeometry args={[80, 2, 30]} />
-        <meshStandardMaterial color="#1a1a1a" metalness={0.5} />
+    <group position={[0, 0, stageLength / 2]}>
+      {/* Main stage platform - full length */}
+      <mesh position={[0, 1.5, 0]}>
+        <boxGeometry args={[100, 3, stageLength]} />
+        <meshStandardMaterial color="#1a1a1a" metalness={0.6} />
       </mesh>
-      {/* Stage lights rig */}
-      <mesh position={[0, 25, 20]}>
-        <boxGeometry args={[90, 2, 5]} />
-        <meshStandardMaterial color="#333333" metalness={0.7} />
+      {/* Stage rigging overhead - full length */}
+      <mesh position={[0, 35, 0]}>
+        <boxGeometry args={[110, 3, stageLength]} />
+        <meshStandardMaterial color="#222222" metalness={0.8} />
       </mesh>
-      {/* Stage lights */}
-      {[...Array(8)].map((_, i) => (
-        <group key={i} position={[-35 + i * 10, 22, 20]}>
-          <mesh><sphereGeometry args={[1.5, 8, 8]} /><meshStandardMaterial color="#111111" metalness={0.8} /></mesh>
-          <pointLight intensity={2} color={`hsl(${i * 45}, 100%, 50%)`} distance={40} />
+      {/* Stage lights along full length */}
+      {[...Array(Math.ceil(stageLength / 20))].map((_, i) => (
+        <group key={`light-row-${i}`} position={[0, 30, -stageLength / 2 + 10 + i * 20]}>
+          {[-40, 0, 40].map((x, j) => (
+            <group key={`light-${j}`} position={[x, 0, 0]}>
+              <mesh><sphereGeometry args={[2, 8, 8]} /><meshStandardMaterial color="#111111" metalness={0.8} /></mesh>
+              <pointLight intensity={3} color={`hsl(${(i * 30 + j * 40) % 360}, 100%, 50%)`} distance={50} />
+            </group>
+          ))}
         </group>
       ))}
-      {/* Speakers */}
-      {[-40, 40].map((x, i) => (
-        <group key={`speaker-${i}`} position={[x, 8, 15]}>
-          <mesh><boxGeometry args={[8, 16, 6]} /><meshStandardMaterial color="#1a1a1a" /></mesh>
-          <mesh position={[0, 3, 3.1]}><circleGeometry args={[2.5, 16]} /><meshStandardMaterial color="#333333" /></mesh>
-          <mesh position={[0, -3, 3.1]}><circleGeometry args={[2, 16]} /><meshStandardMaterial color="#333333" /></mesh>
-        </group>
-      ))}
-      {/* Crowd area floor */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, -30]}>
-        <planeGeometry args={[100, 80]} />
-        <meshStandardMaterial color="#0a0a0a" />
-      </mesh>
-    </group>
-  );
-}
-
-function CastleGroundsEnvironment() {
-  return (
-    <group position={[0, 0, -80]}>
-      {/* Castle main structure */}
-      <mesh position={[0, 25, 0]}>
-        <boxGeometry args={[50, 50, 30]} />
-        <meshStandardMaterial color="#4a4a5a" roughness={0.9} />
-      </mesh>
-      {/* Towers */}
-      {[-30, 30].map((x, i) => (
-        <group key={i} position={[x, 30, 0]}>
-          <mesh><cylinderGeometry args={[8, 10, 60, 8]} /><meshStandardMaterial color="#3a3a4a" roughness={0.9} /></mesh>
-          <mesh position={[0, 35, 0]}><coneGeometry args={[10, 15, 8]} /><meshStandardMaterial color="#2a2a3a" /></mesh>
-          {/* Flags */}
-          <mesh position={[0, 50, 0]} rotation={[0, 0, 0.5]}><boxGeometry args={[8, 0.2, 4]} /><meshBasicMaterial color="#cc0000" /></mesh>
-        </group>
-      ))}
-      {/* Walls */}
-      {[-40, 40].map((z, i) => (
-        <mesh key={`wall-${i}`} position={[0, 10, z]}>
-          <boxGeometry args={[100, 20, 3]} />
-          <meshStandardMaterial color="#3a3a4a" roughness={0.9} />
-        </mesh>
-      ))}
-      {/* Gate */}
-      <mesh position={[0, 8, 40]}>
-        <boxGeometry args={[15, 16, 5]} />
-        <meshStandardMaterial color="#2a2a2a" />
-      </mesh>
-      {/* Moat */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]}>
-        <ringGeometry args={[55, 70, 32]} />
-        <meshStandardMaterial color="#1a3a5a" transparent opacity={0.8} />
-      </mesh>
-    </group>
-  );
-}
-
-function AirportRunwayEnvironment() {
-  return (
-    <group position={[0, 0, -40]}>
-      {/* Runway */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.1, 0]}>
-        <planeGeometry args={[30, 200]} />
-        <meshStandardMaterial color="#1a1a1a" />
-      </mesh>
-      {/* Runway markings */}
-      {[...Array(15)].map((_, i) => (
-        <mesh key={i} position={[0, 0.15, -90 + i * 12]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[1, 6]} />
-          <meshBasicMaterial color="#ffffff" />
-        </mesh>
-      ))}
-      {/* Edge lights */}
-      {[-16, 16].map((x, side) => (
-        [...Array(20)].map((_, i) => (
-          <mesh key={`light-${side}-${i}`} position={[x, 0.5, -100 + i * 10]}>
-            <sphereGeometry args={[0.3, 8, 8]} />
-            <meshBasicMaterial color={side === 0 ? "#00ff00" : "#ff0000"} />
-          </mesh>
+      {/* Speakers on sides */}
+      {[-55, 55].map((x, side) => (
+        [...Array(Math.ceil(stageLength / 60))].map((_, i) => (
+          <group key={`speaker-${side}-${i}`} position={[x, 12, -stageLength / 2 + 30 + i * 60]}>
+            <mesh><boxGeometry args={[12, 24, 8]} /><meshStandardMaterial color="#1a1a1a" /></mesh>
+            <mesh position={[0, 5, 4.1]}><circleGeometry args={[4, 16]} /><meshStandardMaterial color="#333333" /></mesh>
+            <mesh position={[0, -5, 4.1]}><circleGeometry args={[3, 16]} /><meshStandardMaterial color="#333333" /></mesh>
+          </group>
         ))
       ))}
-      {/* Control tower */}
-      <group position={[50, 0, -50]}>
-        <mesh position={[0, 10, 0]}><cylinderGeometry args={[3, 4, 20, 8]} /><meshStandardMaterial color="#444444" /></mesh>
-        <mesh position={[0, 22, 0]}><cylinderGeometry args={[5, 3, 4, 8]} /><meshStandardMaterial color="#333333" metalness={0.5} /></mesh>
-        <mesh position={[0, 25, 0]}><cylinderGeometry args={[4, 4, 2, 8]} /><meshStandardMaterial color="#88ccff" transparent opacity={0.6} /></mesh>
-      </group>
-      {/* Terminal building */}
-      <mesh position={[-60, 7, 20]}>
-        <boxGeometry args={[40, 14, 60]} />
-        <meshStandardMaterial color="#3a3a4a" metalness={0.3} />
-      </mesh>
     </group>
   );
 }
 
-function ThemeParkEnvironment() {
+function CastleGroundsEnvironment({ totalLength }: { totalLength: number }) {
+  const groundsLength = Math.max(totalLength + 80, 160);
+  
   return (
-    <group position={[0, 0, -60]}>
-      {/* Ferris wheel */}
-      <group position={[-50, 30, 0]}>
-        <mesh rotation={[0, 0, Math.PI / 2]}><torusGeometry args={[25, 1, 8, 32]} /><meshStandardMaterial color="#ff4444" metalness={0.5} /></mesh>
-        {[...Array(8)].map((_, i) => (
-          <mesh key={i} position={[Math.cos(i * 0.785) * 25, Math.sin(i * 0.785) * 25, 0]}>
-            <boxGeometry args={[4, 6, 3]} />
-            <meshStandardMaterial color={`hsl(${i * 45}, 70%, 50%)`} />
-          </mesh>
-        ))}
-      </group>
-      {/* Roller coaster track */}
-      <mesh position={[40, 15, -20]}>
-        <torusGeometry args={[20, 0.5, 8, 32, Math.PI * 1.5]} />
-        <meshStandardMaterial color="#ff6600" metalness={0.7} />
-      </mesh>
-      {/* Carousel */}
-      <group position={[0, 5, 30]}>
-        <mesh><cylinderGeometry args={[10, 10, 1, 16]} /><meshStandardMaterial color="#ffcc00" /></mesh>
-        {[...Array(6)].map((_, i) => (
-          <mesh key={i} position={[Math.cos(i * 1.047) * 7, 3, Math.sin(i * 1.047) * 7]}>
-            <boxGeometry args={[1, 5, 1]} />
-            <meshStandardMaterial color={`hsl(${i * 60}, 60%, 50%)`} />
-          </mesh>
-        ))}
-        <mesh position={[0, 0.5, 0]}><cylinderGeometry args={[0.5, 0.5, 6, 8]} /><meshStandardMaterial color="#ffcc00" /></mesh>
-      </group>
-      {/* Ground */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-        <planeGeometry args={[150, 150]} />
-        <meshStandardMaterial color="#2a5a2a" roughness={0.9} />
-      </mesh>
-    </group>
-  );
-}
-
-function AncientRuinsEnvironment() {
-  return (
-    <group position={[0, 0, -60]}>
-      {/* Columns */}
-      {[...Array(8)].map((_, i) => (
-        <group key={i} position={[-35 + i * 10, 0, -20]}>
-          <mesh position={[0, 8, 0]}><cylinderGeometry args={[1.5, 1.8, 16, 12]} /><meshStandardMaterial color="#a09080" roughness={0.9} /></mesh>
-          <mesh position={[0, 17, 0]}><boxGeometry args={[3, 1, 3]} /><meshStandardMaterial color="#908070" roughness={0.9} /></mesh>
-        </group>
-      ))}
-      {/* Broken columns */}
-      {[...Array(4)].map((_, i) => (
-        <mesh key={`broken-${i}`} position={[-20 + i * 15, 4, -40]}>
-          <cylinderGeometry args={[1.5, 1.8, 8, 12]} />
-          <meshStandardMaterial color="#a09080" roughness={0.9} />
+    <group position={[0, 0, groundsLength / 2]}>
+      {/* Castle walls on both sides */}
+      {[-65, 65].map((x, side) => (
+        <mesh key={`wall-${side}`} position={[x, 15, 0]}>
+          <boxGeometry args={[15, 35, groundsLength]} />
+          <meshStandardMaterial color="#4a4a5a" roughness={0.9} />
         </mesh>
+      ))}
+      {/* Towers along walls */}
+      {[-65, 65].map((x, side) => (
+        [...Array(Math.ceil(groundsLength / 60))].map((_, i) => (
+          <group key={`tower-${side}-${i}`} position={[x, 30, -groundsLength / 2 + 30 + i * 60]}>
+            <mesh><cylinderGeometry args={[8, 10, 45, 8]} /><meshStandardMaterial color="#3a3a4a" roughness={0.9} /></mesh>
+            <mesh position={[0, 28, 0]}><coneGeometry args={[10, 15, 8]} /><meshStandardMaterial color="#2a2a3a" /></mesh>
+          </group>
+        ))
       ))}
       {/* Stone floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-        <planeGeometry args={[80, 80]} />
-        <meshStandardMaterial color="#807060" roughness={0.95} />
+        <planeGeometry args={[110, groundsLength]} />
+        <meshStandardMaterial color="#605040" roughness={0.95} />
       </mesh>
-      {/* Debris */}
-      {[...Array(15)].map((_, i) => (
-        <mesh key={`debris-${i}`} position={[-30 + Math.random() * 60, 0.5, -20 + Math.random() * 40]}>
-          <boxGeometry args={[1 + Math.random() * 2, 1, 1 + Math.random() * 2]} />
-          <meshStandardMaterial color="#908070" roughness={0.9} />
+      {/* Torches along path */}
+      {[...Array(Math.ceil(groundsLength / 30))].map((_, i) => (
+        <group key={`torch-${i}`}>
+          <mesh position={[-45, 8, -groundsLength / 2 + i * 30]}><cylinderGeometry args={[0.4, 0.4, 10, 6]} /><meshStandardMaterial color="#4a3020" /></mesh>
+          <pointLight position={[-45, 14, -groundsLength / 2 + i * 30]} intensity={1.5} color="#ff6600" distance={30} />
+          <mesh position={[45, 8, -groundsLength / 2 + i * 30 + 15]}><cylinderGeometry args={[0.4, 0.4, 10, 6]} /><meshStandardMaterial color="#4a3020" /></mesh>
+          <pointLight position={[45, 14, -groundsLength / 2 + i * 30 + 15]} intensity={1.5} color="#ff6600" distance={30} />
+        </group>
+      ))}
+    </group>
+  );
+}
+
+function AirportRunwayEnvironment({ totalLength }: { totalLength: number }) {
+  const runwayLength = Math.max(totalLength + 120, 240);
+  
+  return (
+    <group position={[0, 0, runwayLength / 2]}>
+      {/* Runway surface */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.1, 0]}>
+        <planeGeometry args={[40, runwayLength]} />
+        <meshStandardMaterial color="#1a1a1a" roughness={0.95} />
+      </mesh>
+      {/* Center line markings */}
+      {[...Array(Math.ceil(runwayLength / 18))].map((_, i) => (
+        <mesh key={`center-${i}`} position={[0, 0.15, -runwayLength / 2 + i * 18]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[2, 10]} />
+          <meshBasicMaterial color="#ffffff" />
+        </mesh>
+      ))}
+      {/* Edge lights along full length */}
+      {[-18, 18].map((x, side) => (
+        [...Array(Math.ceil(runwayLength / 15))].map((_, i) => (
+          <mesh key={`light-${side}-${i}`} position={[x, 0.5, -runwayLength / 2 + i * 15]}>
+            <sphereGeometry args={[0.4, 8, 8]} />
+            <meshBasicMaterial color={side === -18 ? '#00ff00' : '#ff0000'} />
+          </mesh>
+        ))
+      ))}
+      {/* Terminal buildings on sides */}
+      {[-80, 80].map((x, side) => (
+        <mesh key={`terminal-${side}`} position={[x, 15, 0]}>
+          <boxGeometry args={[50, 30, runwayLength * 0.7]} />
+          <meshStandardMaterial color="#3a3a4a" metalness={0.3} />
+        </mesh>
+      ))}
+      {/* Control towers */}
+      {[...Array(Math.ceil(runwayLength / 150))].map((_, i) => (
+        <group key={`tower-${i}`} position={[70, 0, -runwayLength / 2 + 75 + i * 150]}>
+          <mesh position={[0, 18, 0]}><cylinderGeometry args={[5, 6, 36, 8]} /><meshStandardMaterial color="#444444" /></mesh>
+          <mesh position={[0, 38, 0]}><cylinderGeometry args={[8, 5, 8, 8]} /><meshStandardMaterial color="#333333" metalness={0.5} /></mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
+
+function ThemeParkEnvironment({ totalLength }: { totalLength: number }) {
+  const parkLength = Math.max(totalLength + 60, 140);
+  
+  return (
+    <group position={[0, 0, parkLength / 2]}>
+      {/* Ground */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+        <planeGeometry args={[150, parkLength]} />
+        <meshStandardMaterial color="#2a5a2a" roughness={0.95} />
+      </mesh>
+      {/* Ferris wheels on both sides */}
+      {[-60, 60].map((x, side) => (
+        [...Array(Math.ceil(parkLength / 100))].map((_, i) => (
+          <group key={`ferris-${side}-${i}`} position={[x, 30, -parkLength / 2 + 50 + i * 100]}>
+            <mesh rotation={[0, 0, Math.PI / 2]}><torusGeometry args={[22, 1.5, 8, 32]} /><meshStandardMaterial color="#ff4444" metalness={0.5} /></mesh>
+            {[...Array(6)].map((_, j) => (
+              <mesh key={j} position={[Math.cos(j * 1.047) * 22, Math.sin(j * 1.047) * 22, 0]}>
+                <boxGeometry args={[5, 6, 4]} />
+                <meshStandardMaterial color={`hsl(${j * 60}, 70%, 50%)`} />
+              </mesh>
+            ))}
+          </group>
+        ))
+      ))}
+      {/* Carousels along center */}
+      {[...Array(Math.ceil(parkLength / 70))].map((_, i) => (
+        <group key={`carousel-${i}`} position={[0, 5, -parkLength / 2 + 35 + i * 70]}>
+          <mesh><cylinderGeometry args={[10, 10, 1, 16]} /><meshStandardMaterial color="#ffcc00" /></mesh>
+          {[...Array(6)].map((_, j) => (
+            <mesh key={j} position={[Math.cos(j * 1.047) * 7, 4, Math.sin(j * 1.047) * 7]}>
+              <boxGeometry args={[1.5, 7, 1.5]} />
+              <meshStandardMaterial color={`hsl(${j * 60}, 60%, 50%)`} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+    </group>
+  );
+}
+
+function AncientRuinsEnvironment({ totalLength }: { totalLength: number }) {
+  const ruinsLength = Math.max(totalLength + 50, 120);
+  
+  return (
+    <group position={[0, 0, ruinsLength / 2]}>
+      {/* Stone floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+        <planeGeometry args={[100, ruinsLength]} />
+        <meshStandardMaterial color="#706050" roughness={0.98} />
+      </mesh>
+      {/* Columns on both sides */}
+      {[-40, 40].map((x, side) => (
+        [...Array(Math.ceil(ruinsLength / 20))].map((_, i) => (
+          <group key={`col-${side}-${i}`} position={[x, 0, -ruinsLength / 2 + i * 20]}>
+            <mesh position={[0, i % 3 === 0 ? 5 : 12, 0]}><cylinderGeometry args={[2, 2.5, i % 3 === 0 ? 10 : 24, 12]} /><meshStandardMaterial color="#a09080" roughness={0.9} /></mesh>
+            {i % 3 !== 0 && <mesh position={[0, 25, 0]}><boxGeometry args={[5, 3, 5]} /><meshStandardMaterial color="#908070" roughness={0.9} /></mesh>}
+          </group>
+        ))
+      ))}
+      {/* Debris scattered */}
+      {[...Array(Math.ceil(ruinsLength / 15))].map((_, i) => (
+        <mesh key={`debris-${i}`} position={[(i % 2 === 0 ? -1 : 1) * (20 + i % 4 * 8), 1, -ruinsLength / 2 + i * 15]} rotation={[i * 0.3, i * 0.5, 0]}>
+          <boxGeometry args={[3 + i % 2, 2, 3 + i % 3]} />
+          <meshStandardMaterial color="#908070" roughness={0.95} />
         </mesh>
       ))}
     </group>
   );
 }
 
-function ZenGardenEnvironment() {
+function ZenGardenEnvironment({ totalLength }: { totalLength: number }) {
+  const gardenLength = Math.max(totalLength + 40, 100);
+  
   return (
-    <group position={[0, 0, -40]}>
+    <group position={[0, 0, gardenLength / 2]}>
       {/* Sand garden */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-        <planeGeometry args={[100, 100]} />
+        <planeGeometry args={[100, gardenLength]} />
         <meshStandardMaterial color="#e8e0d0" roughness={1} />
       </mesh>
       {/* Raked lines */}
-      {[...Array(12)].map((_, i) => (
-        <mesh key={i} position={[0, 0.05, -40 + i * 7]} rotation={[-Math.PI / 2, 0, 0]}>
+      {[...Array(Math.ceil(gardenLength / 8))].map((_, i) => (
+        <mesh key={i} position={[0, 0.05, -gardenLength / 2 + i * 8]} rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[100, 0.5]} />
           <meshBasicMaterial color="#d0c8b8" />
         </mesh>
       ))}
-      {/* Rocks */}
-      {[...Array(5)].map((_, i) => (
-        <mesh key={i} position={[-30 + i * 15, 2, -10 + i * 5]} rotation={[i * 0.3, i * 0.5, i * 0.2]}>
-          <dodecahedronGeometry args={[3 + i * 0.5, 0]} />
-          <meshStandardMaterial color="#4a4a4a" roughness={0.8} />
+      {/* Rock formations */}
+      {[...Array(Math.ceil(gardenLength / 35))].map((_, i) => (
+        <mesh key={`rock-${i}`} position={[(i % 2 === 0 ? -1 : 1) * 30, 4, -gardenLength / 2 + 17 + i * 35]} rotation={[i * 0.2, i * 0.3, i * 0.15]}>
+          <dodecahedronGeometry args={[5, 0]} />
+          <meshStandardMaterial color="#4a4a4a" roughness={0.85} />
         </mesh>
       ))}
-      {/* Bamboo fence */}
-      {[...Array(20)].map((_, i) => (
-        <mesh key={`bamboo-${i}`} position={[-50 + i * 5, 3, -50]}>
-          <cylinderGeometry args={[0.2, 0.2, 6, 6]} />
-          <meshStandardMaterial color="#5a8a4a" roughness={0.7} />
-        </mesh>
+      {/* Bamboo fences on sides */}
+      {[-50, 50].map((x, side) => (
+        [...Array(Math.ceil(gardenLength / 5))].map((_, i) => (
+          <mesh key={`bamboo-${side}-${i}`} position={[x, 5, -gardenLength / 2 + i * 5]}>
+            <cylinderGeometry args={[0.3, 0.3, 10, 6]} />
+            <meshStandardMaterial color="#5a8a4a" roughness={0.7} />
+          </mesh>
+        ))
       ))}
-      {/* Small bridge */}
-      <group position={[30, 1, 0]}>
-        <mesh rotation={[0, 0, 0]}><boxGeometry args={[8, 0.3, 3]} /><meshStandardMaterial color="#8b4513" /></mesh>
-        <mesh position={[-3, 1.5, 0]} rotation={[0, 0, 0.3]}><boxGeometry args={[0.3, 3, 3]} /><meshStandardMaterial color="#8b4513" /></mesh>
-        <mesh position={[3, 1.5, 0]} rotation={[0, 0, -0.3]}><boxGeometry args={[0.3, 3, 3]} /><meshStandardMaterial color="#8b4513" /></mesh>
-      </group>
     </group>
   );
 }
 
-function SkiResortEnvironment() {
+function SkiResortEnvironment({ totalLength }: { totalLength: number }) {
+  const resortLength = Math.max(totalLength + 80, 180);
+  
   return (
-    <group position={[0, 0, -80]}>
-      {/* Mountain slopes */}
-      <mesh position={[0, 30, -40]} rotation={[0.2, 0, 0]}>
-        <coneGeometry args={[80, 100, 4]} />
-        <meshStandardMaterial color="#ffffff" roughness={0.9} />
+    <group position={[0, 0, resortLength / 2]}>
+      {/* Snow ground */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+        <planeGeometry args={[150, resortLength]} />
+        <meshStandardMaterial color="#f0f5ff" roughness={0.9} />
       </mesh>
-      {/* Ski runs (groomed lines) */}
-      {[...Array(5)].map((_, i) => (
-        <mesh key={i} position={[-30 + i * 15, 20 - i * 3, 0]} rotation={[0.5, 0, 0.1 * i]}>
-          <planeGeometry args={[8, 60]} />
-          <meshStandardMaterial color="#e8e8f0" roughness={0.8} />
+      {/* Mountain slopes on sides */}
+      {[-85, 85].map((x, side) => (
+        <mesh key={`slope-${side}`} position={[x, 35, 0]} rotation={[0, 0, side * 0.4]}>
+          <coneGeometry args={[70, 90, 4]} />
+          <meshStandardMaterial color="#ffffff" roughness={0.92} />
         </mesh>
       ))}
-      {/* Ski lift */}
-      <group position={[-40, 0, 20]}>
-        {/* Towers */}
-        {[0, 30, 60].map((z, i) => (
-          <mesh key={i} position={[0, 12, z]}><boxGeometry args={[2, 24, 2]} /><meshStandardMaterial color="#444444" metalness={0.5} /></mesh>
-        ))}
-        {/* Cable */}
-        <mesh position={[0, 25, 30]}><boxGeometry args={[0.1, 0.1, 65]} /><meshStandardMaterial color="#222222" /></mesh>
-        {/* Chairs */}
-        {[10, 30, 50].map((z, i) => (
-          <mesh key={`chair-${i}`} position={[0, 22, z]}><boxGeometry args={[2, 3, 1]} /><meshStandardMaterial color="#ff4444" /></mesh>
-        ))}
-      </group>
-      {/* Lodge */}
-      <mesh position={[50, 6, 40]}>
-        <boxGeometry args={[25, 12, 15]} />
-        <meshStandardMaterial color="#8b4513" roughness={0.9} />
+      {/* Ski lift towers along path */}
+      {[-40, 40].map((x, side) => (
+        [...Array(Math.ceil(resortLength / 50))].map((_, i) => (
+          <mesh key={`lift-${side}-${i}`} position={[x, 18, -resortLength / 2 + 25 + i * 50]}>
+            <boxGeometry args={[2.5, 36, 2.5]} />
+            <meshStandardMaterial color="#444444" metalness={0.5} />
+          </mesh>
+        ))
+      ))}
+      {/* Lodge buildings */}
+      {[...Array(Math.ceil(resortLength / 120))].map((_, i) => (
+        <group key={`lodge-${i}`} position={[60, 10, -resortLength / 2 + 60 + i * 120]}>
+          <mesh><boxGeometry args={[35, 20, 45]} /><meshStandardMaterial color="#8b4513" roughness={0.9} /></mesh>
+          <mesh position={[0, 12, 0]}><boxGeometry args={[38, 10, 48]} /><meshStandardMaterial color="#5a3a13" /></mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
+
+// ============================================================================
+// NEW ADVANCED IMMERSIVE ENVIRONMENTS
+// ============================================================================
+
+function UnderwaterKingdomEnvironment({ totalLength }: { totalLength: number }) {
+  const kingdomLength = Math.max(totalLength + 60, 140);
+  
+  return (
+    <group position={[0, 0, kingdomLength / 2]}>
+      {/* Ocean floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -10, 0]}>
+        <planeGeometry args={[150, kingdomLength]} />
+        <meshStandardMaterial color="#001a33" roughness={0.95} />
       </mesh>
-      <mesh position={[50, 15, 40]} rotation={[0, 0, 0]}>
-        <boxGeometry args={[27, 5, 17]} />
-        <meshStandardMaterial color="#5a3a13" />
+      {/* Coral castle structures on sides */}
+      {[-60, 60].map((x, side) => (
+        [...Array(Math.ceil(kingdomLength / 60))].map((_, i) => (
+          <group key={`castle-${side}-${i}`} position={[x, 20, -kingdomLength / 2 + 30 + i * 60]}>
+            <mesh><cylinderGeometry args={[10, 14, 45, 6]} /><meshStandardMaterial color={`hsl(${200 + i * 20}, 60%, 40%)`} roughness={0.7} /></mesh>
+            <mesh position={[0, 28, 0]}><coneGeometry args={[12, 20, 6]} /><meshStandardMaterial color={`hsl(${180 + i * 20}, 70%, 50%)`} /></mesh>
+          </group>
+        ))
+      ))}
+      {/* Seaweed forest */}
+      {[...Array(Math.ceil(kingdomLength / 12))].map((_, i) => (
+        <mesh key={`seaweed-${i}`} position={[(i % 2 === 0 ? -1 : 1) * 35, 0, -kingdomLength / 2 + i * 12]} rotation={[0.1 * (i % 3), 0, 0.05]}>
+          <boxGeometry args={[0.8, 22, 0.8]} />
+          <meshStandardMaterial color="#1a5a3a" transparent opacity={0.7} />
+        </mesh>
+      ))}
+      {/* Bioluminescent particles */}
+      {[...Array(50)].map((_, i) => (
+        <mesh key={`glow-${i}`} position={[(Math.random() - 0.5) * 120, Math.random() * 35, (Math.random() - 0.5) * kingdomLength]}>
+          <sphereGeometry args={[0.6, 8, 8]} />
+          <meshBasicMaterial color={`hsl(${180 + Math.random() * 60}, 100%, 70%)`} transparent opacity={0.6} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function CyberpunkCityEnvironment({ totalLength }: { totalLength: number }) {
+  const cityLength = Math.max(totalLength + 40, 120);
+  
+  return (
+    <group position={[0, 0, cityLength / 2]}>
+      {/* Neon ground */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.1, 0]}>
+        <planeGeometry args={[120, cityLength]} />
+        <meshStandardMaterial color="#0a0a0f" metalness={0.8} roughness={0.3} />
       </mesh>
+      {/* Mega buildings on sides */}
+      {[-70, 70].map((x, side) => (
+        [...Array(Math.ceil(cityLength / 30))].map((_, i) => (
+          <group key={`mega-${side}-${i}`} position={[x, 40 + (i % 4) * 15, -cityLength / 2 + i * 30]}>
+            <mesh><boxGeometry args={[28, 80 + (i % 5) * 25, 22]} /><meshStandardMaterial color="#0a0a15" metalness={0.6} roughness={0.4} /></mesh>
+            {/* Holographic signs */}
+            <mesh position={[side * -14, 20, 0]} rotation={[0, side === -70 ? 0 : Math.PI, 0]}>
+              <planeGeometry args={[4, 18]} />
+              <meshBasicMaterial color={`hsl(${280 + i * 25}, 100%, 50%)`} transparent opacity={0.8} />
+            </mesh>
+          </group>
+        ))
+      ))}
+      {/* Neon strips */}
+      {[-30, 30].map((x, i) => (
+        <mesh key={`neon-${i}`} position={[x, 0.2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[2, cityLength]} />
+          <meshBasicMaterial color={i === 0 ? '#ff00ff' : '#00ffff'} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function MedievalArenaEnvironment({ totalLength }: { totalLength: number }) {
+  const arenaLength = Math.max(totalLength + 60, 150);
+  
+  return (
+    <group position={[0, 0, arenaLength / 2]}>
+      {/* Sand floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+        <planeGeometry args={[100, arenaLength]} />
+        <meshStandardMaterial color="#c2a060" roughness={0.98} />
+      </mesh>
+      {/* Arena walls on sides */}
+      {[-60, 60].map((x, side) => (
+        <mesh key={`wall-${side}`} position={[x, 15, 0]}>
+          <boxGeometry args={[15, 35, arenaLength]} />
+          <meshStandardMaterial color="#6a5a4a" roughness={0.9} />
+        </mesh>
+      ))}
+      {/* Spectator stands */}
+      {[-45, 45].map((x, side) => (
+        [...Array(Math.ceil(arenaLength / 25))].map((_, i) => (
+          <mesh key={`stand-${side}-${i}`} position={[x, 8 + (i % 2) * 4, -arenaLength / 2 + i * 25]} rotation={[0, 0, side * -0.2]}>
+            <boxGeometry args={[12, 15, 18]} />
+            <meshStandardMaterial color="#5a4a3a" roughness={0.9} />
+          </mesh>
+        ))
+      ))}
+      {/* Torch posts */}
+      {[...Array(Math.ceil(arenaLength / 35))].map((_, i) => (
+        <group key={`torch-${i}`}>
+          <mesh position={[-40, 7, -arenaLength / 2 + i * 35]}><cylinderGeometry args={[0.5, 0.5, 12, 6]} /><meshStandardMaterial color="#4a3020" /></mesh>
+          <pointLight position={[-40, 15, -arenaLength / 2 + i * 35]} intensity={2} color="#ff6600" distance={35} />
+          <mesh position={[40, 7, -arenaLength / 2 + i * 35 + 17]}><cylinderGeometry args={[0.5, 0.5, 12, 6]} /><meshStandardMaterial color="#4a3020" /></mesh>
+          <pointLight position={[40, 15, -arenaLength / 2 + i * 35 + 17]} intensity={2} color="#ff6600" distance={35} />
+        </group>
+      ))}
+    </group>
+  );
+}
+
+function SpaceColonyEnvironment({ totalLength }: { totalLength: number }) {
+  const colonyLength = Math.max(totalLength + 50, 130);
+  
+  return (
+    <group position={[0, 0, colonyLength / 2]}>
+      {/* Metal floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+        <planeGeometry args={[100, colonyLength]} />
+        <meshStandardMaterial color="#2a2a3a" metalness={0.7} roughness={0.4} />
+      </mesh>
+      {/* Colony modules on sides */}
+      {[-60, 60].map((x, side) => (
+        [...Array(Math.ceil(colonyLength / 50))].map((_, i) => (
+          <group key={`module-${side}-${i}`} position={[x, 15, -colonyLength / 2 + 25 + i * 50]}>
+            <mesh><cylinderGeometry args={[12, 12, 30, 12]} /><meshStandardMaterial color="#3a3a4a" metalness={0.6} roughness={0.3} /></mesh>
+            <mesh position={[0, 0, side === -60 ? 12 : -12]}><sphereGeometry args={[10, 12, 12]} /><meshStandardMaterial color="#4a4a5a" metalness={0.5} transparent opacity={0.8} /></mesh>
+          </group>
+        ))
+      ))}
+      {/* Glass dome sections */}
+      {[...Array(Math.ceil(colonyLength / 70))].map((_, i) => (
+        <mesh key={`dome-${i}`} position={[0, 25, -colonyLength / 2 + 35 + i * 70]}>
+          <sphereGeometry args={[30, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
+          <meshStandardMaterial color="#88ccff" transparent opacity={0.3} metalness={0.1} roughness={0.1} side={THREE.DoubleSide} />
+        </mesh>
+      ))}
+      {/* Power conduits */}
+      {[-30, 30].map((x, i) => (
+        <mesh key={`conduit-${i}`} position={[x, 6, 0]}>
+          <boxGeometry args={[1.5, 10, colonyLength]} />
+          <meshBasicMaterial color="#00ffff" transparent opacity={0.4} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function TropicalBeachEnvironment({ totalLength }: { totalLength: number }) {
+  const beachLength = Math.max(totalLength + 50, 130);
+  
+  return (
+    <group position={[0, 0, beachLength / 2]}>
+      {/* Sandy beach */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+        <planeGeometry args={[120, beachLength]} />
+        <meshStandardMaterial color="#f4d03f" roughness={0.95} />
+      </mesh>
+      {/* Ocean on one side */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-75, -0.5, 0]}>
+        <planeGeometry args={[70, beachLength + 60]} />
+        <meshStandardMaterial color="#006994" transparent opacity={0.85} metalness={0.3} roughness={0.6} />
+      </mesh>
+      {/* Palm trees on both sides */}
+      {[-50, 50].map((x, side) => (
+        [...Array(Math.ceil(beachLength / 25))].map((_, i) => (
+          <group key={`palm-${side}-${i}`} position={[x + (i % 3) * 10, 0, -beachLength / 2 + i * 25]}>
+            <mesh position={[0, 7, 0]}><cylinderGeometry args={[0.7, 1.2, 14, 8]} /><meshStandardMaterial color="#8b4513" roughness={0.8} /></mesh>
+            <mesh position={[0, 16, 0]}><sphereGeometry args={[6, 8, 6, 0, Math.PI * 2, 0, Math.PI / 2]} /><meshStandardMaterial color="#228b22" roughness={0.7} /></mesh>
+          </group>
+        ))
+      ))}
+      {/* Beach huts */}
+      {[...Array(Math.ceil(beachLength / 60))].map((_, i) => (
+        <group key={`hut-${i}`} position={[45, 4, -beachLength / 2 + 30 + i * 60]}>
+          <mesh><boxGeometry args={[12, 8, 10]} /><meshStandardMaterial color="#deb887" roughness={0.9} /></mesh>
+          <mesh position={[0, 6, 0]} rotation={[0.1, 0, 0]}><boxGeometry args={[14, 5, 12]} /><meshStandardMaterial color="#cd853f" roughness={0.85} /></mesh>
+        </group>
+      ))}
+      {/* Beach umbrellas */}
+      {[...Array(Math.ceil(beachLength / 35))].map((_, i) => (
+        <group key={`umbrella-${i}`} position={[-20 + (i % 2) * 40, 0, -beachLength / 2 + i * 35]}>
+          <mesh position={[0, 5, 0]}><cylinderGeometry args={[0.25, 0.25, 10, 8]} /><meshStandardMaterial color="#8b4513" /></mesh>
+          <mesh position={[0, 10, 0]}><coneGeometry args={[5, 3, 8]} /><meshStandardMaterial color={`hsl(${(i * 60) % 360}, 70%, 50%)`} /></mesh>
+        </group>
+      ))}
     </group>
   );
 }
@@ -1232,7 +1470,7 @@ function TowerChartScene({
       <FloatingParticles />
       
       {/* Background Environment Preset */}
-      <BackgroundEnvironment preset={backgroundPreset} />
+      <BackgroundEnvironment preset={backgroundPreset} totalLength={towers.length * towerSpacing} />
       
       <ambientLight intensity={ambientIntensity} />
       <directionalLight position={[50, 80, 50]} intensity={1.1} />
