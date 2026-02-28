@@ -3248,9 +3248,12 @@ function TowerChartScene({ data, frame, fps, renderOptimized }: { data: TowerCha
   const introOpacity = Math.min(1, frame / introDuration);
   const revealProgress = Math.min(1, frame / (introDuration + totalItems * itemRevealDelay * fps * 0.5));
   
-  // Keep ALL towers visible once revealed (start from 0)
-  const visibleStart = 0;
-  const visibleEnd = Math.min(towers.length - 1, currentIndex + 4);
+  // In render mode, keep a moving visibility window to reduce draw calls.
+  // In editor/preview mode, keep all revealed towers visible for richer visuals.
+  const visibleStart = renderOptimized ? Math.max(0, currentIndex - 2) : 0;
+  const visibleEnd = renderOptimized
+    ? Math.min(towers.length - 1, currentIndex + 5)
+    : Math.min(towers.length - 1, currentIndex + 4);
   
   return (
     <>
@@ -3264,13 +3267,26 @@ function TowerChartScene({ data, frame, fps, renderOptimized }: { data: TowerCha
       {!renderOptimized && <FloatingParticles />}
       
       <ambientLight intensity={resolvedAmbientIntensity} />
-      <directionalLight position={[50, 80, 50]} intensity={1.1} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} shadow-camera-far={250} shadow-camera-left={-100} shadow-camera-right={100} shadow-camera-top={100} shadow-camera-bottom={-100} />
+      <directionalLight
+        position={[50, 80, 50]}
+        intensity={1.1}
+        castShadow={!renderOptimized}
+        shadow-mapSize-width={renderOptimized ? 1024 : 2048}
+        shadow-mapSize-height={renderOptimized ? 1024 : 2048}
+        shadow-camera-far={250}
+        shadow-camera-left={-100}
+        shadow-camera-right={100}
+        shadow-camera-top={100}
+        shadow-camera-bottom={-100}
+      />
       <directionalLight position={[-40, 50, -40]} intensity={0.4} color="#6666ff" />
       <pointLight position={[0, 80, 0]} intensity={0.6} />
       <hemisphereLight args={['#5555aa', '#222233', 0.4]} />
       
       {showGround && <Ground color={groundColor} />}
-      <ContactShadows position={[0, 0.02, 0]} opacity={0.35} scale={180} blur={2} far={80} />
+      {!renderOptimized && (
+        <ContactShadows position={[0, 0.02, 0]} opacity={0.35} scale={180} blur={2} far={80} />
+      )}
       
       {!renderOptimized && customModelPath && (
         <ModelErrorBoundary>
@@ -3295,11 +3311,15 @@ function TowerChartScene({ data, frame, fps, renderOptimized }: { data: TowerCha
       
       {towers.map((tower, index) => {
         // Tower is visible if it's been revealed (index <= visibleEnd)
-        const isRevealed = index <= visibleEnd;
+        const isRevealed = index >= visibleStart && index <= visibleEnd;
         const itemReveal = Math.max(0, Math.min(1, (revealProgress * totalItems * 1.2) - index * 0.12));
         const isHighlighted = index === currentIndex || index === currentIndex + 1;
         // Show label for all revealed towers (not just current window)
         const shouldShowLabel = resolvedShowLabels3D && itemReveal > 0.25 && isRevealed;
+
+        if (renderOptimized && !isRevealed && itemReveal <= 0) {
+          return null;
+        }
         
         return (
           <Tower
@@ -3429,10 +3449,10 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
   return (
     <AbsoluteFill style={{ backgroundColor }}>
       <Canvas
-        shadows
+        shadows={!isRendering}
         camera={{ position: [35, 18, -25], fov: 50, near: 0.1, far: 600 }}
         style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
-        gl={{ antialias: true, alpha: false, preserveDrawingBuffer: true }}
+        gl={{ antialias: !isRendering, alpha: false, preserveDrawingBuffer: !isRendering }}
         onCreated={({ gl }) => {
           gl.shadowMap.type = THREE.PCFShadowMap;
         }}
