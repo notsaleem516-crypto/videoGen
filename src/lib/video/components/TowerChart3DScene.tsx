@@ -1,11 +1,12 @@
 // ============================================================================
 // TOWER CHART 3D SCENE - 3D Ranking visualization with Three.js
-// FRAME-SYNC: Camera position synchronized with Remotion frame capture
+// FIX: Use delayRender/continueRender pattern from Remotion docs
+// https://www.remotion.dev/docs/flickering
 // ============================================================================
 
-import React, { useMemo, useEffect, useState, Suspense, useRef, useCallback } from 'react';
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, delayRender, continueRender } from 'remotion';
-import { Canvas, useThree, useFrame, invalidate } from '@react-three/fiber';
+import React, { useMemo, useEffect, useState, Suspense, useRef } from 'react';
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, delayRender, continueRender, cancelRender } from 'remotion';
+import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { Text, Box, Plane, Billboard, Stars, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import type { TowerChart3DBlock, AnimationPhase } from '../schemas';
@@ -43,7 +44,7 @@ function formatValue(value: number): string {
 }
 
 // ============================================================================
-// CALCULATE CAMERA STATE - Pure function, must match frames exactly
+// CAMERA CALCULATION - Pure function, deterministic
 // ============================================================================
 
 function calculateCameraState(
@@ -61,7 +62,6 @@ function calculateCameraState(
   const nextIndex = Math.min(currentIndex + 1, towers.length - 1);
   const nextTower = towers[nextIndex];
   
-  // Ease-in-out for smooth movement
   const easedProgress = progress < 0.5 
     ? 2 * progress * progress 
     : 1 - Math.pow(-2 * progress + 2, 2) / 2;
@@ -81,7 +81,7 @@ function calculateCameraState(
 }
 
 // ============================================================================
-// 3D SCENE COMPONENTS - All STATIC, no animations
+// 3D SCENE COMPONENTS
 // ============================================================================
 
 function StarField() {
@@ -142,6 +142,8 @@ function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, ran
   visible: boolean;
 }) {
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [handle] = useState(() => delayRender('Loading tower texture'));
   
   useEffect(() => {
     if (image) {
@@ -149,12 +151,25 @@ function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, ran
       loader.load(image, (tex) => { 
         tex.colorSpace = THREE.SRGBColorSpace; 
         setTexture(tex); 
-      }, undefined, () => setTexture(null));
+        setLoaded(true);
+        continueRender(handle);
+      }, undefined, () => {
+        setTexture(null);
+        setLoaded(true);
+        continueRender(handle);
+      });
     } else {
       setTexture(null);
+      setLoaded(true);
+      continueRender(handle);
     }
-  }, [image]);
+    return () => {
+      cancelRender(handle);
+    };
+  }, [image, handle]);
   
+  // Wait for texture to load
+  if (!loaded) return null;
   if (!visible) return null;
   
   return (
@@ -221,45 +236,28 @@ function Ground({ color }: { color: string }) {
 }
 
 // ============================================================================
-// FRAME-SYNCED CAMERA - Updates on EVERY Remotion frame
+// SYNCHRONIZED CAMERA - Uses delayRender/continueRender pattern
 // ============================================================================
 
-function FrameSyncedCamera({ 
+function SynchronizedCamera({ 
   cameraPosition, 
-  lookAt,
-  remotionFrame 
+  lookAt 
 }: { 
   cameraPosition: [number, number, number]; 
   lookAt: [number, number, number];
-  remotionFrame: number;
 }) {
   const { camera, gl } = useThree();
-  const lastFrame = useRef(-1);
   
-  // This runs on every Three.js render frame
-  useFrame(() => {
-    // Only update if Remotion frame changed
-    if (remotionFrame !== lastFrame.current) {
-      lastFrame.current = remotionFrame;
-      
-      // Set camera position exactly
-      camera.position.set(...cameraPosition);
-      camera.lookAt(...lookAt);
-      
-      // Update projection matrix
-      camera.updateProjectionMatrix();
-      
-      // Force GPU to finish all commands before this frame is captured
-      const ctx = gl.getContext();
-      if (ctx) {
-        ctx.finish();
-      }
-    }
-  });
-  
-  // Also set camera immediately during React render
+  // Set camera IMMEDIATELY on every render
   camera.position.set(...cameraPosition);
   camera.lookAt(...lookAt);
+  camera.updateProjectionMatrix();
+  
+  // Force WebGL to finish before Remotion captures
+  const ctx = gl.getContext();
+  if (ctx) {
+    ctx.finish();
+  }
   
   return null;
 }
@@ -272,7 +270,6 @@ function TowerChartScene({
   towers,
   cameraPosition,
   lookAt,
-  remotionFrame,
   visibleStart,
   visibleEnd,
   currentIndex,
@@ -292,7 +289,6 @@ function TowerChartScene({
   towers: ReturnType<typeof calculateTowers>;
   cameraPosition: [number, number, number];
   lookAt: [number, number, number];
-  remotionFrame: number;
   visibleStart: number;
   visibleEnd: number;
   currentIndex: number;
@@ -336,12 +332,8 @@ function TowerChartScene({
         </Suspense>
       )}
       
-      {/* Frame-synced camera - receives Remotion frame number */}
-      <FrameSyncedCamera 
-        cameraPosition={cameraPosition} 
-        lookAt={lookAt}
-        remotionFrame={remotionFrame}
-      />
+      {/* Synchronized camera - no useFrame, sets immediately */}
+      <SynchronizedCamera position={cameraPosition} lookAt={lookAt} />
       
       {towers.map((tower, index) => {
         const inVisibleRange = index >= visibleStart && index <= visibleEnd;
@@ -393,7 +385,7 @@ function CustomModel({ modelPath, position, scale, rotation }: {
 }
 
 // ============================================================================
-// CALCULATE TOWERS - Pure function
+// CALCULATE TOWERS
 // ============================================================================
 
 function calculateTowers(
@@ -447,9 +439,10 @@ export interface TowerChart3DSceneProps {
 export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.ReactElement {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
-  const [renderHandle] = useState(() => delayRender('Initializing 3D scene'));
-  const canvasRef = useRef<any>(null);
-  const [ready, setReady] = useState(false);
+  
+  // Use delayRender/continueRender pattern from Remotion docs
+  const [handle] = useState(() => delayRender('Initializing 3D scene'));
+  const [glReady, setGlReady] = useState(false);
   
   const {
     title = 'Rankings',
@@ -478,14 +471,14 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
     animationDirection = 'top-to-bottom',
   } = data;
   
-  // Preload model if provided
+  // Preload model
   useEffect(() => {
     if (customModelPath) {
       preloadModel(customModelPath);
     }
   }, [customModelPath]);
   
-  // ========== ALL CALCULATIONS BEFORE CANVAS ==========
+  // ========== CALCULATIONS ==========
   
   const introDuration = 40;
   const totalItems = items.length;
@@ -504,13 +497,12 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
   const visibleStart = Math.max(0, currentIndex - 1);
   const visibleEnd = Math.min(items.length - 1, currentIndex + 4);
   
-  // Calculate towers
   const towers = useMemo(() => 
     calculateTowers(items, towerSpacing, baseHeight, maxHeight, gradientStart, gradientEnd, useGradientByRank, animationDirection),
     [items, towerSpacing, baseHeight, maxHeight, gradientStart, gradientEnd, useGradientByRank, animationDirection]
   );
   
-  // Calculate camera state - KEY: this changes every frame
+  // Camera state - calculated from frame, deterministic
   const cameraState = useMemo(() => 
     calculateCameraState(
       towers.map(t => ({ position: t.position, height: t.height })),
@@ -526,22 +518,21 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
     ? [customModelPosition.x, customModelPosition.y, customModelPosition.z] 
     : [0, 35, -60];
   
-  // Callback when Canvas is created
+  // Continue render when ready
+  useEffect(() => {
+    if (glReady) {
+      continueRender(handle);
+    }
+  }, [glReady, handle]);
+  
+  // Canvas ready callback
   const onCreated = useCallback(({ gl }: { gl: THREE.WebGLRenderer }) => {
     const ctx = gl.getContext();
     if (ctx) {
       ctx.finish();
     }
-    setReady(true);
-    continueRender(renderHandle);
-  }, [renderHandle]);
-  
-  // Force re-render when frame changes
-  useEffect(() => {
-    if (canvasRef.current) {
-      invalidate();
-    }
-  }, [frame]);
+    setGlReady(true);
+  }, []);
   
   const titleOpacity = interpolate(frame, [0, 25], [0, 1], { extrapolateRight: 'clamp' });
   const titleY = interpolate(frame, [0, 25], [-35, 0], { extrapolateRight: 'clamp' });
@@ -549,7 +540,6 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
   return (
     <AbsoluteFill style={{ backgroundColor }}>
       <Canvas
-        ref={canvasRef}
         camera={{ 
           position: cameraState.position, 
           fov: 50, 
@@ -564,14 +554,13 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
           powerPreference: 'high-performance',
         }}
         dpr={1}
-        frameloop="always"
+        frameloop="demand"
         onCreated={onCreated}
       >
         <TowerChartScene 
           towers={towers}
           cameraPosition={cameraState.position}
           lookAt={cameraState.lookAt}
-          remotionFrame={frame}
           visibleStart={visibleStart}
           visibleEnd={visibleEnd}
           currentIndex={currentIndex}
