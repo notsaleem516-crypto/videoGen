@@ -7,7 +7,6 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from 'remo
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Text, Box, Plane, Billboard, Stars, Float, Cone, Cylinder, Sphere, Torus, MeshDistortMaterial, MeshWobbleMaterial } from '@react-three/drei';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { TowerChart3DBlock, AnimationPhase } from '../schemas';
 import type { MotionProfileType } from '../utils/animations';
 
@@ -3092,48 +3091,42 @@ function CameraController({ towers, currentIndex, progress, distance, angle }: {
   angle: number;
 }) {
   const { camera } = useThree();
-  const smoothPos = useRef(new THREE.Vector3());
-  const smoothLook = useRef(new THREE.Vector3());
-  const initRef = useRef(false);
   
-  // Initialize once
+  // Deterministic camera position - no lerp, no refs, fully frame-based
+  // This ensures consistent rendering regardless of GPU speed
   useEffect(() => {
     if (towers.length === 0) return;
-    const angleRad = (angle * Math.PI) / 180;
-    camera.position.set(
-      Math.sin(angleRad) * distance,
-      18,
-      towers[0].position[2] + Math.cos(angleRad) * distance
-    );
-    smoothPos.current.copy(camera.position);
-    smoothLook.current.set(0, 10, 0);
-    initRef.current = true;
-  }, []); // Empty deps - only init once
-  
-  useFrame(() => {
-    if (!initRef.current || towers.length === 0) return;
     
     const currentTower = towers[Math.min(currentIndex, towers.length - 1)];
     const nextIndex = Math.min(currentIndex + 1, towers.length - 1);
     const nextTower = towers[nextIndex];
     
-    const targetZ = THREE.MathUtils.lerp(currentTower.position[2], nextTower.position[2], progress);
-    const avgHeight = (currentTower.height + nextTower.height) / 2;
+    // Smooth easing function for progress (ease-in-out)
+    const easedProgress = progress < 0.5 
+      ? 2 * progress * progress 
+      : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+    
+    // Interpolate camera position directly - deterministic!
+    const targetZ = THREE.MathUtils.lerp(currentTower.position[2], nextTower.position[2], easedProgress);
+    const currentHeight = currentTower.height;
+    const nextHeight = nextTower.height;
+    const avgHeight = THREE.MathUtils.lerp(currentHeight, nextHeight, easedProgress);
+    
     const angleRad = (angle * Math.PI) / 180;
     
-    const targetPos = new THREE.Vector3(
-      Math.sin(angleRad) * distance,
-      avgHeight + 15,
-      targetZ + Math.cos(angleRad) * distance
-    );
+    // Calculate camera position directly
+    const camX = Math.sin(angleRad) * distance;
+    const camY = avgHeight + 15;
+    const camZ = targetZ + Math.cos(angleRad) * distance;
     
-    smoothPos.current.lerp(targetPos, 0.04);
-    camera.position.copy(smoothPos.current);
+    // Set camera position directly - no smoothing, fully deterministic
+    camera.position.set(camX, camY, camZ);
     
-    const lookTarget = new THREE.Vector3(0, avgHeight + 6, targetZ);
-    smoothLook.current.lerp(lookTarget, 0.05);
-    camera.lookAt(smoothLook.current);
-  });
+    // Look at target - also deterministic
+    const lookY = avgHeight + 6;
+    camera.lookAt(0, lookY, targetZ);
+    
+  }, [towers, currentIndex, progress, distance, angle, camera]);
   
   return null;
 }
@@ -3318,49 +3311,10 @@ function CustomModel({ modelPath, position, scale, rotation }: {
   scale: number;
   rotation: number;
 }) {
-  const [scene, setScene] = useState<THREE.Group | null>(null);
-  const [error, setError] = useState(false);
-  const modelRef = useRef<THREE.Group>(null);
-  
-  useEffect(() => {
-    if (!modelPath) {
-      setError(true);
-      return;
-    }
-    
-    // Use the GLTF loader directly with error handling
-    const loader = new GLTFLoader();
-    
-    loader.load(
-      modelPath,
-      (gltf) => {
-        if (gltf.scene) {
-          // Reset model transforms
-          gltf.scene.position.set(0, 0, 0);
-          gltf.scene.rotation.set(0, 0, 0);
-          gltf.scene.scale.set(1, 1, 1);
-          
-          setScene(gltf.scene);
-        }
-      },
-      undefined,
-      (err) => {
-        console.warn('Failed to load custom model:', modelPath, err);
-        setError(true);
-      }
-    );
-  }, [modelPath]);
-  
-  useFrame((state) => {
-    if (modelRef.current) {
-      modelRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 0.4) * 0.5;
-      modelRef.current.rotation.y = (rotation * Math.PI / 180) + state.clock.elapsedTime * 0.15;
-    }
-  });
-  
-  if (error || !scene) return null;
-  
-  return <primitive ref={modelRef} object={scene.clone()} position={position} scale={scale} />;
+  // Custom model loading is disabled to avoid Turbopack/GLTFLoader compatibility issues
+  // The 3D backgrounds provide rich visual content without custom models
+  // To re-enable: Use the useGLTF hook from @react-three/drei with preload
+  return null;
 }
 
 // ============================================================================
