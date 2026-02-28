@@ -2,9 +2,9 @@
 // TOWER CHART 3D SCENE - 3D Ranking visualization with Three.js
 // ============================================================================
 
-import React, { useMemo, useEffect, useState, Suspense, useRef } from 'react';
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, delayRender, continueRender } from 'remotion';
-import { Canvas, useThree, useFrame } from '@react-three/fiber';
+import React, { useMemo, useEffect, useState, Suspense } from 'react';
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from 'remotion';
+import { Canvas, useThree } from '@react-three/fiber';
 import { Text, Box, Plane, Billboard, Stars, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import type { TowerChart3DBlock, AnimationPhase } from '../schemas';
@@ -41,6 +41,11 @@ function formatValue(value: number): string {
   return value.toLocaleString();
 }
 
+function deterministicNoise(seed: number): number {
+  const x = Math.sin(seed * 12.9898) * 43758.5453;
+  return x - Math.floor(x);
+}
+
 // ============================================================================
 // 3D SCENE COMPONENTS
 // ============================================================================
@@ -62,14 +67,15 @@ function StarField() {
 }
 
 function FloatingParticles() {
-  // STATIC particles - no animation for deterministic rendering
+  // Deterministic particle positions to avoid frame-to-frame flicker.
   const count = 30;
   const positions = useMemo(() => {
     const pos = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 120;
-      pos[i * 3 + 1] = Math.random() * 60;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 200;
+      const seed = i + 1;
+      pos[i * 3] = (deterministicNoise(seed * 11) - 0.5) * 120;
+      pos[i * 3 + 1] = deterministicNoise(seed * 17) * 60;
+      pos[i * 3 + 2] = (deterministicNoise(seed * 23) - 0.5) * 200;
     }
     return pos;
   }, []);
@@ -109,8 +115,6 @@ function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, ran
         tex.colorSpace = THREE.SRGBColorSpace; 
         setTexture(tex); 
       }, undefined, () => setTexture(null));
-    } else {
-      setTexture(null);
     }
   }, [image]);
   
@@ -182,28 +186,6 @@ function Ground({ color }: { color: string }) {
       <gridHelper args={[400, 80, '#2a2a4a', '#1a1a3a']} position={[0, 0.01, 0]} />
     </group>
   );
-}
-
-function GPUFrameSynchronizer() {
-  // CRITICAL: Force GPU to complete all rendering before frame capture
-  // This fixes the "shaky towers" issue in GPU mode where frames were
-  // being captured before the GPU finished rendering
-  const { gl } = useThree();
-  const frameCount = useRef(0);
-  
-  useFrame(() => {
-    // Force WebGL to complete all pending commands
-    // This ensures the frame is fully rendered before Remotion captures it
-    const webglContext = gl.getContext();
-    if (webglContext) {
-      // gl.finish() blocks until all GPU commands are complete
-      // This is essential for deterministic frame-by-frame video rendering
-      webglContext.finish();
-    }
-    frameCount.current++;
-  });
-  
-  return null;
 }
 
 function CameraController({ towers, currentIndex, progress, distance, angle }: {
@@ -354,9 +336,6 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
         </Suspense>
       )}
       
-      {/* GPU Frame Synchronizer - CRITICAL for GPU mode rendering */}
-      <GPUFrameSynchronizer />
-      
       {towers.length > 0 && (
         <CameraController
           towers={towers.map(t => ({ position: t.position, height: t.height }))}
@@ -434,8 +413,6 @@ export interface TowerChart3DSceneProps {
 export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.ReactElement {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
-  const [glContext, setGlContext] = useState<WebGLRenderingContext | null>(null);
-  const [handle] = useState(() => delayRender('Initializing 3D scene'));
   
   const { title = 'Rankings', subtitle, backgroundColor = '#050510', items = [], gradientStart = '#3B82F6', customModelPath } = data;
   
@@ -446,29 +423,8 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
     }
   }, [customModelPath]);
   
-  // CRITICAL: Force WebGL to finish rendering after each frame change
-  // This fixes GPU mode vibration by ensuring frames are complete before capture
-  useEffect(() => {
-    if (glContext) {
-      // Force GPU to complete all pending commands
-      glContext.finish();
-      // Allow Remotion to capture this frame
-      continueRender(handle);
-    }
-  }, [frame, glContext, handle]);
-  
   const titleOpacity = interpolate(frame, [0, 25], [0, 1], { extrapolateRight: 'clamp' });
   const titleY = interpolate(frame, [0, 25], [-35, 0], { extrapolateRight: 'clamp' });
-  
-  // Callback to get GL context from Canvas
-  const onCreated = ({ gl }: { gl: THREE.WebGLRenderer }) => {
-    const ctx = gl.getContext();
-    if (ctx) {
-      setGlContext(ctx);
-      // Initial finish to ensure first frame is ready
-      ctx.finish();
-    }
-  };
   
   return (
     <AbsoluteFill style={{ backgroundColor }}>
@@ -477,8 +433,7 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
         style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
         gl={{ antialias: false, alpha: false, preserveDrawingBuffer: true, powerPreference: 'high-performance' }}
         dpr={1}
-        frameloop="always"
-        onCreated={onCreated}
+        frameloop="demand"
       >
         <TowerChartScene data={data} frame={frame} fps={fps} />
       </Canvas>
