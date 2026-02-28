@@ -2,12 +2,13 @@
 
 import { useEditorStore } from '@/store/editor-store';
 import { Button } from '@/components/ui/button';
-import { Download, Loader2, Video, Play, Sparkles, Maximize2 } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { Download, Loader2, Video, Play } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
 import { Player } from '@remotion/player';
-import { DynamicVideo, getCompositionConfig } from '@/lib/video/compositions/DynamicVideo';
 import { type VideoPlan, type AIDecision, COMPONENT_IDS } from '@/lib/video/schemas';
 import { motion, AnimatePresence } from 'framer-motion';
+
+type DynamicVideoModule = typeof import('@/lib/video/compositions/DynamicVideo');
 
 function generatePlanFromBlocks(videoInput: { contentBlocks: Array<{ type: string; duration?: number }> }): VideoPlan {
   const typeToComponentId: Record<string, string> = {
@@ -74,12 +75,34 @@ function getDefaultDuration(type: string): number {
 export function VideoPreview() {
   const { videoInput, exportVideo } = useEditorStore();
   const [isExporting, setIsExporting] = useState(false);
+  const [dynamicVideoModule, setDynamicVideoModule] = useState<DynamicVideoModule | null>(null);
+  const [previewLoadError, setPreviewLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isActive = true;
+
+    import('@/lib/video/compositions/DynamicVideo')
+      .then((module) => {
+        if (!isActive) return;
+        setDynamicVideoModule(module);
+        setPreviewLoadError(null);
+      })
+      .catch((error) => {
+        console.error('Failed to load preview engine:', error);
+        if (!isActive) return;
+        setPreviewLoadError('Preview engine failed to load. Please check dependency versions.');
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   const plan = useMemo(() => generatePlanFromBlocks(videoInput), [videoInput]);
   const config = useMemo(() => {
-    if (videoInput.contentBlocks.length === 0) return null;
-    return getCompositionConfig(videoInput, plan);
-  }, [videoInput, plan]);
+    if (!dynamicVideoModule || videoInput.contentBlocks.length === 0) return null;
+    return dynamicVideoModule.getCompositionConfig(videoInput, plan);
+  }, [dynamicVideoModule, videoInput, plan]);
 
   const handleExport = async () => {
     if (videoInput.contentBlocks.length === 0) return;
@@ -138,7 +161,7 @@ export function VideoPreview() {
           </div>
           <Button
             size="sm"
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 shadow-lg shadow-purple-500/25"
+            className="bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-700 hover:to-indigo-700 text-white border-0 shadow-lg shadow-cyan-500/25"
             onClick={handleExport}
             disabled={isExporting || videoInput.contentBlocks.length === 0}
           >
@@ -182,7 +205,18 @@ export function VideoPreview() {
                 Click blocks in the library to add them to your video timeline
               </p>
             </motion.div>
-          ) : config ? (
+          ) : previewLoadError ? (
+            <motion.div
+              key="preview-error"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative z-10 max-w-md text-center border border-red-500/20 bg-red-500/10 rounded-2xl p-6"
+            >
+              <h3 className="text-base font-semibold text-red-200 mb-2">Preview unavailable</h3>
+              <p className="text-sm text-red-100/80">{previewLoadError}</p>
+            </motion.div>
+          ) : config && dynamicVideoModule ? (
             <motion.div 
               key="player"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -191,7 +225,7 @@ export function VideoPreview() {
               className="relative z-10"
             >
               {/* Glow Effect */}
-              <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-blue-500/20 blur-2xl opacity-50" />
+              <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/20 via-indigo-500/20 to-cyan-500/20 blur-2xl opacity-50" />
               
               {/* Player Container */}
               <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-700/50 bg-black">
@@ -199,7 +233,7 @@ export function VideoPreview() {
                 <div className="absolute inset-0 pointer-events-none border-4 border-gray-800/50 rounded-2xl" />
                 
                 <Player
-                  component={DynamicVideo}
+                  component={dynamicVideoModule.DynamicVideo}
                   inputProps={{ input: videoInput, plan }}
                   durationInFrames={config.durationInFrames}
                   compositionWidth={config.width}
@@ -223,7 +257,7 @@ export function VideoPreview() {
       <div className="h-10 bg-gray-900/50 backdrop-blur border-t border-gray-800/50 flex items-center justify-center flex-shrink-0">
         <div className="flex items-center gap-4 text-xs text-gray-500">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
             {videoInput.videoMeta.theme}
           </span>
           <span>{videoInput.videoMeta.fps} FPS</span>
