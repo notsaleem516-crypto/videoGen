@@ -4,7 +4,7 @@
 
 import React, { useMemo, useEffect, useState, Suspense, useRef } from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, delayRender, continueRender } from 'remotion';
-import { Canvas, useThree, useFrame } from '@react-three/fiber';
+import { Canvas, useThree, useFrame, invalidate } from '@react-three/fiber';
 import { Text, Box, Plane, Billboard, Stars, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import type { TowerChart3DBlock, AnimationPhase } from '../schemas';
@@ -42,12 +42,48 @@ function formatValue(value: number): string {
 }
 
 // ============================================================================
+// CALCULATE CAMERA POSITION - Done OUTSIDE Canvas for determinism
+// ============================================================================
+
+function calculateCameraState(
+  towers: { position: [number, number, number]; height: number }[],
+  currentIndex: number,
+  progress: number,
+  distance: number,
+  angle: number
+): { position: [number, number, number]; lookAt: [number, number, number] } {
+  if (towers.length === 0) {
+    return { position: [35, 18, -25], lookAt: [0, 10, 0] };
+  }
+
+  const currentTower = towers[Math.min(currentIndex, towers.length - 1)];
+  const nextIndex = Math.min(currentIndex + 1, towers.length - 1);
+  const nextTower = towers[nextIndex];
+  
+  // Ease-in-out for smooth movement
+  const easedProgress = progress < 0.5 
+    ? 2 * progress * progress 
+    : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+  
+  const targetZ = THREE.MathUtils.lerp(currentTower.position[2], nextTower.position[2], easedProgress);
+  const avgHeight = THREE.MathUtils.lerp(currentTower.height, nextTower.height, easedProgress);
+  const angleRad = (angle * Math.PI) / 180;
+  
+  return {
+    position: [
+      Math.sin(angleRad) * distance,
+      avgHeight + 15,
+      targetZ + Math.cos(angleRad) * distance
+    ],
+    lookAt: [0, avgHeight + 6, targetZ]
+  };
+}
+
+// ============================================================================
 // 3D SCENE COMPONENTS
 // ============================================================================
 
 function StarField() {
-  // STATIC stars - no animation for deterministic rendering
-  // Animation based on clock.elapsedTime causes GPU/CPU timing differences
   return (
     <Stars
       radius={150}
@@ -62,7 +98,6 @@ function StarField() {
 }
 
 function FloatingParticles() {
-  // STATIC particles - no animation for deterministic rendering
   const count = 30;
   const positions = useMemo(() => {
     const pos = new Float32Array(count * 3);
@@ -118,13 +153,11 @@ function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, ran
   
   return (
     <group position={position}>
-      {/* Base glow */}
       <mesh position={[0, 0.05, 0]} receiveShadow>
         <planeGeometry args={[width + 1.5, depth + 1.5]} />
         <meshBasicMaterial color={color} transparent opacity={0.25 * opacity} />
       </mesh>
       
-      {/* Main tower */}
       <Box args={[width, height, depth]} position={[0, height / 2, 0]}>
         <meshStandardMaterial 
           color={color} 
@@ -137,7 +170,6 @@ function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, ran
         />
       </Box>
       
-      {/* Top cap */}
       <Box args={[width + 0.25, 0.35, depth + 0.25]} position={[0, height + 0.175, 0]}>
         <meshStandardMaterial 
           color="#ffffff"
@@ -150,7 +182,6 @@ function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, ran
         />
       </Box>
       
-      {/* Image on top */}
       {image && texture && (
         <Billboard position={[0, height + 3, 0]} follow={true}>
           <mesh>
@@ -160,7 +191,6 @@ function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, ran
         </Billboard>
       )}
       
-      {/* Labels */}
       {showLabel && (
         <Billboard position={[0, height + (image && texture ? 5 : 3), 0]} follow={true}>
           <Text position={[-width/2 - 1.2, 1.2, 0]} fontSize={0.9} color="#FFD700" anchorX="center" anchorY="middle" fontWeight="bold" outlineWidth={0.06} outlineColor="#000000">#{rank}</Text>
@@ -184,149 +214,78 @@ function Ground({ color }: { color: string }) {
   );
 }
 
-function GPUFrameSynchronizer() {
-  // CRITICAL: Force GPU to complete all rendering before frame capture
-  // This fixes the "shaky towers" issue in GPU mode where frames were
-  // being captured before the GPU finished rendering
-  const { gl } = useThree();
-  const frameCount = useRef(0);
+// ============================================================================
+// FRAME SYNCHRONIZER - Ensures GPU completes before frame capture
+// ============================================================================
+
+function FrameSynchronizer({ cameraPosition, lookAt }: { 
+  cameraPosition: [number, number, number]; 
+  lookAt: [number, number, number];
+}) {
+  const { camera, gl } = useThree();
+  const hasSynced = useRef(false);
   
+  // Update camera and sync GPU on every frame
   useFrame(() => {
-    // Force WebGL to complete all pending commands
-    // This ensures the frame is fully rendered before Remotion captures it
-    const webglContext = gl.getContext();
-    if (webglContext) {
-      // gl.finish() blocks until all GPU commands are complete
-      // This is essential for deterministic frame-by-frame video rendering
-      webglContext.finish();
+    // Set camera position and lookAt
+    camera.position.set(...cameraPosition);
+    camera.lookAt(...lookAt);
+    
+    // Force WebGL to complete all commands before Remotion captures
+    const ctx = gl.getContext();
+    if (ctx) {
+      ctx.finish();
     }
-    frameCount.current++;
+    
+    hasSynced.current = true;
   });
   
   return null;
 }
 
-function CameraController({ towers, currentIndex, progress, distance, angle }: {
-  towers: { position: [number, number, number]; height: number }[];
-  currentIndex: number;
-  progress: number;
-  distance: number;
-  angle: number;
-}) {
-  const { camera } = useThree();
-  
-  // FULLY DETERMINISTIC - calculate position directly from props
-  // NO lerp, NO useRef, NO useEffect - synchronous calculation
-  // This ensures exact same position for every frame regardless of GPU/CPU
-  
-  if (towers.length > 0) {
-    const currentTower = towers[Math.min(currentIndex, towers.length - 1)];
-    const nextIndex = Math.min(currentIndex + 1, towers.length - 1);
-    const nextTower = towers[nextIndex];
-    
-    // Ease-in-out for smooth movement
-    const easedProgress = progress < 0.5 
-      ? 2 * progress * progress 
-      : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-    
-    // Direct interpolation - no smoothing
-    const targetZ = THREE.MathUtils.lerp(currentTower.position[2], nextTower.position[2], easedProgress);
-    const avgHeight = THREE.MathUtils.lerp(currentTower.height, nextTower.height, easedProgress);
-    const angleRad = (angle * Math.PI) / 180;
-    
-    // Set camera position DIRECTLY - no refs, no accumulation
-    camera.position.set(
-      Math.sin(angleRad) * distance,
-      avgHeight + 15,
-      targetZ + Math.cos(angleRad) * distance
-    );
-    
-    // Set lookAt DIRECTLY
-    camera.lookAt(0, avgHeight + 6, targetZ);
-  }
-  
-  return null;
-}
+// ============================================================================
+// SCENE COMPONENT - Receives pre-calculated values as props
+// ============================================================================
 
-function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame: number; fps: number }) {
-  const {
-    items = [],
-    towerSpacing = 7,
-    baseHeight = 4,
-    maxHeight = 30,
-    gradientStart = '#3B82F6',
-    gradientEnd = '#8B5CF6',
-    useGradientByRank = true,
-    showLabels3D = true,
-    cameraDistance = 35,
-    cameraPauseDuration = 0.4,
-    cameraMoveSpeed = 0.5,
-    cameraAngle = 35,
-    backgroundColor = '#050510',
-    groundColor = '#0a0a1f',
-    showGround = true,
-    ambientIntensity = 0.5,
-    itemRevealDelay = 0.06,
-    customModelPath,
-    customModelPosition,
-    customModelScale = 2,
-    customModelRotation = 0,
-    animationDirection = 'top-to-bottom',
-  } = data;
-  
-  // Sort items based on animation direction
-  const sortedItems = useMemo(() => {
-    const sorted = [...items].sort((a, b) => a.rank - b.rank);
-    // If bottom-to-top, reverse the order so we start from highest rank (last position)
-    return animationDirection === 'bottom-to-top' ? sorted.reverse() : sorted;
-  }, [items, animationDirection]);
-  
-  const { minValue, maxValue } = useMemo(() => {
-    if (items.length === 0) return { minValue: 0, maxValue: 1 };
-    const values = items.map(i => i.value);
-    return { minValue: Math.min(...values), maxValue: Math.max(...values) };
-  }, [items]);
-  
-  const towers = useMemo(() => {
-    const heightRange = maxHeight - baseHeight;
-    return sortedItems.map((item, index) => {
-      const normalizedValue = (item.value - minValue) / (maxValue - minValue || 1);
-      const height = baseHeight + normalizedValue * heightRange;
-      const color = useGradientByRank
-        ? lerpColor(gradientEnd, gradientStart, (items.length - item.rank) / Math.max(items.length - 1, 1))
-        : (item.color || gradientStart);
-      return {
-        ...item,
-        height,
-        color,
-        position: [0, 0, index * towerSpacing] as [number, number, number],
-        valueFormatted: item.valueFormatted || formatValue(item.value),
-      };
-    });
-  }, [sortedItems, minValue, maxValue, baseHeight, maxHeight, gradientStart, gradientEnd, useGradientByRank, towerSpacing, items.length]);
-  
-  // Model position with defaults
-  const modelPos: [number, number, number] = customModelPosition 
-    ? [customModelPosition.x, customModelPosition.y, customModelPosition.z] 
-    : [0, 35, -60];
-  
-  const introDuration = 40;
-  const totalItems = items.length;
-  const pauseFrames = cameraPauseDuration * fps;
-  const moveFrames = cameraMoveSpeed * fps;
-  const totalAnimFrames = totalItems * (pauseFrames + moveFrames);
-  
-  const animFrame = Math.max(0, frame - introDuration);
-  const animProgress = Math.min(animFrame / totalAnimFrames, 1);
-  const currentIndex = Math.min(Math.floor(animProgress * totalItems), totalItems - 1);
-  const itemProgress = (animProgress * totalItems) % 1;
-  
-  const introOpacity = Math.min(1, frame / introDuration);
-  const revealProgress = Math.min(1, frame / (introDuration + totalItems * itemRevealDelay * fps * 0.5));
-  
-  const visibleStart = Math.max(0, currentIndex - 1);
-  const visibleEnd = Math.min(towers.length - 1, currentIndex + 4);
-  
+function TowerChartScene({ 
+  towers,
+  cameraPosition,
+  lookAt,
+  visibleStart,
+  visibleEnd,
+  currentIndex,
+  introOpacity,
+  revealProgress,
+  totalItems,
+  showLabels3D,
+  showGround,
+  groundColor,
+  backgroundColor,
+  ambientIntensity,
+  customModelPath,
+  customModelPosition,
+  customModelScale,
+  customModelRotation,
+}: { 
+  towers: ReturnType<typeof calculateTowers>;
+  cameraPosition: [number, number, number];
+  lookAt: [number, number, number];
+  visibleStart: number;
+  visibleEnd: number;
+  currentIndex: number;
+  introOpacity: number;
+  revealProgress: number;
+  totalItems: number;
+  showLabels3D: boolean;
+  showGround: boolean;
+  groundColor: string;
+  backgroundColor: string;
+  ambientIntensity: number;
+  customModelPath?: string;
+  customModelPosition: [number, number, number];
+  customModelScale: number;
+  customModelRotation: number;
+}) {
   return (
     <>
       <color attach="background" args={[backgroundColor]} />
@@ -347,25 +306,15 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
         <Suspense fallback={null}>
           <CustomModel 
             modelPath={customModelPath} 
-            position={modelPos} 
+            position={customModelPosition} 
             scale={customModelScale} 
             rotation={customModelRotation}
           />
         </Suspense>
       )}
       
-      {/* GPU Frame Synchronizer - CRITICAL for GPU mode rendering */}
-      <GPUFrameSynchronizer />
-      
-      {towers.length > 0 && (
-        <CameraController
-          towers={towers.map(t => ({ position: t.position, height: t.height }))}
-          currentIndex={currentIndex}
-          progress={itemProgress}
-          distance={cameraDistance}
-          angle={cameraAngle}
-        />
-      )}
+      {/* Frame synchronizer - updates camera and syncs GPU */}
+      <FrameSynchronizer cameraPosition={cameraPosition} lookAt={lookAt} />
       
       {towers.map((tower, index) => {
         const inVisibleRange = index >= visibleStart && index <= visibleEnd;
@@ -405,15 +354,11 @@ function CustomModel({ modelPath, position, scale, rotation }: {
   
   useEffect(() => {
     if (scene) {
-      // Reset model transforms
       scene.position.set(0, 0, 0);
       scene.rotation.set(0, 0, 0);
       scene.scale.set(1, 1, 1);
     }
   }, [scene]);
-  
-  // STATIC model - no animation for deterministic rendering
-  // Animation based on clock.elapsedTime causes GPU/CPU timing differences
   
   if (!scene) return null;
   
@@ -421,7 +366,48 @@ function CustomModel({ modelPath, position, scale, rotation }: {
 }
 
 // ============================================================================
-// MAIN COMPONENT
+// CALCULATE TOWERS - Pure function, no side effects
+// ============================================================================
+
+function calculateTowers(
+  items: TowerChart3DBlock['items'],
+  towerSpacing: number,
+  baseHeight: number,
+  maxHeight: number,
+  gradientStart: string,
+  gradientEnd: string,
+  useGradientByRank: boolean,
+  animationDirection: string
+) {
+  if (!items || items.length === 0) return [];
+  
+  const sorted = [...items].sort((a, b) => a.rank - b.rank);
+  const sortedItems = animationDirection === 'bottom-to-top' ? sorted.reverse() : sorted;
+  
+  const values = items.map(i => i.value);
+  const minValue = Math.min(...values);
+  const maxValue = Math.max(...values);
+  const heightRange = maxHeight - baseHeight;
+  
+  return sortedItems.map((item, index) => {
+    const normalizedValue = (item.value - minValue) / (maxValue - minValue || 1);
+    const height = baseHeight + normalizedValue * heightRange;
+    const color = useGradientByRank
+      ? lerpColor(gradientEnd, gradientStart, (items.length - item.rank) / Math.max(items.length - 1, 1))
+      : (item.color || gradientStart);
+    
+    return {
+      ...item,
+      height,
+      color,
+      position: [0, 0, index * towerSpacing] as [number, number, number],
+      valueFormatted: item.valueFormatted || formatValue(item.value),
+    };
+  });
+}
+
+// ============================================================================
+// MAIN COMPONENT - All calculations done BEFORE Canvas
 // ============================================================================
 
 export interface TowerChart3DSceneProps {
@@ -435,9 +421,34 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const [glContext, setGlContext] = useState<WebGLRenderingContext | null>(null);
-  const [handle] = useState(() => delayRender('Initializing 3D scene'));
+  const [renderHandle] = useState(() => delayRender('Initializing 3D scene'));
   
-  const { title = 'Rankings', subtitle, backgroundColor = '#050510', items = [], gradientStart = '#3B82F6', customModelPath } = data;
+  const {
+    title = 'Rankings',
+    subtitle,
+    backgroundColor = '#050510',
+    items = [],
+    gradientStart = '#3B82F6',
+    gradientEnd = '#8B5CF6',
+    useGradientByRank = true,
+    showLabels3D = true,
+    cameraDistance = 35,
+    cameraPauseDuration = 0.4,
+    cameraMoveSpeed = 0.5,
+    cameraAngle = 35,
+    groundColor = '#0a0a1f',
+    showGround = true,
+    ambientIntensity = 0.5,
+    itemRevealDelay = 0.06,
+    towerSpacing = 7,
+    baseHeight = 4,
+    maxHeight = 30,
+    customModelPath,
+    customModelPosition,
+    customModelScale = 2,
+    customModelRotation = 0,
+    animationDirection = 'top-to-bottom',
+  } = data;
   
   // Preload model if provided
   useEffect(() => {
@@ -446,41 +457,109 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
     }
   }, [customModelPath]);
   
-  // CRITICAL: Force WebGL to finish rendering after each frame change
-  // This fixes GPU mode vibration by ensuring frames are complete before capture
+  // Calculate ALL scene state BEFORE Canvas - fully deterministic
+  const introDuration = 40;
+  const totalItems = items.length;
+  const pauseFrames = cameraPauseDuration * fps;
+  const moveFrames = cameraMoveSpeed * fps;
+  const totalAnimFrames = totalItems * (pauseFrames + moveFrames);
+  
+  const animFrame = Math.max(0, frame - introDuration);
+  const animProgress = Math.min(animFrame / totalAnimFrames, 1);
+  const currentIndex = Math.min(Math.floor(animProgress * totalItems), totalItems - 1);
+  const itemProgress = (animProgress * totalItems) % 1;
+  
+  const introOpacity = Math.min(1, frame / introDuration);
+  const revealProgress = Math.min(1, frame / (introDuration + totalItems * itemRevealDelay * fps * 0.5));
+  
+  const visibleStart = Math.max(0, currentIndex - 1);
+  const visibleEnd = Math.min(items.length - 1, currentIndex + 4);
+  
+  // Calculate towers - pure computation
+  const towers = useMemo(() => 
+    calculateTowers(items, towerSpacing, baseHeight, maxHeight, gradientStart, gradientEnd, useGradientByRank, animationDirection),
+    [items, towerSpacing, baseHeight, maxHeight, gradientStart, gradientEnd, useGradientByRank, animationDirection]
+  );
+  
+  // Calculate camera state - pure computation
+  const cameraState = useMemo(() => 
+    calculateCameraState(
+      towers.map(t => ({ position: t.position, height: t.height })),
+      currentIndex,
+      itemProgress,
+      cameraDistance,
+      cameraAngle
+    ),
+    [towers, currentIndex, itemProgress, cameraDistance, cameraAngle]
+  );
+  
+  // Model position with defaults
+  const modelPos: [number, number, number] = customModelPosition 
+    ? [customModelPosition.x, customModelPosition.y, customModelPosition.z] 
+    : [0, 35, -60];
+  
+  // Continue render when GL context is ready
   useEffect(() => {
     if (glContext) {
-      // Force GPU to complete all pending commands
       glContext.finish();
-      // Allow Remotion to capture this frame
-      continueRender(handle);
+      continueRender(renderHandle);
     }
-  }, [frame, glContext, handle]);
+  }, [glContext, renderHandle, frame]);
+  
+  // Callback to get GL context
+  const onCreated = ({ gl }: { gl: THREE.WebGLRenderer }) => {
+    const ctx = gl.getContext();
+    if (ctx) {
+      ctx.finish();
+      setGlContext(ctx);
+    }
+  };
   
   const titleOpacity = interpolate(frame, [0, 25], [0, 1], { extrapolateRight: 'clamp' });
   const titleY = interpolate(frame, [0, 25], [-35, 0], { extrapolateRight: 'clamp' });
   
-  // Callback to get GL context from Canvas
-  const onCreated = ({ gl }: { gl: THREE.WebGLRenderer }) => {
-    const ctx = gl.getContext();
-    if (ctx) {
-      setGlContext(ctx);
-      // Initial finish to ensure first frame is ready
-      ctx.finish();
-    }
-  };
-  
   return (
     <AbsoluteFill style={{ backgroundColor }}>
       <Canvas
-        camera={{ position: [35, 18, -25], fov: 50, near: 0.1, far: 600 }}
+        camera={{ 
+          position: cameraState.position, 
+          fov: 50, 
+          near: 0.1, 
+          far: 600 
+        }}
         style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
-        gl={{ antialias: false, alpha: false, preserveDrawingBuffer: true, powerPreference: 'high-performance' }}
+        gl={{ 
+          antialias: false, 
+          alpha: false, 
+          preserveDrawingBuffer: true, 
+          powerPreference: 'high-performance',
+          // Ensure consistent rendering
+          toneMapping: THREE.ACESFilmicToneMapping,
+        }}
         dpr={1}
-        frameloop="always"
+        frameloop="demand"
         onCreated={onCreated}
       >
-        <TowerChartScene data={data} frame={frame} fps={fps} />
+        <TowerChartScene 
+          towers={towers}
+          cameraPosition={cameraState.position}
+          lookAt={cameraState.lookAt}
+          visibleStart={visibleStart}
+          visibleEnd={visibleEnd}
+          currentIndex={currentIndex}
+          introOpacity={introOpacity}
+          revealProgress={revealProgress}
+          totalItems={totalItems}
+          showLabels3D={showLabels3D}
+          showGround={showGround}
+          groundColor={groundColor}
+          backgroundColor={backgroundColor}
+          ambientIntensity={ambientIntensity}
+          customModelPath={customModelPath}
+          customModelPosition={modelPos}
+          customModelScale={customModelScale}
+          customModelRotation={customModelRotation}
+        />
       </Canvas>
       
       {/* Title Overlay */}
