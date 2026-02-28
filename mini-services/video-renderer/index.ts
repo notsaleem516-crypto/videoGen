@@ -959,6 +959,8 @@ serve({
         }
         
         // Render the video with GPU-optimized settings
+        // CRITICAL: concurrency=1 to prevent flickering from multi-threading
+        // See: https://www.remotion.dev/docs/flickering
         await renderMedia({
           serveUrl: BUNDLE_PATH,
           composition: {
@@ -974,8 +976,11 @@ serve({
           inputProps: props,
           crf,
           logLevel: 'warn',
+          // FIX: Force single-threaded rendering to prevent flickering
+          // Multi-threading causes frame timing issues with WebGL/Three.js
+          concurrency: 1,
           // GPU-specific options for deterministic frame rendering
-          delayRenderTimeoutInMilliseconds: 60000, // Allow more time for GPU sync
+          delayRenderTimeoutInMilliseconds: 60000,
           chromiumOptions: {
             args: chromiumOptions.args,
             gl: chromiumOptions.gl,
@@ -1099,6 +1104,8 @@ serve({
         }
         
         // Render the video with GPU-optimized settings
+        // CRITICAL: concurrency=1 to prevent flickering from multi-threading
+        // See: https://www.remotion.dev/docs/flickering
         await renderMedia({
           serveUrl: BUNDLE_PATH,
           composition: {
@@ -1114,8 +1121,11 @@ serve({
           inputProps: props,
           crf,
           logLevel: 'warn',
+          // FIX: Force single-threaded rendering to prevent flickering
+          // Multi-threading causes frame timing issues with WebGL/Three.js
+          concurrency: 1,
           // GPU-specific options for deterministic frame rendering
-          delayRenderTimeoutInMilliseconds: 60000, // Allow more time for GPU sync
+          delayRenderTimeoutInMilliseconds: 60000,
           chromiumOptions: {
             args: chromiumOptions.args,
             gl: chromiumOptions.gl,
