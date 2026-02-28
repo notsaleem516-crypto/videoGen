@@ -568,6 +568,51 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     color: z.string().default('#FFFFFF'),
     showLabels: z.boolean().default(true),
   }).merge(BlockCustomizationSchema),
+  // Tower Chart 3D Block - 3D ranking visualization
+  z.object({
+    type: z.literal('tower-chart-3d'),
+    title: z.string().max(100).default('Top Rankings'),
+    subtitle: z.string().max(200).optional(),
+    items: z.array(z.object({
+      rank: z.number().int().min(1),
+      name: z.string().max(100),
+      value: z.number().min(0),
+      valueFormatted: z.string().max(50).optional(),
+      color: z.string().optional(),
+      image: z.string().optional(),
+      subtitle: z.string().max(100).optional(),
+    })).min(1).max(50),
+    towerStyle: z.enum(['boxes', 'cylinders', 'hexagons']).default('boxes'),
+    towerSpacing: z.number().min(2).max(10).default(5),
+    baseHeight: z.number().min(1).max(5).default(2),
+    maxHeight: z.number().min(10).max(50).default(25),
+    gradientStart: z.string().default('#3B82F6'),
+    gradientEnd: z.string().default('#8B5CF6'),
+    useGradientByRank: z.boolean().default(true),
+    showValueLabels: z.boolean().default(true),
+    showRankNumbers: z.boolean().default(true),
+    cameraDistance: z.number().min(10).max(50).default(20),
+    cameraPauseDuration: z.number().min(0.2).max(2).default(0.4),
+    cameraMoveSpeed: z.number().min(0.3).max(3).default(0.8),
+    cameraAngle: z.number().min(0).max(90).default(30),
+    animationDirection: z.enum(['top-to-bottom', 'bottom-to-top']).default('top-to-bottom'),
+    backgroundColor: z.string().default('#0a0a1a'),
+    groundColor: z.string().default('#151525'),
+    showGround: z.boolean().default(true),
+    ambientIntensity: z.number().min(0.3).max(2).default(0.6),
+    showLabels3D: z.boolean().default(true),
+    backgroundPreset: z.string().default('cyber-grid'),
+    introAnimation: z.enum(['fade', 'zoom', 'slide-up', 'none']).default('fade'),
+    itemRevealDelay: z.number().min(0).max(0.5).default(0.05),
+    customModelPath: z.string().optional(),
+    customModelPosition: z.object({
+      x: z.number().default(0),
+      y: z.number().default(35),
+      z: z.number().default(-60),
+    }).optional(),
+    customModelScale: z.number().min(0.1).max(10).default(2),
+    customModelRotation: z.number().min(0).max(360).default(0),
+  }).merge(BlockCustomizationSchema),
 ]);
 
 const VideoInputSchema = z.object({
@@ -675,6 +720,13 @@ function calculateCompositionConfig(input: z.infer<typeof VideoInputSchema>) {
     } else if (blockType === 'countdown') {
       // Countdown typically shows for 5-10 seconds
       contentDuration += 6;
+    } else if (blockType === 'tower-chart-3d') {
+      // Tower chart 3D duration based on number of items
+      const towerBlock = block as { items?: unknown[]; cameraPauseDuration?: number; cameraMoveSpeed?: number };
+      const itemCount = towerBlock.items?.length || 5;
+      const pauseDuration = towerBlock.cameraPauseDuration || 0.4;
+      const moveSpeed = towerBlock.cameraMoveSpeed || 0.8;
+      contentDuration += 1.5 + itemCount * (pauseDuration + moveSpeed) + 1;
     } else {
       contentDuration += 3; // default 3 seconds per block
     }
@@ -727,6 +779,7 @@ async function generateVideoPlan(videoMeta: z.infer<typeof VideoMetaSchema>, con
     'gradient-text': 'gradient-text-scene',
     'animated-bg': 'animated-bg-scene',
     'countdown': 'countdown-scene',
+    'tower-chart-3d': 'tower-chart-3d-scene',
   };
   
   // Create decisions for each block
@@ -811,6 +864,15 @@ async function generateVideoPlan(videoMeta: z.infer<typeof VideoMetaSchema>, con
     } else if (blockType === 'countdown') {
       // Countdown typically shows for 5-10 seconds
       duration = 6;
+    } else if (blockType === 'tower-chart-3d') {
+      // Tower chart 3D duration based on number of items
+      // Each item: pause duration + move speed, plus intro animation
+      const towerBlock = block as { items?: unknown[]; cameraPauseDuration?: number; cameraMoveSpeed?: number };
+      const itemCount = towerBlock.items?.length || 5;
+      const pauseDuration = towerBlock.cameraPauseDuration || 0.4;
+      const moveSpeed = towerBlock.cameraMoveSpeed || 0.8;
+      // Intro (1.5s) + items * (pause + move) + outro buffer
+      duration = 1.5 + itemCount * (pauseDuration + moveSpeed) + 1;
     }
     
     return {
