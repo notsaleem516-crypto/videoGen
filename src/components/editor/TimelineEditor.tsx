@@ -69,9 +69,11 @@ interface SortableBlockProps {
 
 function SortableBlock({ block, index, isSelected, zoom, onSelect, onDuplicate, onDelete }: SortableBlockProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: index.toString() });
- // Calculate width based on zoom level
+
+  // Calculate width based on zoom level
   const baseWidth = 120;
   const width = Math.max(100, baseWidth * zoom);
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -83,7 +85,7 @@ function SortableBlock({ block, index, isSelected, zoom, onSelect, onDuplicate, 
   const gradient = BLOCK_GRADIENTS[block.type] || 'from-gray-500 to-gray-600';
   const duration = (block as { duration?: number }).duration || 3;
   
- 
+
 
   return (
     <motion.div
@@ -300,7 +302,7 @@ export function TimelineEditor() {
               strategy={horizontalListSortingStrategy}
             >
               <ScrollArea className="h-full">
-                <div className="flex gap-3 pb-2">
+                <div className="flex gap-3 px-2 pt-2 pb-3">
                   <AnimatePresence>
                     {videoInput.contentBlocks.map((block, index) => (
                       <SortableBlock

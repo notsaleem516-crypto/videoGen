@@ -94,8 +94,8 @@ export function BlockLibrarySidebar() {
       </div>
       
       {/* Block Categories */}
-      <ScrollArea className="flex-1 h-full">
-        <div className="p-3 space-y-4 pb-8">
+      <ScrollArea className="flex-1 min-h-0">
+        <div className="p-3 space-y-4 pb-16">
           {BLOCK_CATEGORIES.map((category, catIndex) => {
             const CatIcon = category.icon;
             return (
