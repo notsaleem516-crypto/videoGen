@@ -738,6 +738,12 @@ export const TowerChart3DBlockSchema = z.object({
     'zen-garden',       // Japanese peaceful garden
     'ski-resort',       // Snowy mountain slopes
     'vineyard',         // Rolling hills with grape vines
+    // New Advanced Immersive Environments
+    'underwater-kingdom', // Underwater coral kingdom
+    'cyberpunk-city',     // Futuristic cyberpunk metropolis
+    'medieval-arena',     // Ancient gladiator arena
+    'space-colony',       // Space station colony
+    'tropical-beach',     // Tropical beach paradise
   ]).default('cyber-grid'),
   
   // Animation
