@@ -18,3 +18,26 @@ Stage Summary:
 - Full property editor with location, temperature, humidity, wind
 - High/low forecast display
 - Details toggle for humidity and wind information
+
+---
+Task ID: 11
+Agent: Main Coordinator
+Task: Fix GPU mode tower vibration in 3D video rendering
+
+Work Log:
+- Analyzed the issue: GPU mode causes tower vibration, CPU mode (SwiftShader) works fine
+- Root cause: GPU renders asynchronously, frames captured before GPU finishes rendering
+- Solution 1: Added GPUFrameSynchronizer component that calls gl.finish() in useFrame loop
+- Solution 2: Added delayRender/continueRender mechanism with gl.finish() in useEffect
+- Solution 3: Changed frameloop from "demand" to "always" for consistent frame rendering
+- Added onCreated callback to capture WebGL context for synchronization
+- Added GPU detection in video-renderer service (Windows nvidia-smi, WMIC fallback)
+- Added chromiumOptions for GPU mode (--use-gl=egl, --disable-gpu-vsync, etc.)
+- Added delayRenderTimeoutInMilliseconds: 60000 for GPU sync timing
+- Updated health check endpoint to include GPU information
+
+Stage Summary:
+- TowerChart3DScene.tsx now has proper WebGL synchronization for GPU rendering
+- Video renderer service now detects GPU and applies appropriate chromium options
+- GPU mode should no longer produce shaky/vibrating tower renders
+- Both render endpoints (/render and /render-full) now use GPU-optimized settings
