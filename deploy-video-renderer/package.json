@@ -1,0 +1,18 @@
+{
+  "name": "video-renderer-service",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "bun mini-service-video-renderer.js",
+    "dev": "bun --hot mini-service-video-renderer.js"
+  },
+  "dependencies": {
+    "@remotion/renderer": "4.0.424",
+    "@remotion/bundler": "4.0.424",
+    "@remotion/compositor-linux-x64-gnu": "4.0.424",
+    "remotion": "4.0.424",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^3.22.3"
+  }
+}

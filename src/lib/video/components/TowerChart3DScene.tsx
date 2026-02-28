@@ -34,30 +34,23 @@ function formatValue(value: number): string {
 // ============================================================================
 
 function StarField() {
-  const starsRef = useRef<THREE.Points>(null);
-  
-  useFrame((state) => {
-    if (starsRef.current) {
-      starsRef.current.rotation.y = state.clock.elapsedTime * 0.008;
-    }
-  });
-  
+  // Static stars - no animation for faster rendering
   return (
     <Stars
-      ref={starsRef}
       radius={150}
       depth={80}
-      count={4000}
+      count={2000}
       factor={5}
       saturation={0.3}
       fade
-      speed={0.3}
+      speed={0}
     />
   );
 }
 
 function FloatingParticles() {
-  const count = 60;
+  // Static particles - no per-frame updates for faster rendering
+  const count = 30;
   const positions = useMemo(() => {
     const pos = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
@@ -68,21 +61,8 @@ function FloatingParticles() {
     return pos;
   }, []);
   
-  const pointsRef = useRef<THREE.Points>(null);
-  
-  useFrame(() => {
-    if (pointsRef.current) {
-      const posArray = pointsRef.current.geometry.attributes.position.array as Float32Array;
-      for (let i = 0; i < count; i++) {
-        posArray[i * 3 + 1] += 0.015;
-        if (posArray[i * 3 + 1] > 60) posArray[i * 3 + 1] = 0;
-      }
-      pointsRef.current.geometry.attributes.position.needsUpdate = true;
-    }
-  });
-  
   return (
-    <points ref={pointsRef}>
+    <points>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
       </bufferGeometry>
@@ -95,16 +75,8 @@ function FloatingParticles() {
 // PRESET BACKGROUND COMPONENTS
 // ============================================================================
 
-/** Cyber Grid - Neon grid floor with glow lines */
+/** Cyber Grid - Neon grid floor with glow lines - Static for faster rendering */
 function CyberGridBackground({ baseColor }: { baseColor: string }) {
-  const gridRef = useRef<THREE.Group>(null);
-  
-  useFrame((state) => {
-    if (gridRef.current) {
-      gridRef.current.position.z = (state.clock.elapsedTime * 2) % 10;
-    }
-  });
-  
   return (
     <group>
       {/* Main neon grid floor */}
@@ -113,8 +85,8 @@ function CyberGridBackground({ baseColor }: { baseColor: string }) {
         <meshBasicMaterial color="#0a0a2a" transparent opacity={0.95} />
       </mesh>
       
-      {/* Animated grid lines */}
-      <group ref={gridRef}>
+      {/* Static grid lines */}
+      <group>
         {Array.from({ length: 30 }).map((_, i) => (
           <mesh key={`line-x-${i}`} position={[-150 + i * 10, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
             <planeGeometry args={[300, 0.08]} />

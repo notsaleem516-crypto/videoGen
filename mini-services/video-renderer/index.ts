@@ -870,6 +870,8 @@ serve({
           logLevel: 'warn',
           // Ensure audio track exists even if silent (required for some players)
           enforceAudioTrack: true,
+          // Parallel rendering
+          concurrency: Math.max(2, os.cpus().length - 1),
         });
         
         // Read the video file
@@ -1001,6 +1003,8 @@ serve({
           logLevel: 'warn',
           // Ensure audio track exists even if silent (required for some players)
           enforceAudioTrack: true,
+          // Parallel rendering
+          concurrency: Math.max(2, os.cpus().length - 1),
         });
         
         // Read the video file

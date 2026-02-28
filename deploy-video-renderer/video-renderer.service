@@ -1,0 +1,15 @@
+[Unit]
+Description=Video Renderer Service
+After=network.target
+
+[Service]
+Type=simple
+User=ec2-user
+WorkingDirectory=/opt/video-renderer
+ExecStart=/home/ec2-user/.bun/bin/bun mini-service-video-renderer.js
+Restart=always
+RestartSec=10
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
