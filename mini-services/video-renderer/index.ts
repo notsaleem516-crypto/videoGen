@@ -24,7 +24,23 @@ interface GPUInfo {
   vendor?: string;
 }
 
+const RENDER_MODE = process.env.REMOTION_RENDER_MODE?.toLowerCase();
+
 function detectGPU(): GPUInfo {
+  if (RENDER_MODE === 'cpu') {
+    console.log('[GPU] REMOTION_RENDER_MODE=cpu, forcing software rendering');
+    return { hasGPU: false };
+  }
+
+  if (RENDER_MODE === 'gpu') {
+    console.log('[GPU] REMOTION_RENDER_MODE=gpu, forcing GPU rendering');
+    return {
+      hasGPU: true,
+      gpuName: 'Forced by REMOTION_RENDER_MODE=gpu',
+      vendor: 'Forced',
+    };
+  }
+
   const platform = os.platform();
   
   try {
@@ -101,19 +117,16 @@ function detectGPU(): GPUInfo {
           };
         }
       } catch {
-        // No NVIDIA GPU, check for other GPUs
+        // No NVIDIA GPU. lspci can report virtual adapters that do not
+        // provide stable hardware acceleration for headless Chromium,
+        // so treat this as CPU mode to avoid shaky / non-deterministic frames.
         try {
           const lspciResult = execSync('lspci | grep -i vga', {
             encoding: 'utf-8',
             timeout: 5000,
           });
           if (lspciResult.trim()) {
-            console.log(`[GPU] Detected GPU via lspci: ${lspciResult.trim()}`);
-            return {
-              hasGPU: true,
-              gpuName: lspciResult.trim(),
-              vendor: 'Unknown',
-            };
+            console.log(`[GPU] lspci VGA detected (${lspciResult.trim()}) but no supported GPU runtime found; using software rendering`);
           }
         } catch {
           // No GPU found
@@ -180,7 +193,7 @@ function getChromiumOptions(useGPU: boolean) {
         '--enable-native-gpu-memory-buffers',
         '--use-gl=egl', // Use EGL for better GPU support
         '--disable-software-rasterizer', // Force GPU
-        '--disable-gpu-vsync', // Disable vsync for consistent frame timing
+        '--run-all-compositor-stages-before-draw',
       ],
       gl: 'egl' as const,
     };
