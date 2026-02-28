@@ -1476,6 +1476,7 @@ function TowerChartScene({
   customModelScale,
   customModelRotation,
   towerSpacing,
+  labelVisibleEnd,
 }: { 
   towers: ReturnType<typeof calculateTowers>;
   cameraPosition: [number, number, number];
@@ -1497,6 +1498,7 @@ function TowerChartScene({
   customModelScale: number;
   customModelRotation: number;
   towerSpacing: number;
+  labelVisibleEnd: number;
 }) {
   return (
     <>
@@ -1535,6 +1537,8 @@ function TowerChartScene({
         const inVisibleRange = index >= visibleStart && index <= visibleEnd;
         const itemReveal = Math.max(0, Math.min(1, (revealProgress * totalItems * 1.2) - index * 0.12));
         const isHighlighted = index === currentIndex || index === currentIndex + 1;
+        // Labels persist for all revealed towers (from start up to current progress)
+        const labelVisible = index <= labelVisibleEnd && itemReveal > 0.25;
         
         return (
           <Tower
@@ -1548,7 +1552,7 @@ function TowerChartScene({
             value={tower.valueFormatted}
             subtitle={tower.subtitle}
             image={tower.image}
-            showLabel={showLabels3D && itemReveal > 0.25 && inVisibleRange}
+            showLabel={showLabels3D && labelVisible}
             isHighlighted={isHighlighted}
             visible={inVisibleRange || itemReveal > 0}
           />
@@ -1694,6 +1698,9 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
   const visibleStart = Math.max(0, currentIndex - 1);
   const visibleEnd = Math.min(items.length - 1, currentIndex + 4);
   
+  // Labels should persist for all revealed towers, not just visible range
+  const labelVisibleEnd = items.length - 1; // All towers that have been revealed
+  
   const towers = useMemo(() => 
     calculateTowers(items, towerSpacing, baseHeight, maxHeight, gradientStart, gradientEnd, useGradientByRank, animationDirection),
     [items, towerSpacing, baseHeight, maxHeight, gradientStart, gradientEnd, useGradientByRank, animationDirection]
@@ -1775,6 +1782,7 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
           customModelScale={customModelScale}
           customModelRotation={customModelRotation}
           towerSpacing={towerSpacing}
+          labelVisibleEnd={labelVisibleEnd}
         />
       </Canvas>
       
