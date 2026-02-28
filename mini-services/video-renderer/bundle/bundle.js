@@ -101495,29 +101495,37 @@ function FloatingParticles() {
 function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, rank, name, value, subtitle, image, showLabel, isHighlighted, visible }) {
   const [texture, setTexture] = (0,react.useState)(null);
   const [loaded, setLoaded] = (0,react.useState)(false);
-  const [handle] = (0,react.useState)(() => (0,esm.delayRender)("Loading tower texture"));
+  const loadedRef = (0,react.useRef)(false);
   (0,react.useEffect)(() => {
-    if (image) {
-      const loader = new TextureLoader();
-      loader.load(image, (tex) => {
-        tex.colorSpace = SRGBColorSpace;
-        setTexture(tex);
-        setLoaded(true);
-        (0,esm.continueRender)(handle);
-      }, void 0, () => {
-        setTexture(null);
-        setLoaded(true);
-        (0,esm.continueRender)(handle);
-      });
-    } else {
+    if (!image) {
       setTexture(null);
       setLoaded(true);
-      (0,esm.continueRender)(handle);
+      return;
     }
+    const handle = (0,esm.delayRender)("Loading tower texture: " + image);
+    let cancelled = false;
+    const loader = new TextureLoader();
+    loader.load(image, (tex) => {
+      if (cancelled) return;
+      tex.colorSpace = SRGBColorSpace;
+      setTexture(tex);
+      setLoaded(true);
+      loadedRef.current = true;
+      (0,esm.continueRender)(handle);
+    }, void 0, () => {
+      if (cancelled) return;
+      setTexture(null);
+      setLoaded(true);
+      loadedRef.current = true;
+      (0,esm.continueRender)(handle);
+    });
     return () => {
-      (0,esm.cancelRender)(handle);
+      cancelled = true;
+      if (!loadedRef.current) {
+        (0,esm.cancelRender)(handle);
+      }
     };
-  }, [image, handle]);
+  }, [image]);
   if (!loaded) return null;
   if (!visible) return null;
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)("group", { position, children: [

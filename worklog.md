@@ -41,3 +41,24 @@ Stage Summary:
 - Video renderer service now detects GPU and applies appropriate chromium options
 - GPU mode should no longer produce shaky/vibrating tower renders
 - Both render endpoints (/render and /render-full) now use GPU-optimized settings
+
+---
+Task ID: 12
+Agent: Main Coordinator
+Task: Fix "Rendering was cancelled" error in Tower 3D block
+
+Work Log:
+- Identified the root cause: cancelRender(handle) was being called in cleanup of Tower component's useEffect
+- This happened when component unmounted or re-rendered, even after continueRender was called
+- The error stack trace showed cancelRenderInternal being called, stopping the render
+- Fixed the Tower component's texture loading pattern:
+  - Skip delayRender entirely if no image (instant loading case)
+  - Track loading state with both useState and useRef for cleanup check
+  - Added `cancelled` flag to prevent callbacks after unmount
+  - Only call cancelRender in cleanup if loading hasn't completed yet
+- Rebuilt video bundle with `bun run video:bundle`
+
+Stage Summary:
+- TowerChart3DScene.tsx now properly handles async texture loading without causing render cancellation
+- The "Rendering was cancelled" error should be resolved
+- Video bundle updated with the fix

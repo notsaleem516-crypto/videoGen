@@ -143,30 +143,44 @@ function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, ran
 }) {
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const [handle] = useState(() => delayRender('Loading tower texture'));
+  const loadedRef = useRef(false);
   
   useEffect(() => {
-    if (image) {
-      const loader = new THREE.TextureLoader();
-      loader.load(image, (tex) => { 
-        tex.colorSpace = THREE.SRGBColorSpace; 
-        setTexture(tex); 
-        setLoaded(true);
-        continueRender(handle);
-      }, undefined, () => {
-        setTexture(null);
-        setLoaded(true);
-        continueRender(handle);
-      });
-    } else {
+    // Skip delayRender if no image - texture loading is instant
+    if (!image) {
       setTexture(null);
       setLoaded(true);
-      continueRender(handle);
+      return;
     }
+    
+    // Only use delayRender for actual async loading
+    const handle = delayRender('Loading tower texture: ' + image);
+    let cancelled = false;
+    
+    const loader = new THREE.TextureLoader();
+    loader.load(image, (tex) => {
+      if (cancelled) return;
+      tex.colorSpace = THREE.SRGBColorSpace;
+      setTexture(tex);
+      setLoaded(true);
+      loadedRef.current = true;
+      continueRender(handle);
+    }, undefined, () => {
+      if (cancelled) return;
+      setTexture(null);
+      setLoaded(true);
+      loadedRef.current = true;
+      continueRender(handle);
+    });
+    
     return () => {
-      cancelRender(handle);
+      cancelled = true;
+      // Only cancel if not yet loaded
+      if (!loadedRef.current) {
+        cancelRender(handle);
+      }
     };
-  }, [image, handle]);
+  }, [image]);
   
   // Wait for texture to load
   if (!loaded) return null;
