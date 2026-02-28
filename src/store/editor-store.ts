@@ -689,7 +689,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   // Export video
   exportVideo: async () => {
     try {
-      const response = await fetch('/api/render?XTransformPort=3031', {
+      const response = await fetch('http://localhost:3031/render-full', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(get().videoInput),
