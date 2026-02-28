@@ -2,7 +2,7 @@
 // TOWER CHART 3D SCENE - 3D Ranking visualization with Three.js
 // ============================================================================
 
-import React, { useRef, useMemo, useEffect, useState, Suspense, Component } from 'react';
+import React, { useRef, useMemo, useEffect, useState, Component } from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, getRemotionEnvironment } from 'remotion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Text, Box, Plane, ContactShadows, Billboard, Stars, Float, Cone, Cylinder, Sphere, Torus, MeshDistortMaterial, MeshWobbleMaterial } from '@react-three/drei';
@@ -3167,7 +3167,7 @@ function CameraController({ towers, currentIndex, progress, distance, angle }: {
   return null;
 }
 
-function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame: number; fps: number }) {
+function TowerChartScene({ data, frame, fps, renderOptimized }: { data: TowerChart3DBlock; frame: number; fps: number; renderOptimized: boolean }) {
   const {
     items = [],
     towerSpacing = 7,
@@ -3194,8 +3194,6 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
     backgroundPreset = 'cyber-grid',
   } = data;
 
-  const {isRendering} = getRemotionEnvironment();
-  const renderOptimized = isRendering;
   const resolvedBackgroundPreset = renderOptimized ? 'none' : backgroundPreset;
   const resolvedShowLabels3D = renderOptimized ? false : showLabels3D;
   const resolvedAmbientIntensity = renderOptimized ? Math.min(ambientIntensity, 0.45) : ambientIntensity;
@@ -3421,6 +3419,7 @@ export interface TowerChart3DSceneProps {
 export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.ReactElement {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
+  const { isRendering } = getRemotionEnvironment();
   
   const { title = 'Rankings', subtitle, backgroundColor = '#050510', items = [], gradientStart = '#3B82F6', customModelPath } = data;
   
@@ -3434,9 +3433,12 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
         camera={{ position: [35, 18, -25], fov: 50, near: 0.1, far: 600 }}
         style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
         gl={{ antialias: true, alpha: false, preserveDrawingBuffer: true }}
+        onCreated={({ gl }) => {
+          gl.shadowMap.type = THREE.PCFShadowMap;
+        }}
         dpr={1}
       >
-        <TowerChartScene data={data} frame={frame} fps={fps} />
+        <TowerChartScene data={data} frame={frame} fps={fps} renderOptimized={isRendering} />
       </Canvas>
       
       {/* Title Overlay */}
