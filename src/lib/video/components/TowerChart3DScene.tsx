@@ -455,7 +455,7 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
   const { fps, width, height } = useVideoConfig();
   
   // Use delayRender/continueRender pattern from Remotion docs
-  const [handle] = useState(() => delayRender('Initializing 3D scene'));
+  const [handle] = useState(() => delayRender("Initializing 3D scene"));
   const [glReady, setGlReady] = useState(false);
   
   const {
