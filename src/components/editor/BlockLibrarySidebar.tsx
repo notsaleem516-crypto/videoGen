@@ -30,7 +30,7 @@ const BLOCK_CATEGORIES = [
     icon: BarChart3,
     blocks: [
       { type: 'stat', label: 'Stat', icon: BarChart3, gradient: 'from-blue-500 to-cyan-500', description: 'Key metrics' },
-      { type: 'comparison', label: 'Compare', icon: BarChart3, gradient: 'from-purple-500 to-pink-500', description: 'Compare values' },
+      { type: 'comparison', label: 'Compare', icon: BarChart3, gradient: 'from-cyan-500 to-indigo-500', description: 'Compare values' },
       { type: 'line-chart', label: 'Line Chart', icon: LineChart, gradient: 'from-emerald-500 to-teal-500', description: 'Data trend' },
       { type: 'pie-chart', label: 'Pie Chart', icon: PieChart, gradient: 'from-amber-500 to-yellow-500', description: 'Data breakdown' },
       { type: 'counter', label: 'Counter', icon: Timer, gradient: 'from-cyan-500 to-blue-500', description: 'Animated counter' },
@@ -81,9 +81,9 @@ export function BlockLibrarySidebar() {
   return (
     <div className="w-72 bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950 border-r border-gray-800/50 flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="p-5 border-b border-gray-800/50 bg-gradient-to-r from-purple-500/10 to-pink-500/10">
+      <div className="p-5 border-b border-gray-800/50 bg-gradient-to-r from-cyan-500/10 to-indigo-500/10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/25">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-cyan-500/25">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -149,7 +149,7 @@ export function BlockLibrarySidebar() {
       {/* Footer */}
       <div className="p-4 border-t border-gray-800/50 bg-gray-900/50">
         <div className="flex items-center gap-2 justify-center text-xs text-gray-500">
-          <Zap className="w-3 h-3 text-yellow-500" />
+          <Zap className="w-3 h-3 text-cyan-400" />
           <span>{TOTAL_BLOCKS} blocks in {BLOCK_CATEGORIES.length} categories</span>
         </div>
       </div>

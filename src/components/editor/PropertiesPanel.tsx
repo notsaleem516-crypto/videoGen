@@ -333,7 +333,7 @@ function PositionSettings({ block, index }: { block: Record<string, unknown>; in
                 onClick={() => updateBlock(index, { verticalAlign: pos })}
                 className={`p-2 rounded-lg border text-xs font-medium transition-all ${
                   (block.verticalAlign as string) === pos || (!block.verticalAlign && pos === 'center')
-                    ? 'border-purple-500 bg-purple-500/20 text-white'
+                    ? 'border-cyan-400 bg-cyan-500/20 text-white'
                     : 'border-gray-700/50 bg-gray-800/30 text-gray-400 hover:border-gray-600'
                 }`}
               >
@@ -353,7 +353,7 @@ function PositionSettings({ block, index }: { block: Record<string, unknown>; in
                 onClick={() => updateBlock(index, { horizontalAlign: pos })}
                 className={`p-2 rounded-lg border text-xs font-medium transition-all ${
                   (block.horizontalAlign as string) === pos || (!block.horizontalAlign && pos === 'center')
-                    ? 'border-purple-500 bg-purple-500/20 text-white'
+                    ? 'border-cyan-400 bg-cyan-500/20 text-white'
                     : 'border-gray-700/50 bg-gray-800/30 text-gray-400 hover:border-gray-600'
                 }`}
               >
@@ -388,9 +388,9 @@ export function PropertiesPanel() {
   if (!selectedBlock) {
     return (
       <div className="w-80 bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950 border-l border-gray-800/50 flex flex-col h-full overflow-hidden">
-        <div className="p-5 border-b border-gray-800/50 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+        <div className="p-5 border-b border-gray-800/50 bg-gradient-to-r from-cyan-500/10 to-indigo-500/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-500 flex items-center justify-center shadow-lg">
               <Settings className="w-5 h-5 text-white" />
             </div>
             <div>

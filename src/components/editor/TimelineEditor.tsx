@@ -52,7 +52,7 @@ const BLOCK_GRADIENTS: Record<string, string> = {
   // New blocks
   counter: 'from-cyan-500 to-blue-500', 'progress-bar': 'from-green-500 to-emerald-500',
   'qr-code': 'from-slate-500 to-gray-600', video: 'from-red-500 to-rose-500',
-  'avatar-grid': 'from-orange-500 to-amber-500', 'social-stats': 'from-blue-500 to-indigo-500',
+  'avatar-grid': 'from-cyan-500 to-indigo-500', 'social-stats': 'from-blue-500 to-indigo-500',
   cta: 'from-emerald-500 to-teal-500', 'gradient-text': 'from-violet-500 to-fuchsia-500',
   'animated-bg': 'from-indigo-500 to-purple-500', countdown: 'from-rose-500 to-orange-500',
 };
@@ -69,20 +69,21 @@ interface SortableBlockProps {
 
 function SortableBlock({ block, index, isSelected, zoom, onSelect, onDuplicate, onDelete }: SortableBlockProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: index.toString() });
-
+ // Calculate width based on zoom level
+  const baseWidth = 120;
+  const width = Math.max(100, baseWidth * zoom);
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 50 : 1,
+    width: `${width}px`,
   };
 
   const Icon = BLOCK_ICONS[block.type] || BarChart3;
   const gradient = BLOCK_GRADIENTS[block.type] || 'from-gray-500 to-gray-600';
   const duration = (block as { duration?: number }).duration || 3;
   
-  // Calculate width based on zoom level
-  const baseWidth = 120;
-  const width = Math.max(100, baseWidth * zoom);
+ 
 
   return (
     <motion.div
@@ -95,12 +96,11 @@ function SortableBlock({ block, index, isSelected, zoom, onSelect, onDuplicate, 
       className={`
         relative flex-shrink-0 rounded-xl cursor-pointer transition-all duration-200 group
         ${isSelected 
-          ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-900 shadow-lg shadow-purple-500/25' 
+          ? 'ring-2 ring-cyan-400 ring-offset-2 ring-offset-gray-900 shadow-lg shadow-cyan-500/25' 
           : 'hover:ring-1 hover:ring-gray-600'
         }
         ${isDragging ? 'shadow-2xl' : ''}
       `}
-      style={{ width: `${width}px` }}
       onClick={onSelect}
     >
       {/* Block Card */}
@@ -223,7 +223,7 @@ export function TimelineEditor() {
       <div className="h-12 border-b border-gray-800/50 flex items-center justify-between px-5 flex-shrink-0 bg-gray-900/50 backdrop-blur">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-indigo-500 flex items-center justify-center">
               <Clock className="w-4 h-4 text-white" />
             </div>
             <h3 className="text-sm font-semibold text-white">Timeline</h3>

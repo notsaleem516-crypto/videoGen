@@ -155,7 +155,7 @@ export function EditorToolbar() {
               Import
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-gray-900 border-gray-700 max-w-xl">
+          <DialogContent className="bg-gray-900 border-gray-700 max-w-xl max-h-[500px] overflow-scroll">
             <DialogHeader>
               <DialogTitle className="text-white">Import JSON Project</DialogTitle>
             </DialogHeader>
