@@ -4,7 +4,7 @@
 // https://www.remotion.dev/docs/flickering
 // ============================================================================
 
-import React, { useMemo, useEffect, useState, Suspense, useRef } from 'react';
+import React, { useMemo, useEffect, useState, Suspense, useRef, useCallback } from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, delayRender, continueRender, cancelRender } from 'remotion';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { Text, Box, Plane, Billboard, Stars, useGLTF } from '@react-three/drei';

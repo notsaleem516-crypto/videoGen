@@ -101753,7 +101753,7 @@ function TowerChart3DScene({ data }) {
       (0,esm.continueRender)(handle);
     }
   }, [glReady, handle]);
-  const onCreated = useCallback(({ gl }) => {
+  const onCreated = (0,react.useCallback)(({ gl }) => {
     const ctx = gl.getContext();
     if (ctx) {
       ctx.finish();
