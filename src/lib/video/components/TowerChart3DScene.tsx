@@ -2772,65 +2772,21 @@ function Ground({ color }: { color: string }) {
   );
 }
 
-function CameraController({ towers, currentIndex, progress, distance, angle }: {
-  towers: { position: [number, number, number]; height: number }[];
-  currentIndex: number;
-  progress: number;
-  distance: number;
-  angle: number;
-}) {
+function LookAtController({ lookAt }: { lookAt: [number, number, number] }) {
   const { camera } = useThree();
-  const initializedRef = useRef(false);
   
-  // Initialize camera on first render
-  if (!initializedRef.current && towers.length > 0) {
-    const angleRad = (angle * Math.PI) / 180;
-    camera.position.set(
-      Math.sin(angleRad) * distance,
-      18,
-      towers[0].position[2] + Math.cos(angleRad) * distance
-    );
-    camera.lookAt(0, 10, towers[0].position[2]);
-    initializedRef.current = true;
-  }
-  
-  // Update camera position SYNCHRONOUSLY during render (not in useEffect)
-  // This ensures the camera is in the right position BEFORE the frame is captured
-  if (towers.length > 0) {
-    const currentTower = towers[Math.min(currentIndex, towers.length - 1)];
-    const nextIndex = Math.min(currentIndex + 1, towers.length - 1);
-    const nextTower = towers[nextIndex];
-    
-    // Smooth easing function for progress (ease-in-out)
-    const easedProgress = progress < 0.5 
-      ? 2 * progress * progress 
-      : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-    
-    // Interpolate camera position directly - deterministic!
-    const targetZ = THREE.MathUtils.lerp(currentTower.position[2], nextTower.position[2], easedProgress);
-    const currentHeight = currentTower.height;
-    const nextHeight = nextTower.height;
-    const avgHeight = THREE.MathUtils.lerp(currentHeight, nextHeight, easedProgress);
-    
-    const angleRad = (angle * Math.PI) / 180;
-    
-    // Calculate camera position directly
-    const camX = Math.sin(angleRad) * distance;
-    const camY = avgHeight + 15;
-    const camZ = targetZ + Math.cos(angleRad) * distance;
-    
-    // Set camera position SYNCHRONOUSLY - this happens before frame capture
-    camera.position.set(camX, camY, camZ);
-    
-    // Look at target - also deterministic
-    const lookY = avgHeight + 6;
-    camera.lookAt(0, lookY, targetZ);
-  }
+  // Set lookAt synchronously during render - no useEffect, no async
+  camera.lookAt(lookAt[0], lookAt[1], lookAt[2]);
   
   return null;
 }
 
-function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame: number; fps: number }) {
+function TowerChartScene({ data, frame, fps, cameraLookAt }: { 
+  data: TowerChart3DBlock; 
+  frame: number; 
+  fps: number;
+  cameraLookAt: [number, number, number];
+}) {
   const {
     items = [],
     towerSpacing = 7,
@@ -2911,6 +2867,43 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
   const visibleStart = 0;
   const visibleEnd = Math.min(towers.length - 1, currentIndex + 4);
   
+  // ============================================================================
+  // CALCULATE CAMERA POSITION DIRECTLY FROM FRAME - FULLY DETERMINISTIC
+  // ============================================================================
+  const cameraPosition = useMemo(() => {
+    if (towers.length === 0) {
+      return { x: 35, y: 18, z: -25, lookAt: { x: 0, y: 10, z: 0 } };
+    }
+    
+    const currentTower = towers[Math.min(currentIndex, towers.length - 1)];
+    const nextIndex = Math.min(currentIndex + 1, towers.length - 1);
+    const nextTower = towers[nextIndex];
+    
+    // Smooth easing function for progress (ease-in-out)
+    const easedProgress = itemProgress < 0.5 
+      ? 2 * itemProgress * itemProgress 
+      : 1 - Math.pow(-2 * itemProgress + 2, 2) / 2;
+    
+    // Interpolate camera position
+    const targetZ = THREE.MathUtils.lerp(currentTower.position[2], nextTower.position[2], easedProgress);
+    const currentHeight = currentTower.height;
+    const nextHeight = nextTower.height;
+    const avgHeight = THREE.MathUtils.lerp(currentHeight, nextHeight, easedProgress);
+    
+    const angleRad = (cameraAngle * Math.PI) / 180;
+    
+    return {
+      x: Math.sin(angleRad) * cameraDistance,
+      y: avgHeight + 15,
+      z: targetZ + Math.cos(angleRad) * cameraDistance,
+      lookAt: {
+        x: 0,
+        y: avgHeight + 6,
+        z: targetZ
+      }
+    };
+  }, [towers, currentIndex, itemProgress, cameraDistance, cameraAngle]);
+  
   return (
     <>
       <color attach="background" args={[backgroundColor]} />
@@ -2941,15 +2934,8 @@ function TowerChartScene({ data, frame, fps }: { data: TowerChart3DBlock; frame:
         </ModelErrorBoundary>
       )}
       
-      {towers.length > 0 && (
-        <CameraController
-          towers={towers.map(t => ({ position: t.position, height: t.height }))}
-          currentIndex={currentIndex}
-          progress={itemProgress}
-          distance={cameraDistance}
-          angle={cameraAngle}
-        />
-      )}
+      {/* Look at target - camera position is set in Canvas props */}
+      <LookAtController lookAt={cameraLookAt} />
       
       {towers.map((tower, index) => {
         // Tower is visible if it's been revealed (index <= visibleEnd)
@@ -3027,11 +3013,107 @@ export interface TowerChart3DSceneProps {
   animation?: AnimationPhase;
 }
 
+// Calculate camera position from frame - pure function, no React hooks
+function calculateCameraPosition(
+  towers: { position: [number, number, number]; height: number }[],
+  currentIndex: number,
+  itemProgress: number,
+  cameraDistance: number,
+  cameraAngle: number
+): { position: [number, number, number]; lookAt: [number, number, number] } {
+  if (towers.length === 0) {
+    return { position: [35, 18, -25], lookAt: [0, 10, 0] };
+  }
+  
+  const currentTower = towers[Math.min(currentIndex, towers.length - 1)];
+  const nextIndex = Math.min(currentIndex + 1, towers.length - 1);
+  const nextTower = towers[nextIndex];
+  
+  // Smooth easing function for progress (ease-in-out)
+  const easedProgress = itemProgress < 0.5 
+    ? 2 * itemProgress * itemProgress 
+    : 1 - Math.pow(-2 * itemProgress + 2, 2) / 2;
+  
+  // Interpolate camera position
+  const targetZ = THREE.MathUtils.lerp(currentTower.position[2], nextTower.position[2], easedProgress);
+  const currentHeight = currentTower.height;
+  const nextHeight = nextTower.height;
+  const avgHeight = THREE.MathUtils.lerp(currentHeight, nextHeight, easedProgress);
+  
+  const angleRad = (cameraAngle * Math.PI) / 180;
+  
+  const camX = Math.sin(angleRad) * cameraDistance;
+  const camY = avgHeight + 15;
+  const camZ = targetZ + Math.cos(angleRad) * cameraDistance;
+  
+  const lookY = avgHeight + 6;
+  
+  return {
+    position: [camX, camY, camZ],
+    lookAt: [0, lookY, targetZ]
+  };
+}
+
 export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.ReactElement {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   
-  const { title = 'Rankings', subtitle, backgroundColor = '#050510', items = [], gradientStart = '#3B82F6', customModelPath } = data;
+  const { 
+    title = 'Rankings', 
+    subtitle, 
+    backgroundColor = '#050510', 
+    items = [], 
+    gradientStart = '#3B82F6',
+    gradientEnd = '#8B5CF6',
+    cameraDistance = 35,
+    cameraAngle = 35,
+    cameraPauseDuration = 0.4,
+    cameraMoveSpeed = 0.5,
+    towerSpacing = 7,
+    baseHeight = 4,
+    maxHeight = 30,
+    useGradientByRank = true,
+  } = data;
+  
+  // Calculate all animation values BEFORE Canvas
+  const sortedItems = useMemo(() => {
+    const sorted = [...items].sort((a, b) => a.rank - b.rank);
+    return sorted;
+  }, [items]);
+  
+  const towers = useMemo(() => {
+    if (items.length === 0) return [];
+    const values = items.map(i => i.value);
+    const minVal = Math.min(...values);
+    const maxVal = Math.max(...values);
+    const heightRange = maxHeight - baseHeight;
+    
+    return sortedItems.map((item, index) => {
+      const normalizedValue = (item.value - minVal) / (maxVal - minVal || 1);
+      const height = baseHeight + normalizedValue * heightRange;
+      return {
+        position: [0, 0, index * towerSpacing] as [number, number, number],
+        height,
+      };
+    });
+  }, [sortedItems, items, baseHeight, maxHeight, towerSpacing]);
+  
+  // Animation timing
+  const introDuration = 40;
+  const totalItems = items.length;
+  const pauseFrames = cameraPauseDuration * fps;
+  const moveFrames = cameraMoveSpeed * fps;
+  const totalAnimFrames = totalItems * (pauseFrames + moveFrames);
+  
+  const animFrame = Math.max(0, frame - introDuration);
+  const animProgress = Math.min(animFrame / totalAnimFrames, 1);
+  const currentIndex = Math.min(Math.floor(animProgress * totalItems), totalItems - 1);
+  const itemProgress = (animProgress * totalItems) % 1;
+  
+  // Calculate camera position BEFORE Canvas - fully deterministic
+  const cameraState = useMemo(() => {
+    return calculateCameraPosition(towers, currentIndex, itemProgress, cameraDistance, cameraAngle);
+  }, [towers, currentIndex, itemProgress, cameraDistance, cameraAngle]);
   
   const titleOpacity = interpolate(frame, [0, 25], [0, 1], { extrapolateRight: 'clamp' });
   const titleY = interpolate(frame, [0, 25], [-35, 0], { extrapolateRight: 'clamp' });
@@ -3039,13 +3121,18 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
   return (
     <AbsoluteFill style={{ backgroundColor }}>
       <Canvas
-        camera={{ position: [35, 18, -25], fov: 50, near: 0.1, far: 600 }}
+        camera={{ 
+          position: cameraState.position, 
+          fov: 50, 
+          near: 0.1, 
+          far: 600 
+        }}
         style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
         gl={{ antialias: false, alpha: false, preserveDrawingBuffer: true, powerPreference: 'high-performance' }}
         dpr={1}
         frameloop="demand"
       >
-        <TowerChartScene data={data} frame={frame} fps={fps} />
+        <TowerChartScene data={data} frame={frame} fps={fps} cameraLookAt={cameraState.lookAt} />
       </Canvas>
       
       {/* Title Overlay */}
