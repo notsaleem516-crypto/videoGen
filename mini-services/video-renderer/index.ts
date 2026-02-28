@@ -113,6 +113,30 @@ function getRenderMediaPerformanceOptions(quality: string) {
     x264Preset: x264PresetMap[quality] || 'medium',
   };
 }
+const MAX_RENDER_TIMEOUT_MS = 15 * 60 * 1000;
+const DEFAULT_DELAY_RENDER_TIMEOUT_MS = 120_000;
+const MAX_DELAY_RENDER_TIMEOUT_MS = 10 * 60 * 1000;
+
+function getDelayRenderTimeoutMs(durationInFrames: number, fps: number): number {
+  const envValue = Number(process.env.RENDER_DELAY_RENDER_TIMEOUT_MS);
+  if (Number.isFinite(envValue) && envValue > 0) {
+    return Math.min(Math.floor(envValue), MAX_DELAY_RENDER_TIMEOUT_MS);
+  }
+
+  const durationSeconds = Math.max(1, durationInFrames / fps);
+  const adaptiveMs = Math.round(durationSeconds * 1000 + 60_000);
+  return Math.min(Math.max(DEFAULT_DELAY_RENDER_TIMEOUT_MS, adaptiveMs), MAX_DELAY_RENDER_TIMEOUT_MS);
+}
+
+function getDelayRenderRetries(): number {
+  const envValue = Number(process.env.RENDER_DELAY_RENDER_RETRIES);
+  if (Number.isFinite(envValue) && envValue >= 0) {
+    return Math.floor(envValue);
+  }
+
+  return 2;
+}
+
 function getRenderTimeoutMs(durationInFrames: number, fps: number): number {
   const durationSeconds = Math.max(1, durationInFrames / fps);
   const estimatedMs = durationSeconds * 4000 + 90_000;
@@ -738,6 +762,8 @@ serve({
         
         // Render the video with H264 settings for maximum compatibility
         const renderTimeoutMs = getRenderTimeoutMs(compositionConfig.durationInFrames, compositionConfig.fps);
+        const delayRenderTimeoutMs = getDelayRenderTimeoutMs(compositionConfig.durationInFrames, compositionConfig.fps);
+        const delayRenderRetries = getDelayRenderRetries();
 
         const renderPerformanceOptions = getRenderMediaPerformanceOptions(quality);
 
@@ -758,6 +784,9 @@ serve({
           logLevel: 'warn',
           // Ensure audio track exists even if silent (required for some players)
           enforceAudioTrack: true,
+          // Increase per-frame React readiness timeout to avoid false failures on heavy frames
+          delayRenderTimeoutInMilliseconds: delayRenderTimeoutMs,
+          delayRenderRetries,
           ...renderPerformanceOptions,
         }, renderTimeoutMs);
         
@@ -864,6 +893,8 @@ serve({
         
         // Render the video with H264 settings for maximum compatibility
         const renderTimeoutMs = getRenderTimeoutMs(compositionConfig.durationInFrames, compositionConfig.fps);
+        const delayRenderTimeoutMs = getDelayRenderTimeoutMs(compositionConfig.durationInFrames, compositionConfig.fps);
+        const delayRenderRetries = getDelayRenderRetries();
 
         const renderPerformanceOptions = getRenderMediaPerformanceOptions(quality);
 
@@ -884,6 +915,9 @@ serve({
           logLevel: 'warn',
           // Ensure audio track exists even if silent (required for some players)
           enforceAudioTrack: true,
+          // Increase per-frame React readiness timeout to avoid false failures on heavy frames
+          delayRenderTimeoutInMilliseconds: delayRenderTimeoutMs,
+          delayRenderRetries,
           ...renderPerformanceOptions,
         }, renderTimeoutMs);
         
