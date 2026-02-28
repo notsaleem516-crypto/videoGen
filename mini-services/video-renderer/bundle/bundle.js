@@ -2,16 +2,14 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 4243
+/***/ 896
 (__unused_webpack_module, __unused_webpack___webpack_exports__, __webpack_require__) {
 
 
-// UNUSED EXPORTS: DynamicVideo, getCompositionConfigFromProps, registerComposition
-
-// EXTERNAL MODULE: ./node_modules/remotion/dist/esm/index.mjs
-var esm = __webpack_require__(3947);
 // EXTERNAL MODULE: ./node_modules/react/jsx-runtime.js
 var jsx_runtime = __webpack_require__(4848);
+// EXTERNAL MODULE: ./node_modules/remotion/dist/esm/index.mjs
+var esm = __webpack_require__(3947);
 ;// ./src/lib/video/utils/theme.ts
 
 const THEMES = {
@@ -87,12 +85,7 @@ function adjustColor(hex, percent) {
 }
 
 ;// ./src/lib/video/components/BaseScene.tsx
-/* unused harmony import specifier */ var jsxs;
 /* unused harmony import specifier */ var jsx;
-/* unused harmony import specifier */ var interpolate;
-/* unused harmony import specifier */ var spring;
-/* unused harmony import specifier */ var useCurrentFrame;
-/* unused harmony import specifier */ var AbsoluteFill;
 /* unused harmony import specifier */ var BaseScene_getTheme;
 
 
@@ -103,43 +96,43 @@ function getAnimationTransform(animationType, progress, frame, fps) {
   switch (animationType) {
     case "slide-up":
       return {
-        transform: `translateY(${interpolate(clampedProgress, [0, 1], [50, 0])}px)`,
+        transform: `translateY(${(0,esm.interpolate)(clampedProgress, [0, 1], [50, 0])}px)`,
         opacity: clampedProgress
       };
     case "slide-down":
       return {
-        transform: `translateY(${interpolate(clampedProgress, [0, 1], [-50, 0])}px)`,
+        transform: `translateY(${(0,esm.interpolate)(clampedProgress, [0, 1], [-50, 0])}px)`,
         opacity: clampedProgress
       };
     case "slide-left":
       return {
-        transform: `translateX(${interpolate(clampedProgress, [0, 1], [50, 0])}px)`,
+        transform: `translateX(${(0,esm.interpolate)(clampedProgress, [0, 1], [50, 0])}px)`,
         opacity: clampedProgress
       };
     case "slide-right":
       return {
-        transform: `translateX(${interpolate(clampedProgress, [0, 1], [-50, 0])}px)`,
+        transform: `translateX(${(0,esm.interpolate)(clampedProgress, [0, 1], [-50, 0])}px)`,
         opacity: clampedProgress
       };
     case "zoom":
       return {
-        transform: `scale(${interpolate(clampedProgress, [0, 1], [0.8, 1])})`,
+        transform: `scale(${(0,esm.interpolate)(clampedProgress, [0, 1], [0.8, 1])})`,
         opacity: clampedProgress
       };
     case "bounce":
-      const bounceProgress = spring({ frame, fps, config: { damping: 10, stiffness: 100 } });
+      const bounceProgress = (0,esm.spring)({ frame, fps, config: { damping: 10, stiffness: 100 } });
       return {
         transform: `scale(${bounceProgress})`,
         opacity: bounceProgress
       };
     case "rotate":
       return {
-        transform: `rotate(${interpolate(clampedProgress, [0, 1], [-180, 0])}deg) scale(${clampedProgress})`,
+        transform: `rotate(${(0,esm.interpolate)(clampedProgress, [0, 1], [-180, 0])}deg) scale(${clampedProgress})`,
         opacity: clampedProgress
       };
     case "flip":
       return {
-        transform: `perspective(400px) rotateY(${interpolate(clampedProgress, [0, 1], [90, 0])}deg)`,
+        transform: `perspective(400px) rotateY(${(0,esm.interpolate)(clampedProgress, [0, 1], [90, 0])}deg)`,
         opacity: clampedProgress
       };
     case "none":
@@ -163,9 +156,9 @@ function BaseScene({
   customization,
   animation
 }) {
-  const frame = useCurrentFrame();
+  const frame = (0,esm.useCurrentFrame)();
   const fps = 30;
-  const colors = BaseScene_getTheme(theme);
+  const colors = getTheme(theme);
   const cust = customization || {};
   const enterAnim = cust.enterAnimation || "fade";
   const animDuration = (cust.animationDuration || 0.5) * fps;
@@ -217,8 +210,8 @@ function BaseScene({
   if (cust.shadowEnabled) {
     contentWrapperStyle.boxShadow = `0 ${cust.shadowBlur || 20}px ${cust.shadowBlur || 20}px ${cust.shadowColor || "rgba(0,0,0,0.5)"}`;
   }
-  return /* @__PURE__ */ jsxs(AbsoluteFill, { style: containerStyle, children: [
-    /* @__PURE__ */ jsx(
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: containerStyle, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
       "div",
       {
         style: {
@@ -231,7 +224,7 @@ function BaseScene({
         }
       }
     ),
-    /* @__PURE__ */ jsx("div", { style: contentWrapperStyle, children })
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("div", { style: contentWrapperStyle, children })
   ] });
 }
 function ThemedText({
@@ -290,10 +283,9 @@ function extractCustomization(data) {
 }
 
 ;// ./src/lib/video/utils/animations.ts
-/* unused harmony import specifier */ var animations_useCurrentFrame;
+/* unused harmony import specifier */ var useCurrentFrame;
 /* unused harmony import specifier */ var useVideoConfig;
 /* unused harmony import specifier */ var remotionSpring;
-/* unused harmony import specifier */ var animations_interpolate;
 
 
 const MOTION_PROFILES = {
@@ -314,7 +306,7 @@ const MOTION_PROFILES = {
   }
 };
 function useSpringAnimation(profile = "dynamic", delay = 0) {
-  const frame = animations_useCurrentFrame();
+  const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const config = MOTION_PROFILES[profile];
   return remotionSpring({
@@ -328,7 +320,7 @@ function useSpringAnimation(profile = "dynamic", delay = 0) {
   });
 }
 function useSequencePhase(sequence) {
-  const frame = animations_useCurrentFrame();
+  const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const enterFrames = sequence.enter * fps;
   const holdFrames = sequence.hold * fps;
@@ -357,13 +349,13 @@ function useSequencePhase(sequence) {
   return { phase: "complete", progress: 0, frameInPhase: 0 };
 }
 function useFadeIn(duration = 0.5, delay = 0, profile = "dynamic") {
-  const frame = animations_useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
   const startFrame = delay * fps;
   const durationFrames = duration * fps;
   if (frame < startFrame) return 0;
   const config = MOTION_PROFILES[profile];
-  const progress = remotionSpring({
+  const progress = (0,esm.spring)({
     frame: frame - startFrame,
     fps,
     config: {
@@ -372,15 +364,15 @@ function useFadeIn(duration = 0.5, delay = 0, profile = "dynamic") {
       mass: config.mass
     }
   });
-  return animations_interpolate(progress, [0, 1], [0, 1]);
+  return (0,esm.interpolate)(progress, [0, 1], [0, 1]);
 }
 function useScaleIn(duration = 0.5, delay = 0, profile = "dynamic") {
-  const frame = animations_useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
   const startFrame = delay * fps;
   if (frame < startFrame) return 0;
   const config = MOTION_PROFILES[profile];
-  const progress = remotionSpring({
+  const progress = (0,esm.spring)({
     frame: frame - startFrame,
     fps,
     config: {
@@ -389,11 +381,11 @@ function useScaleIn(duration = 0.5, delay = 0, profile = "dynamic") {
       mass: config.mass
     }
   });
-  return animations_interpolate(progress, [0, 1], [0.8, 1]);
+  return (0,esm.interpolate)(progress, [0, 1], [0.8, 1]);
 }
 function useSlideIn(direction = "up", distance = 100, duration = 0.5, delay = 0, profile = "dynamic") {
-  const frame = animations_useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
   const startFrame = delay * fps;
   if (frame < startFrame) {
     switch (direction) {
@@ -408,7 +400,7 @@ function useSlideIn(direction = "up", distance = 100, duration = 0.5, delay = 0,
     }
   }
   const config = MOTION_PROFILES[profile];
-  const progress = remotionSpring({
+  const progress = (0,esm.spring)({
     frame: frame - startFrame,
     fps,
     config: {
@@ -417,7 +409,7 @@ function useSlideIn(direction = "up", distance = 100, duration = 0.5, delay = 0,
       mass: config.mass
     }
   });
-  const offset = animations_interpolate(progress, [0, 1], [distance, 0]);
+  const offset = (0,esm.interpolate)(progress, [0, 1], [distance, 0]);
   switch (direction) {
     case "left":
       return { x: -offset, y: 0 };
@@ -430,15 +422,15 @@ function useSlideIn(direction = "up", distance = 100, duration = 0.5, delay = 0,
   }
 }
 function useStaggeredEntry(index, staggerDelay = 0.1, profile = "dynamic") {
-  const frame = animations_useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
   const delay = index * staggerDelay;
   const startFrame = delay * fps;
   if (frame < startFrame) {
     return { opacity: 0, translateY: 30, scale: 0.9 };
   }
   const config = MOTION_PROFILES[profile];
-  const progress = remotionSpring({
+  const progress = (0,esm.spring)({
     frame: frame - startFrame,
     fps,
     config: {
@@ -448,19 +440,19 @@ function useStaggeredEntry(index, staggerDelay = 0.1, profile = "dynamic") {
     }
   });
   return {
-    opacity: animations_interpolate(progress, [0, 1], [0, 1]),
-    translateY: animations_interpolate(progress, [0, 1], [30, 0]),
-    scale: animations_interpolate(progress, [0, 1], [0.9, 1])
+    opacity: (0,esm.interpolate)(progress, [0, 1], [0, 1]),
+    translateY: (0,esm.interpolate)(progress, [0, 1], [30, 0]),
+    scale: (0,esm.interpolate)(progress, [0, 1], [0.9, 1])
   };
 }
 function useCountUp(endValue, duration = 1, delay = 0, profile = "dynamic") {
-  const frame = animations_useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
   const startFrame = delay * fps;
   const durationFrames = duration * fps;
   if (frame < startFrame) return 0;
   const config = MOTION_PROFILES[profile];
-  const progress = remotionSpring({
+  const progress = (0,esm.spring)({
     frame: frame - startFrame,
     fps,
     config: {
@@ -470,15 +462,15 @@ function useCountUp(endValue, duration = 1, delay = 0, profile = "dynamic") {
     }
   });
   const clampedProgress = Math.min(1, progress);
-  return Math.round(animations_interpolate(clampedProgress, [0, 1], [0, endValue]));
+  return Math.round((0,esm.interpolate)(clampedProgress, [0, 1], [0, endValue]));
 }
 function useBarGrow(maxValue, currentValue, duration = 1, delay = 0, profile = "dynamic") {
-  const frame = animations_useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
   const startFrame = delay * fps;
   if (frame < startFrame) return 0;
   const config = MOTION_PROFILES[profile];
-  const progress = remotionSpring({
+  const progress = (0,esm.spring)({
     frame: frame - startFrame,
     fps,
     config: {
@@ -489,15 +481,15 @@ function useBarGrow(maxValue, currentValue, duration = 1, delay = 0, profile = "
     }
   });
   const targetWidth = currentValue / maxValue * 100;
-  return animations_interpolate(Math.min(1, progress), [0, 1], [0, targetWidth]);
+  return (0,esm.interpolate)(Math.min(1, progress), [0, 1], [0, targetWidth]);
 }
 function usePulse(interval = 1, scale = 1.05) {
-  const frame = animations_useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
   const period = interval * fps;
   const progress = frame % period / period;
   const pulse = Math.sin(progress * Math.PI * 2) * 0.5 + 0.5;
-  return animations_interpolate(pulse, [0, 1], [1, scale]);
+  return (0,esm.interpolate)(pulse, [0, 1], [1, scale]);
 }
 function buildTransform(options) {
   const transforms = [];
@@ -514,15 +506,6 @@ function buildTransform(options) {
 }
 
 ;// ./src/lib/video/components/IntroOutro.tsx
-/* unused harmony import specifier */ var IntroOutro_jsx;
-/* unused harmony import specifier */ var IntroOutro_jsxs;
-/* unused harmony import specifier */ var IntroOutro_useCurrentFrame;
-/* unused harmony import specifier */ var IntroOutro_useVideoConfig;
-/* unused harmony import specifier */ var IntroOutro_BaseScene;
-/* unused harmony import specifier */ var IntroOutro_useScaleIn;
-/* unused harmony import specifier */ var IntroOutro_useFadeIn;
-/* unused harmony import specifier */ var IntroOutro_useSlideIn;
-/* unused harmony import specifier */ var IntroOutro_getTheme;
 
 
 
@@ -535,18 +518,18 @@ function Intro({
   theme = "dark_modern",
   logoUrl
 }) {
-  const frame = IntroOutro_useCurrentFrame();
-  const { fps } = IntroOutro_useVideoConfig();
-  const colors = IntroOutro_getTheme(theme);
-  const logoScale = IntroOutro_useScaleIn(0.6, 0, "dynamic");
-  const logoOpacity = IntroOutro_useFadeIn(0.4, 0, "dynamic");
-  const titleSlide = IntroOutro_useSlideIn("up", 50, 0.5, 0.2, "dynamic");
-  const titleOpacity = IntroOutro_useFadeIn(0.5, 0.2, "dynamic");
-  const subtitleSlide = IntroOutro_useSlideIn("up", 30, 0.4, 0.4, "subtle");
-  const subtitleOpacity = IntroOutro_useFadeIn(0.4, 0.4, "subtle");
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const colors = getTheme(theme);
+  const logoScale = useScaleIn(0.6, 0, "dynamic");
+  const logoOpacity = useFadeIn(0.4, 0, "dynamic");
+  const titleSlide = useSlideIn("up", 50, 0.5, 0.2, "dynamic");
+  const titleOpacity = useFadeIn(0.5, 0.2, "dynamic");
+  const subtitleSlide = useSlideIn("up", 30, 0.4, 0.4, "subtle");
+  const subtitleOpacity = useFadeIn(0.4, 0.4, "subtle");
   const pulseFrame = frame % (fps * 2);
   const pulseOpacity = 0.5 + Math.sin(pulseFrame / fps * Math.PI) * 0.5;
-  return /* @__PURE__ */ IntroOutro_jsx(IntroOutro_BaseScene, { theme, children: /* @__PURE__ */ IntroOutro_jsxs(
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(BaseScene, { theme, children: /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -558,7 +541,7 @@ function Intro({
         gap: 40
       },
       children: [
-        logoUrl ? /* @__PURE__ */ IntroOutro_jsx(
+        logoUrl ? /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "img",
           {
             src: logoUrl,
@@ -571,7 +554,7 @@ function Intro({
               opacity: logoOpacity
             }
           }
-        ) : /* @__PURE__ */ IntroOutro_jsx(
+        ) : /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -586,7 +569,7 @@ function Intro({
               opacity: logoOpacity,
               boxShadow: `0 0 60px ${colors.primary}40`
             },
-            children: /* @__PURE__ */ IntroOutro_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "svg",
               {
                 width: "50",
@@ -595,12 +578,12 @@ function Intro({
                 fill: "none",
                 stroke: colors.foreground,
                 strokeWidth: "2",
-                children: /* @__PURE__ */ IntroOutro_jsx("polygon", { points: "5 3 19 12 5 21 5 3" })
+                children: /* @__PURE__ */ (0,jsx_runtime.jsx)("polygon", { points: "5 3 19 12 5 21 5 3" })
               }
             )
           }
         ),
-        /* @__PURE__ */ IntroOutro_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -608,7 +591,7 @@ function Intro({
               opacity: titleOpacity,
               textAlign: "center"
             },
-            children: /* @__PURE__ */ IntroOutro_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "h1",
               {
                 style: {
@@ -623,7 +606,7 @@ function Intro({
             )
           }
         ),
-        /* @__PURE__ */ IntroOutro_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -635,14 +618,14 @@ function Intro({
             }
           }
         ),
-        subtitle && /* @__PURE__ */ IntroOutro_jsx(
+        subtitle && /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
               transform: `translate(${subtitleSlide.x}px, ${subtitleSlide.y}px)`,
               opacity: subtitleOpacity
             },
-            children: /* @__PURE__ */ IntroOutro_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "p",
               {
                 style: {
@@ -666,16 +649,16 @@ function Outro({
   theme = "dark_modern",
   logoUrl
 }) {
-  const frame = IntroOutro_useCurrentFrame();
-  const { fps } = IntroOutro_useVideoConfig();
-  const colors = IntroOutro_getTheme(theme);
-  const messageScale = IntroOutro_useScaleIn(0.5, 0, "dynamic");
-  const messageOpacity = IntroOutro_useFadeIn(0.4, 0, "dynamic");
-  const ctaSlide = IntroOutro_useSlideIn("up", 30, 0.4, 0.3, "dynamic");
-  const ctaOpacity = IntroOutro_useFadeIn(0.4, 0.3, "dynamic");
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const colors = getTheme(theme);
+  const messageScale = useScaleIn(0.5, 0, "dynamic");
+  const messageOpacity = useFadeIn(0.4, 0, "dynamic");
+  const ctaSlide = useSlideIn("up", 30, 0.4, 0.3, "dynamic");
+  const ctaOpacity = useFadeIn(0.4, 0.3, "dynamic");
   const fadeOutStart = fps * 1.5;
   const fadeOut = frame > fadeOutStart ? 1 - Math.min(1, (frame - fadeOutStart) / (fps * 0.4)) : 1;
-  return /* @__PURE__ */ IntroOutro_jsx(IntroOutro_BaseScene, { theme, opacity: fadeOut, children: /* @__PURE__ */ IntroOutro_jsxs(
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(BaseScene, { theme, opacity: fadeOut, children: /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -687,7 +670,7 @@ function Outro({
         gap: 60
       },
       children: [
-        /* @__PURE__ */ IntroOutro_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -701,7 +684,7 @@ function Outro({
               transform: `scale(${messageScale})`,
               opacity: messageOpacity
             },
-            children: /* @__PURE__ */ IntroOutro_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "svg",
               {
                 width: "40",
@@ -710,12 +693,12 @@ function Outro({
                 fill: "none",
                 stroke: colors.foreground,
                 strokeWidth: "2.5",
-                children: /* @__PURE__ */ IntroOutro_jsx("polyline", { points: "20 6 9 17 4 12" })
+                children: /* @__PURE__ */ (0,jsx_runtime.jsx)("polyline", { points: "20 6 9 17 4 12" })
               }
             )
           }
         ),
-        /* @__PURE__ */ IntroOutro_jsx("div", { style: { textAlign: "center", opacity: messageOpacity }, children: /* @__PURE__ */ IntroOutro_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)("div", { style: { textAlign: "center", opacity: messageOpacity }, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "h1",
           {
             style: {
@@ -728,14 +711,14 @@ function Outro({
             children: message
           }
         ) }),
-        /* @__PURE__ */ IntroOutro_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
               transform: `translate(${ctaSlide.x}px, ${ctaSlide.y}px)`,
               opacity: ctaOpacity
             },
-            children: /* @__PURE__ */ IntroOutro_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "div",
               {
                 style: {
@@ -744,7 +727,7 @@ function Outro({
                   borderRadius: 50,
                   boxShadow: `0 10px 40px ${colors.primary}40`
                 },
-                children: /* @__PURE__ */ IntroOutro_jsx(
+                children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
                   "span",
                   {
                     style: {
@@ -766,17 +749,10 @@ function Outro({
 
 ;// ./src/lib/video/components/StatScene.tsx
 /* unused harmony import specifier */ var StatScene_jsx;
-/* unused harmony import specifier */ var StatScene_jsxs;
-/* unused harmony import specifier */ var StatScene_useCurrentFrame;
-/* unused harmony import specifier */ var StatScene_useVideoConfig;
-/* unused harmony import specifier */ var StatScene_interpolate;
-/* unused harmony import specifier */ var StatScene_extractCustomization;
+/* unused harmony import specifier */ var jsxs;
 /* unused harmony import specifier */ var StatScene_BaseScene;
 /* unused harmony import specifier */ var StatScene_useScaleIn;
 /* unused harmony import specifier */ var StatScene_useFadeIn;
-/* unused harmony import specifier */ var StatScene_useSlideIn;
-/* unused harmony import specifier */ var StatScene_usePulse;
-/* unused harmony import specifier */ var StatScene_useCountUp;
 /* unused harmony import specifier */ var StatScene_getTheme;
 
 
@@ -790,22 +766,22 @@ function StatScene({
   motionProfile = "dynamic",
   animation
 }) {
-  const frame = StatScene_useCurrentFrame();
-  const { fps } = StatScene_useVideoConfig();
-  const colors = StatScene_getTheme(theme);
-  const customization = StatScene_extractCustomization(data);
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const colors = getTheme(theme);
+  const customization = extractCustomization(data);
   const enterDuration = (animation == null ? void 0 : animation.enter) ?? 0.5;
   const holdDuration = (animation == null ? void 0 : animation.hold) ?? 2;
-  const valueScale = StatScene_useScaleIn(0.6, 0, motionProfile);
-  const valueOpacity = StatScene_useFadeIn(0.4, 0, motionProfile);
-  const headingSlide = StatScene_useSlideIn("up", 40, 0.5, 0.15, motionProfile);
-  const headingOpacity = StatScene_useFadeIn(0.4, 0.15, motionProfile);
-  const subtextSlide = StatScene_useSlideIn("up", 20, 0.4, 0.3, motionProfile);
-  const subtextOpacity = StatScene_useFadeIn(0.4, 0.3, motionProfile);
-  const pulse = StatScene_usePulse(2, 1.02);
+  const valueScale = useScaleIn(0.6, 0, motionProfile);
+  const valueOpacity = useFadeIn(0.4, 0, motionProfile);
+  const headingSlide = useSlideIn("up", 40, 0.5, 0.15, motionProfile);
+  const headingOpacity = useFadeIn(0.4, 0.15, motionProfile);
+  const subtextSlide = useSlideIn("up", 20, 0.4, 0.3, motionProfile);
+  const subtextOpacity = useFadeIn(0.4, 0.3, motionProfile);
+  const pulse = usePulse(2, 1.02);
   const numericValue = parseFloat(data.value.replace(/[^0-9.]/g, ""));
   const suffix = data.value.replace(/[0-9.,]/g, "");
-  const animatedValue = StatScene_useCountUp(
+  const animatedValue = useCountUp(
     isNaN(numericValue) ? 0 : numericValue,
     0.8,
     0.1,
@@ -815,8 +791,8 @@ function StatScene({
   const exitStart = (enterDuration + holdDuration) * fps;
   const exitProgress = frame > exitStart ? Math.min(1, (frame - exitStart) / (fps * 0.4)) : 0;
   const exitOpacity = 1 - exitProgress;
-  const exitScale = StatScene_interpolate(exitProgress, [0, 1], [1, 0.95]);
-  return /* @__PURE__ */ StatScene_jsx(StatScene_BaseScene, { theme, opacity: exitOpacity, customization, animation, children: /* @__PURE__ */ StatScene_jsxs(
+  const exitScale = (0,esm.interpolate)(exitProgress, [0, 1], [1, 0.95]);
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(BaseScene, { theme, opacity: exitOpacity, customization, animation, children: /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -829,14 +805,14 @@ function StatScene({
         transform: `scale(${exitScale})`
       },
       children: [
-        /* @__PURE__ */ StatScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
               transform: `translate(${headingSlide.x}px, ${headingSlide.y}px)`,
               opacity: headingOpacity
             },
-            children: /* @__PURE__ */ StatScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "h2",
               {
                 style: {
@@ -852,14 +828,14 @@ function StatScene({
             )
           }
         ),
-        /* @__PURE__ */ StatScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
               transform: `scale(${valueScale * pulse})`,
               opacity: valueOpacity
             },
-            children: /* @__PURE__ */ StatScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "div",
               {
                 style: {
@@ -877,14 +853,14 @@ function StatScene({
             )
           }
         ),
-        data.subtext && /* @__PURE__ */ StatScene_jsx(
+        data.subtext && /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
               transform: `translate(${subtextSlide.x}px, ${subtextSlide.y}px)`,
               opacity: subtextOpacity
             },
-            children: /* @__PURE__ */ StatScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "p",
               {
                 style: {
@@ -899,7 +875,7 @@ function StatScene({
             )
           }
         ),
-        /* @__PURE__ */ StatScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -948,7 +924,7 @@ function MultiStatScene({
 function StatCard({ stat, index, theme, motionProfile, colors }) {
   const scale = StatScene_useScaleIn(0.5, index * 0.15, motionProfile);
   const opacity = StatScene_useFadeIn(0.4, index * 0.15, motionProfile);
-  return /* @__PURE__ */ StatScene_jsxs(
+  return /* @__PURE__ */ jsxs(
     "div",
     {
       style: {
@@ -1008,12 +984,9 @@ function StatCard({ stat, index, theme, motionProfile, colors }) {
 /* unused harmony import specifier */ var ComparisonScene_jsxs;
 /* unused harmony import specifier */ var ComparisonScene_useCurrentFrame;
 /* unused harmony import specifier */ var ComparisonScene_useVideoConfig;
-/* unused harmony import specifier */ var ComparisonScene_extractCustomization;
 /* unused harmony import specifier */ var ComparisonScene_BaseScene;
-/* unused harmony import specifier */ var ComparisonScene_useSlideIn;
 /* unused harmony import specifier */ var ComparisonScene_useFadeIn;
-/* unused harmony import specifier */ var ComparisonScene_useStaggeredEntry;
-/* unused harmony import specifier */ var ComparisonScene_useBarGrow;
+/* unused harmony import specifier */ var ComparisonScene_useSlideIn;
 /* unused harmony import specifier */ var ComparisonScene_useScaleIn;
 /* unused harmony import specifier */ var ComparisonScene_getTheme;
 
@@ -1028,19 +1001,19 @@ function ComparisonScene({
   motionProfile = "dynamic",
   animation
 }) {
-  const frame = ComparisonScene_useCurrentFrame();
-  const { fps } = ComparisonScene_useVideoConfig();
-  const colors = ComparisonScene_getTheme(theme);
-  const customization = ComparisonScene_extractCustomization(data);
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const colors = getTheme(theme);
+  const customization = extractCustomization(data);
   const enterDuration = (animation == null ? void 0 : animation.enter) ?? 0.5;
   const holdDuration = (animation == null ? void 0 : animation.hold) ?? 3;
-  const titleSlide = ComparisonScene_useSlideIn("up", 40, 0.5, 0, motionProfile);
-  const titleOpacity = ComparisonScene_useFadeIn(0.4, 0, motionProfile);
+  const titleSlide = useSlideIn("up", 40, 0.5, 0, motionProfile);
+  const titleOpacity = useFadeIn(0.4, 0, motionProfile);
   const maxValue = Math.max(...data.items.map((item) => item.value));
   const exitStart = (enterDuration + holdDuration) * fps;
   const exitProgress = frame > exitStart ? Math.min(1, (frame - exitStart) / (fps * 0.4)) : 0;
   const exitOpacity = 1 - exitProgress;
-  return /* @__PURE__ */ ComparisonScene_jsx(ComparisonScene_BaseScene, { theme, opacity: exitOpacity, customization, animation, children: /* @__PURE__ */ ComparisonScene_jsxs(
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(BaseScene, { theme, opacity: exitOpacity, customization, animation, children: /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -1051,14 +1024,14 @@ function ComparisonScene({
         gap: 40
       },
       children: [
-        data.title && /* @__PURE__ */ ComparisonScene_jsx(
+        data.title && /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
               transform: `translate(${titleSlide.x}px, ${titleSlide.y}px)`,
               opacity: titleOpacity
             },
-            children: /* @__PURE__ */ ComparisonScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "h2",
               {
                 style: {
@@ -1072,7 +1045,7 @@ function ComparisonScene({
             )
           }
         ),
-        /* @__PURE__ */ ComparisonScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -1082,7 +1055,7 @@ function ComparisonScene({
               justifyContent: "center",
               gap: 30
             },
-            children: data.items.map((item, index) => /* @__PURE__ */ ComparisonScene_jsx(
+            children: data.items.map((item, index) => /* @__PURE__ */ (0,jsx_runtime.jsx)(
               ComparisonBar,
               {
                 item,
@@ -1108,10 +1081,10 @@ function ComparisonBar({
   motionProfile,
   colors
 }) {
-  const stagger = ComparisonScene_useStaggeredEntry(index, 0.15, motionProfile);
-  const barWidth = ComparisonScene_useBarGrow(maxValue, item.value, 1, index * 0.15, motionProfile);
+  const stagger = useStaggeredEntry(index, 0.15, motionProfile);
+  const barWidth = useBarGrow(maxValue, item.value, 1, index * 0.15, motionProfile);
   const barColor = item.color || generateBarColor(index, colors);
-  return /* @__PURE__ */ ComparisonScene_jsxs(
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -1122,14 +1095,14 @@ function ComparisonBar({
         transform: `translateY(${stagger.translateY}px) scale(${stagger.scale})`
       },
       children: [
-        /* @__PURE__ */ ComparisonScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
               width: 120,
               textAlign: "right"
             },
-            children: /* @__PURE__ */ ComparisonScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "span",
               {
                 style: {
@@ -1142,7 +1115,7 @@ function ComparisonBar({
             )
           }
         ),
-        /* @__PURE__ */ ComparisonScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -1153,7 +1126,7 @@ function ComparisonBar({
               overflow: "hidden",
               position: "relative"
             },
-            children: /* @__PURE__ */ ComparisonScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "div",
               {
                 style: {
@@ -1170,7 +1143,7 @@ function ComparisonBar({
                   paddingRight: 20,
                   boxShadow: `0 4px 20px ${barColor}40`
                 },
-                children: /* @__PURE__ */ ComparisonScene_jsx(
+                children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
                   "span",
                   {
                     style: {
@@ -1387,15 +1360,11 @@ function ComparisonScene_adjustColor(hex, percent) {
 }
 
 ;// ./src/lib/video/components/TextScene.tsx
-/* unused harmony import specifier */ var TextScene_jsx;
 /* unused harmony import specifier */ var TextScene_jsxs;
-/* unused harmony import specifier */ var TextScene_useCurrentFrame;
-/* unused harmony import specifier */ var TextScene_useVideoConfig;
-/* unused harmony import specifier */ var TextScene_extractCustomization;
+/* unused harmony import specifier */ var TextScene_jsx;
 /* unused harmony import specifier */ var TextScene_BaseScene;
 /* unused harmony import specifier */ var TextScene_useSlideIn;
 /* unused harmony import specifier */ var TextScene_useFadeIn;
-/* unused harmony import specifier */ var TextScene_useScaleIn;
 /* unused harmony import specifier */ var TextScene_getTheme;
 
 
@@ -1409,20 +1378,20 @@ function TextScene({
   motionProfile = "subtle",
   animation
 }) {
-  const frame = TextScene_useCurrentFrame();
-  const { fps } = TextScene_useVideoConfig();
-  const colors = TextScene_getTheme(theme);
-  const customization = TextScene_extractCustomization(data);
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const colors = getTheme(theme);
+  const customization = extractCustomization(data);
   const enterDuration = (animation == null ? void 0 : animation.enter) ?? 0.5;
   const holdDuration = (animation == null ? void 0 : animation.hold) ?? 2;
-  const textSlide = TextScene_useSlideIn("up", 50, 0.6, 0, motionProfile);
-  const textOpacity = TextScene_useFadeIn(0.5, 0, motionProfile);
-  const textScale = TextScene_useScaleIn(0.5, 0, motionProfile);
+  const textSlide = useSlideIn("up", 50, 0.6, 0, motionProfile);
+  const textOpacity = useFadeIn(0.5, 0, motionProfile);
+  const textScale = useScaleIn(0.5, 0, motionProfile);
   const fontSize = data.emphasis === "high" ? 48 : data.emphasis === "low" ? 28 : 36;
   const exitStart = (enterDuration + holdDuration) * fps;
   const exitProgress = frame > exitStart ? Math.min(1, (frame - exitStart) / (fps * 0.4)) : 0;
   const exitOpacity = 1 - exitProgress;
-  return /* @__PURE__ */ TextScene_jsx(TextScene_BaseScene, { theme, opacity: exitOpacity, customization, animation, children: /* @__PURE__ */ TextScene_jsx(
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(BaseScene, { theme, opacity: exitOpacity, customization, animation, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
     "div",
     {
       style: {
@@ -1435,7 +1404,7 @@ function TextScene({
         transform: `translate(${textSlide.x}px, ${textSlide.y}px) scale(${textScale})`,
         opacity: textOpacity
       },
-      children: /* @__PURE__ */ TextScene_jsx(
+      children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
         "p",
         {
           style: {
@@ -1459,22 +1428,22 @@ function QuoteScene({
   motionProfile = "dynamic",
   animation
 }) {
-  const frame = TextScene_useCurrentFrame();
-  const { fps } = TextScene_useVideoConfig();
-  const colors = TextScene_getTheme(theme);
-  const customization = TextScene_extractCustomization(data);
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const colors = getTheme(theme);
+  const customization = extractCustomization(data);
   const enterDuration = (animation == null ? void 0 : animation.enter) ?? 0.5;
   const holdDuration = (animation == null ? void 0 : animation.hold) ?? 3;
-  const quoteSlide = TextScene_useSlideIn("up", 60, 0.6, 0, motionProfile);
-  const quoteOpacity = TextScene_useFadeIn(0.5, 0, motionProfile);
-  const authorSlide = TextScene_useSlideIn("up", 30, 0.4, 0.3, motionProfile);
-  const authorOpacity = TextScene_useFadeIn(0.4, 0.3, motionProfile);
-  const markScale = TextScene_useScaleIn(0.4, 0, motionProfile);
-  const markOpacity = TextScene_useFadeIn(0.3, 0, motionProfile);
+  const quoteSlide = useSlideIn("up", 60, 0.6, 0, motionProfile);
+  const quoteOpacity = useFadeIn(0.5, 0, motionProfile);
+  const authorSlide = useSlideIn("up", 30, 0.4, 0.3, motionProfile);
+  const authorOpacity = useFadeIn(0.4, 0.3, motionProfile);
+  const markScale = useScaleIn(0.4, 0, motionProfile);
+  const markOpacity = useFadeIn(0.3, 0, motionProfile);
   const exitStart = (enterDuration + holdDuration) * fps;
   const exitProgress = frame > exitStart ? Math.min(1, (frame - exitStart) / (fps * 0.4)) : 0;
   const exitOpacity = 1 - exitProgress;
-  return /* @__PURE__ */ TextScene_jsx(TextScene_BaseScene, { theme, opacity: exitOpacity, customization, animation, children: /* @__PURE__ */ TextScene_jsxs(
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(BaseScene, { theme, opacity: exitOpacity, customization, animation, children: /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -1487,14 +1456,14 @@ function QuoteScene({
         gap: 40
       },
       children: [
-        /* @__PURE__ */ TextScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
               transform: `scale(${markScale})`,
               opacity: markOpacity
             },
-            children: /* @__PURE__ */ TextScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "span",
               {
                 style: {
@@ -1508,7 +1477,7 @@ function QuoteScene({
             )
           }
         ),
-        /* @__PURE__ */ TextScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -1516,7 +1485,7 @@ function QuoteScene({
               opacity: quoteOpacity,
               textAlign: "center"
             },
-            children: /* @__PURE__ */ TextScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "p",
               {
                 style: {
@@ -1533,14 +1502,14 @@ function QuoteScene({
             )
           }
         ),
-        data.author && /* @__PURE__ */ TextScene_jsx(
+        data.author && /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
               transform: `translate(${authorSlide.x}px, ${authorSlide.y}px)`,
               opacity: authorOpacity
             },
-            children: /* @__PURE__ */ TextScene_jsxs(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsxs)(
               "div",
               {
                 style: {
@@ -1549,7 +1518,7 @@ function QuoteScene({
                   gap: 16
                 },
                 children: [
-                  /* @__PURE__ */ TextScene_jsx(
+                  /* @__PURE__ */ (0,jsx_runtime.jsx)(
                     "div",
                     {
                       style: {
@@ -1559,7 +1528,7 @@ function QuoteScene({
                       }
                     }
                   ),
-                  /* @__PURE__ */ TextScene_jsx(
+                  /* @__PURE__ */ (0,jsx_runtime.jsx)(
                     "span",
                     {
                       style: {
@@ -1803,19 +1772,6 @@ function getRandomReceivedSound() {
 }
 
 ;// ./src/lib/video/components/WhatsAppChatScene.tsx
-/* unused harmony import specifier */ var WhatsAppChatScene_jsxs;
-/* unused harmony import specifier */ var WhatsAppChatScene_jsx;
-/* unused harmony import specifier */ var useMemo;
-/* unused harmony import specifier */ var WhatsAppChatScene_useCurrentFrame;
-/* unused harmony import specifier */ var WhatsAppChatScene_useVideoConfig;
-/* unused harmony import specifier */ var WhatsAppChatScene_AbsoluteFill;
-/* unused harmony import specifier */ var Sequence;
-/* unused harmony import specifier */ var Audio;
-/* unused harmony import specifier */ var WhatsAppChatScene_spring;
-/* unused harmony import specifier */ var WhatsAppChatScene_interpolate;
-/* unused harmony import specifier */ var WhatsAppChatScene_DEFAULT_SOUND_CONFIG;
-/* unused harmony import specifier */ var WhatsAppChatScene_MESSAGE_SENT_SOUND;
-/* unused harmony import specifier */ var WhatsAppChatScene_MESSAGE_RECEIVED_SOUND;
 
 
 
@@ -1853,11 +1809,11 @@ function WhatsAppChatScene({
   theme = "dark_modern",
   motionProfile = "dynamic",
   animation,
-  soundConfig = WhatsAppChatScene_DEFAULT_SOUND_CONFIG
+  soundConfig = DEFAULT_SOUND_CONFIG
 }) {
-  const frame = WhatsAppChatScene_useCurrentFrame();
-  const { fps } = WhatsAppChatScene_useVideoConfig();
-  const sounds = { ...WhatsAppChatScene_DEFAULT_SOUND_CONFIG, ...soundConfig };
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const sounds = { ...DEFAULT_SOUND_CONFIG, ...soundConfig };
   const enterDuration = (animation == null ? void 0 : animation.enter) ?? 0.5;
   const holdDuration = (animation == null ? void 0 : animation.hold) ?? 6;
   const exitDuration = (animation == null ? void 0 : animation.exit) ?? 0.4;
@@ -1881,14 +1837,14 @@ function WhatsAppChatScene({
   const estimatedMessageHeight = scale(85);
   const maxVisibleMessages = 10;
   const scrollOffset = visibleMessageCount > maxVisibleMessages ? (visibleMessageCount - maxVisibleMessages) * estimatedMessageHeight : 0;
-  const messageSoundEvents = useMemo(() => {
+  const messageSoundEvents = (0,react.useMemo)(() => {
     if (!sounds.enabled) return [];
     const events = [];
     for (let i = 0; i < messageCount; i++) {
       const message = data.messages[i];
       const messageStartFrame = Math.round(fps * (initialDelay + i * messageDelay));
       events.push({
-        src: message.from === "person1" ? WhatsAppChatScene_MESSAGE_SENT_SOUND : WhatsAppChatScene_MESSAGE_RECEIVED_SOUND,
+        src: message.from === "person1" ? MESSAGE_SENT_SOUND : MESSAGE_RECEIVED_SOUND,
         startFrame: messageStartFrame,
         duration: 15,
         // ~0.5 seconds at 30fps
@@ -1897,14 +1853,14 @@ function WhatsAppChatScene({
     }
     return events;
   }, [sounds.enabled, messageCount, data.messages, fps, initialDelay, messageDelay]);
-  return /* @__PURE__ */ WhatsAppChatScene_jsxs(WhatsAppChatScene_AbsoluteFill, { style: { opacity: exitOpacity }, children: [
-    sounds.enabled && messageSoundEvents.map((sound) => /* @__PURE__ */ WhatsAppChatScene_jsx(
-      Sequence,
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { opacity: exitOpacity }, children: [
+    sounds.enabled && messageSoundEvents.map((sound) => /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      esm.Sequence,
       {
         from: sound.startFrame,
         durationInFrames: sound.duration,
-        children: /* @__PURE__ */ WhatsAppChatScene_jsx(
-          Audio,
+        children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
+          esm.Audio,
           {
             src: sound.src,
             volume: sounds.volume
@@ -1913,7 +1869,7 @@ function WhatsAppChatScene({
       },
       sound.key
     )),
-    /* @__PURE__ */ WhatsAppChatScene_jsxs(
+    /* @__PURE__ */ (0,jsx_runtime.jsxs)(
       "div",
       {
         style: {
@@ -1925,7 +1881,7 @@ function WhatsAppChatScene({
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
         },
         children: [
-          /* @__PURE__ */ WhatsAppChatScene_jsx(
+          /* @__PURE__ */ (0,jsx_runtime.jsx)(
             WhatsAppHeader,
             {
               contactName: data.person2.name,
@@ -1936,7 +1892,7 @@ function WhatsAppChatScene({
               fps
             }
           ),
-          /* @__PURE__ */ WhatsAppChatScene_jsx(
+          /* @__PURE__ */ (0,jsx_runtime.jsx)(
             "div",
             {
               style: {
@@ -1945,7 +1901,7 @@ function WhatsAppChatScene({
                 position: "relative",
                 backgroundColor: WHATSAPP_COLORS.background
               },
-              children: /* @__PURE__ */ WhatsAppChatScene_jsxs(
+              children: /* @__PURE__ */ (0,jsx_runtime.jsxs)(
                 "div",
                 {
                   style: {
@@ -1963,7 +1919,7 @@ function WhatsAppChatScene({
                     transform: `translateY(-${scrollOffset}px)`
                   },
                   children: [
-                    showTyping && /* @__PURE__ */ WhatsAppChatScene_jsx(
+                    showTyping && /* @__PURE__ */ (0,jsx_runtime.jsx)(
                       TypingIndicator,
                       {
                         visible: frame > fps * enterDuration && frame < fps * (enterDuration + typingDuration),
@@ -1975,7 +1931,7 @@ function WhatsAppChatScene({
                     data.messages.slice(0, visibleMessageCount).map((message, index) => {
                       const initialDelay2 = showTyping ? enterDuration + typingDuration : enterDuration;
                       const startFrame = fps * (initialDelay2 + index * messageDelay);
-                      return /* @__PURE__ */ WhatsAppChatScene_jsx(
+                      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
                         ChatBubble,
                         {
                           message,
@@ -1995,7 +1951,7 @@ function WhatsAppChatScene({
               )
             }
           ),
-          /* @__PURE__ */ WhatsAppChatScene_jsxs(
+          /* @__PURE__ */ (0,jsx_runtime.jsxs)(
             "div",
             {
               style: {
@@ -2006,8 +1962,8 @@ function WhatsAppChatScene({
                 gap: scale(8)
               },
               children: [
-                /* @__PURE__ */ WhatsAppChatScene_jsx("svg", { width: scale(24), height: scale(24), viewBox: "0 0 24 24", fill: WHATSAPP_COLORS.textSecondary, children: /* @__PURE__ */ WhatsAppChatScene_jsx("path", { d: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-4-6c.78 1.71 2.46 3 4.22 3 1.76 0 3.44-1.29 4.22-3H8zm8.5-4c.83 0 1.5-.67 1.5-1.5S11.33 7 10.5 7 9 7.67 9 8.5s.67 1.5 1.5 1.5zm-5 0c.83 0 1.5-.67 1.5-1.5S6.33 7 5.5 7 4 7.67 4 8.5 4.67 10 5.5 10z" }) }),
-                /* @__PURE__ */ WhatsAppChatScene_jsx(
+                /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", { width: scale(24), height: scale(24), viewBox: "0 0 24 24", fill: WHATSAPP_COLORS.textSecondary, children: /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-4-6c.78 1.71 2.46 3 4.22 3 1.76 0 3.44-1.29 4.22-3H8zm8.5-4c.83 0 1.5-.67 1.5-1.5S11.33 7 10.5 7 9 7.67 9 8.5s.67 1.5 1.5 1.5zm-5 0c.83 0 1.5-.67 1.5-1.5S6.33 7 5.5 7 4 7.67 4 8.5 4.67 10 5.5 10z" }) }),
+                /* @__PURE__ */ (0,jsx_runtime.jsx)(
                   "div",
                   {
                     style: {
@@ -2021,11 +1977,11 @@ function WhatsAppChatScene({
                     children: "Type a message"
                   }
                 ),
-                /* @__PURE__ */ WhatsAppChatScene_jsxs("svg", { width: scale(24), height: scale(24), viewBox: "0 0 24 24", fill: WHATSAPP_COLORS.textSecondary, children: [
-                  /* @__PURE__ */ WhatsAppChatScene_jsx("circle", { cx: "12", cy: "12", r: "2.5" }),
-                  /* @__PURE__ */ WhatsAppChatScene_jsx("path", { d: "M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" })
+                /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: scale(24), height: scale(24), viewBox: "0 0 24 24", fill: WHATSAPP_COLORS.textSecondary, children: [
+                  /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "12", cy: "12", r: "2.5" }),
+                  /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" })
                 ] }),
-                /* @__PURE__ */ WhatsAppChatScene_jsx(
+                /* @__PURE__ */ (0,jsx_runtime.jsx)(
                   "div",
                   {
                     style: {
@@ -2037,7 +1993,7 @@ function WhatsAppChatScene({
                       alignItems: "center",
                       justifyContent: "center"
                     },
-                    children: /* @__PURE__ */ WhatsAppChatScene_jsx("svg", { width: scale(20), height: scale(20), viewBox: "0 0 24 24", fill: "white", children: /* @__PURE__ */ WhatsAppChatScene_jsx("path", { d: "M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" }) })
+                    children: /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", { width: scale(20), height: scale(20), viewBox: "0 0 24 24", fill: "white", children: /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" }) })
                   }
                 )
               ]
@@ -2050,7 +2006,7 @@ function WhatsAppChatScene({
 }
 function WhatsAppHeader({ contactName, lastSeen, isOnline, avatar, frame, fps }) {
   const opacity = Math.min(1, frame / (fps * 0.3));
-  return /* @__PURE__ */ WhatsAppChatScene_jsxs(
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -2062,8 +2018,8 @@ function WhatsAppHeader({ contactName, lastSeen, isOnline, avatar, frame, fps })
         opacity
       },
       children: [
-        /* @__PURE__ */ WhatsAppChatScene_jsx("svg", { width: scale(24), height: scale(24), viewBox: "0 0 24 24", fill: "white", children: /* @__PURE__ */ WhatsAppChatScene_jsx("path", { d: "M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" }) }),
-        /* @__PURE__ */ WhatsAppChatScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", { width: scale(24), height: scale(24), viewBox: "0 0 24 24", fill: "white", children: /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" }) }),
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -2073,7 +2029,7 @@ function WhatsAppHeader({ contactName, lastSeen, isOnline, avatar, frame, fps })
               overflow: "hidden",
               position: "relative"
             },
-            children: /* @__PURE__ */ WhatsAppChatScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "img",
               {
                 src: avatar,
@@ -2090,8 +2046,8 @@ function WhatsAppHeader({ contactName, lastSeen, isOnline, avatar, frame, fps })
             )
           }
         ),
-        /* @__PURE__ */ WhatsAppChatScene_jsxs("div", { style: { flex: 1 }, children: [
-          /* @__PURE__ */ WhatsAppChatScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsxs)("div", { style: { flex: 1 }, children: [
+          /* @__PURE__ */ (0,jsx_runtime.jsx)(
             "div",
             {
               style: {
@@ -2102,7 +2058,7 @@ function WhatsAppHeader({ contactName, lastSeen, isOnline, avatar, frame, fps })
               children: contactName
             }
           ),
-          /* @__PURE__ */ WhatsAppChatScene_jsx(
+          /* @__PURE__ */ (0,jsx_runtime.jsx)(
             "div",
             {
               style: {
@@ -2113,9 +2069,9 @@ function WhatsAppHeader({ contactName, lastSeen, isOnline, avatar, frame, fps })
             }
           )
         ] }),
-        /* @__PURE__ */ WhatsAppChatScene_jsx("svg", { width: scale(22), height: scale(22), viewBox: "0 0 24 24", fill: "white", children: /* @__PURE__ */ WhatsAppChatScene_jsx("path", { d: "M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" }) }),
-        /* @__PURE__ */ WhatsAppChatScene_jsx("svg", { width: scale(20), height: scale(20), viewBox: "0 0 24 24", fill: "white", children: /* @__PURE__ */ WhatsAppChatScene_jsx("path", { d: "M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" }) }),
-        /* @__PURE__ */ WhatsAppChatScene_jsx("svg", { width: scale(20), height: scale(20), viewBox: "0 0 24 24", fill: "white", children: /* @__PURE__ */ WhatsAppChatScene_jsx("path", { d: "M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" }) })
+        /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", { width: scale(22), height: scale(22), viewBox: "0 0 24 24", fill: "white", children: /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" }) }),
+        /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", { width: scale(20), height: scale(20), viewBox: "0 0 24 24", fill: "white", children: /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" }) }),
+        /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", { width: scale(20), height: scale(20), viewBox: "0 0 24 24", fill: "white", children: /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" }) })
       ]
     }
   );
@@ -2125,7 +2081,7 @@ function TypingIndicator({ visible, avatar, frame, fps }) {
   const dot1 = Math.sin(frame / fps * Math.PI * 3) * 0.5 + 0.5;
   const dot2 = Math.sin(frame / fps * Math.PI * 3 + 0.3) * 0.5 + 0.5;
   const dot3 = Math.sin(frame / fps * Math.PI * 3 + 0.6) * 0.5 + 0.5;
-  return /* @__PURE__ */ WhatsAppChatScene_jsxs(
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -2135,7 +2091,7 @@ function TypingIndicator({ visible, avatar, frame, fps }) {
         marginBottom: scale(4)
       },
       children: [
-        /* @__PURE__ */ WhatsAppChatScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "img",
           {
             src: avatar,
@@ -2148,7 +2104,7 @@ function TypingIndicator({ visible, avatar, frame, fps }) {
             }
           }
         ),
-        /* @__PURE__ */ WhatsAppChatScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -2161,7 +2117,7 @@ function TypingIndicator({ visible, avatar, frame, fps }) {
               alignItems: "center",
               gap: scale(4)
             },
-            children: [dot1, dot2, dot3].map((dot, i) => /* @__PURE__ */ WhatsAppChatScene_jsx(
+            children: [dot1, dot2, dot3].map((dot, i) => /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "div",
               {
                 style: {
@@ -2192,7 +2148,7 @@ function ChatBubble({
 }) {
   const isSent = message.from === "person1";
   const progress = frame >= startFrame ? Math.min(1, (frame - startFrame) / (fps * 0.3)) : 0;
-  const scaleValue = WhatsAppChatScene_spring({
+  const scaleValue = (0,esm.spring)({
     frame: frame - startFrame,
     fps,
     config: {
@@ -2201,12 +2157,12 @@ function ChatBubble({
       mass: 0.5
     }
   });
-  const translateY = WhatsAppChatScene_interpolate(progress, [0, 1], [20, 0]);
+  const translateY = (0,esm.interpolate)(progress, [0, 1], [20, 0]);
   const showReadTick = message.showReadReceipt && isSent && frame > startFrame + fps * 0.5;
   const readTickProgress = showReadTick ? Math.min(1, (frame - startFrame - fps * 0.5) / (fps * 0.2)) : 0;
   const bubbleColor = isSent ? WHATSAPP_COLORS.sentBubble : WHATSAPP_COLORS.receivedBubble;
   const borderRadius = isSent ? `${scale(12)}px ${scale(4)}px ${scale(12)}px ${scale(12)}px` : `${scale(4)}px ${scale(12)}px ${scale(12)}px ${scale(12)}px`;
-  return /* @__PURE__ */ WhatsAppChatScene_jsxs(
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -2218,7 +2174,7 @@ function ChatBubble({
         transform: `translateY(${translateY}px) scale(${scaleValue})`
       },
       children: [
-        !isSent && /* @__PURE__ */ WhatsAppChatScene_jsx(
+        !isSent && /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "img",
           {
             src: person2Avatar || getAvatarUrl("Receiver", "female"),
@@ -2231,7 +2187,7 @@ function ChatBubble({
             }
           }
         ),
-        /* @__PURE__ */ WhatsAppChatScene_jsxs(
+        /* @__PURE__ */ (0,jsx_runtime.jsxs)(
           "div",
           {
             style: {
@@ -2243,7 +2199,7 @@ function ChatBubble({
               position: "relative"
             },
             children: [
-              /* @__PURE__ */ WhatsAppChatScene_jsx(
+              /* @__PURE__ */ (0,jsx_runtime.jsx)(
                 "div",
                 {
                   style: {
@@ -2255,7 +2211,7 @@ function ChatBubble({
                   children: message.text
                 }
               ),
-              /* @__PURE__ */ WhatsAppChatScene_jsxs(
+              /* @__PURE__ */ (0,jsx_runtime.jsxs)(
                 "div",
                 {
                   style: {
@@ -2266,7 +2222,7 @@ function ChatBubble({
                     marginTop: scale(2)
                   },
                   children: [
-                    /* @__PURE__ */ WhatsAppChatScene_jsx(
+                    /* @__PURE__ */ (0,jsx_runtime.jsx)(
                       "span",
                       {
                         style: {
@@ -2276,7 +2232,7 @@ function ChatBubble({
                         children: message.time || "10:30 AM"
                       }
                     ),
-                    isSent && /* @__PURE__ */ WhatsAppChatScene_jsxs(
+                    isSent && /* @__PURE__ */ (0,jsx_runtime.jsxs)(
                       "svg",
                       {
                         width: scale(16),
@@ -2284,14 +2240,14 @@ function ChatBubble({
                         viewBox: "0 0 16 11",
                         style: { opacity: readTickProgress },
                         children: [
-                          /* @__PURE__ */ WhatsAppChatScene_jsx(
+                          /* @__PURE__ */ (0,jsx_runtime.jsx)(
                             "path",
                             {
                               d: "M11.071.653a.457.457 0 0 0-.304-.102.493.493 0 0 0-.381.178l-6.19 7.636-2.405-2.272a.463.463 0 0 0-.336-.146.47.47 0 0 0-.343.146l-.311.31a.445.445 0 0 0-.14.337c0 .136.047.25.14.343l2.996 2.996a.724.724 0 0 0 .501.203.697.697 0 0 0 .546-.266l6.646-8.417a.497.497 0 0 0 .108-.299.441.441 0 0 0-.19-.374l-.337-.273z",
                               fill: WHATSAPP_COLORS.readTick
                             }
                           ),
-                          /* @__PURE__ */ WhatsAppChatScene_jsx(
+                          /* @__PURE__ */ (0,jsx_runtime.jsx)(
                             "path",
                             {
                               d: "M15.071.653a.457.457 0 0 0-.304-.102.493.493 0 0 0-.381.178l-6.19 7.636-1.18-1.18-.64.64 1.82 1.82a.724.724 0 0 0 .501.203.697.697 0 0 0 .546-.266l6.646-8.417a.497.497 0 0 0 .108-.299.441.441 0 0 0-.19-.374l-.337-.273z",
@@ -2304,7 +2260,7 @@ function ChatBubble({
                   ]
                 }
               ),
-              /* @__PURE__ */ WhatsAppChatScene_jsx(
+              /* @__PURE__ */ (0,jsx_runtime.jsx)(
                 "div",
                 {
                   style: {
@@ -2332,8 +2288,8 @@ function ChatBubble({
 /* unused harmony import specifier */ var WeatherScene_jsx;
 /* unused harmony import specifier */ var WeatherScene_jsxs;
 /* unused harmony import specifier */ var WeatherScene_useCurrentFrame;
-/* unused harmony import specifier */ var WeatherScene_interpolate;
-/* unused harmony import specifier */ var WeatherScene_spring;
+/* unused harmony import specifier */ var interpolate;
+/* unused harmony import specifier */ var spring;
 /* unused harmony import specifier */ var WeatherScene_BaseScene;
 /* unused harmony import specifier */ var WeatherScene_extractCustomization;
 /* unused harmony import specifier */ var WeatherScene_getTheme;
@@ -2390,9 +2346,9 @@ function WeatherScene({
     accentColor = "#38BDF8",
     animateIcon = true
   } = data;
-  const opacity = WeatherScene_interpolate(frame, [0, 15], [0, 1], { extrapolateRight: "clamp" });
-  const slideUp = WeatherScene_interpolate(frame, [0, 20], [30, 0], { extrapolateRight: "clamp" });
-  const scale = WeatherScene_spring({ frame, fps, config: { damping: 15, stiffness: 100 } });
+  const opacity = interpolate(frame, [0, 15], [0, 1], { extrapolateRight: "clamp" });
+  const slideUp = interpolate(frame, [0, 20], [30, 0], { extrapolateRight: "clamp" });
+  const scale = spring({ frame, fps, config: { damping: 15, stiffness: 100 } });
   const cardStyles = {
     glass: {
       background: "rgba(255, 255, 255, 0.1)",
@@ -2579,7 +2535,7 @@ function WeatherScene({
 /* unused harmony import specifier */ var TowerChart3DScene_jsx;
 /* unused harmony import specifier */ var TowerChart3DScene_jsxs;
 /* unused harmony import specifier */ var Fragment;
-/* unused harmony import specifier */ var TowerChart3DScene_useMemo;
+/* unused harmony import specifier */ var useMemo;
 /* unused harmony import specifier */ var useState;
 /* unused harmony import specifier */ var useRef;
 /* unused harmony import specifier */ var useEffect;
@@ -2591,7 +2547,7 @@ function WeatherScene({
 /* unused harmony import specifier */ var TowerChart3DScene_useCurrentFrame;
 /* unused harmony import specifier */ var TowerChart3DScene_useVideoConfig;
 /* unused harmony import specifier */ var TowerChart3DScene_interpolate;
-/* unused harmony import specifier */ var TowerChart3DScene_AbsoluteFill;
+/* unused harmony import specifier */ var AbsoluteFill;
 /* unused harmony import specifier */ var Canvas;
 /* unused harmony import specifier */ var useThree;
 /* unused harmony import specifier */ var Billboard;
@@ -2663,7 +2619,7 @@ function StarField() {
 }
 function FloatingParticles() {
   const count = 30;
-  const positions = TowerChart3DScene_useMemo(() => {
+  const positions = useMemo(() => {
     const pos = new Float32Array(count * 3);
     let seed = 12345;
     const seededRandom = () => {
@@ -2931,11 +2887,11 @@ function TowerChart3DScene({ data }) {
   const revealProgress = Math.min(1, frame / (introDuration + totalItems * itemRevealDelay * fps * 0.5));
   const visibleStart = Math.max(0, currentIndex - 1);
   const visibleEnd = Math.min(items.length - 1, currentIndex + 4);
-  const towers = TowerChart3DScene_useMemo(
+  const towers = useMemo(
     () => calculateTowers(items, towerSpacing, baseHeight, maxHeight, gradientStart, gradientEnd, useGradientByRank, animationDirection),
     [items, towerSpacing, baseHeight, maxHeight, gradientStart, gradientEnd, useGradientByRank, animationDirection]
   );
-  const cameraState = TowerChart3DScene_useMemo(
+  const cameraState = useMemo(
     () => calculateCameraState(
       towers.map((t) => ({ position: t.position, height: t.height })),
       currentIndex,
@@ -2960,7 +2916,7 @@ function TowerChart3DScene({ data }) {
   }, []);
   const titleOpacity = TowerChart3DScene_interpolate(frame, [0, 25], [0, 1], { extrapolateRight: "clamp" });
   const titleY = TowerChart3DScene_interpolate(frame, [0, 25], [-35, 0], { extrapolateRight: "clamp" });
-  return /* @__PURE__ */ TowerChart3DScene_jsxs(TowerChart3DScene_AbsoluteFill, { style: { backgroundColor }, children: [
+  return /* @__PURE__ */ TowerChart3DScene_jsxs(AbsoluteFill, { style: { backgroundColor }, children: [
     /* @__PURE__ */ TowerChart3DScene_jsx(
       Canvas,
       {
@@ -3834,16 +3790,6 @@ function getComponentIdForType(type) {
 }
 
 ;// ./src/lib/video/components/ListScene.tsx
-/* unused harmony import specifier */ var ListScene_jsx;
-/* unused harmony import specifier */ var ListScene_jsxs;
-/* unused harmony import specifier */ var ListScene_useCurrentFrame;
-/* unused harmony import specifier */ var ListScene_useVideoConfig;
-/* unused harmony import specifier */ var ListScene_extractCustomization;
-/* unused harmony import specifier */ var ListScene_BaseScene;
-/* unused harmony import specifier */ var ListScene_useSlideIn;
-/* unused harmony import specifier */ var ListScene_useFadeIn;
-/* unused harmony import specifier */ var ListScene_useStaggeredEntry;
-/* unused harmony import specifier */ var ListScene_getTheme;
 
 
 
@@ -3856,21 +3802,21 @@ function ListScene({
   motionProfile = "dynamic",
   animation
 }) {
-  const frame = ListScene_useCurrentFrame();
-  const { fps } = ListScene_useVideoConfig();
-  const colors = ListScene_getTheme(theme);
-  const customization = ListScene_extractCustomization(data);
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const colors = getTheme(theme);
+  const customization = extractCustomization(data);
   const enterDuration = (animation == null ? void 0 : animation.enter) ?? 0.5;
   const holdDuration = (animation == null ? void 0 : animation.hold) ?? 3;
-  const titleSlide = ListScene_useSlideIn("up", 40, 0.5, 0, motionProfile);
-  const titleOpacity = ListScene_useFadeIn(0.4, 0, motionProfile);
+  const titleSlide = useSlideIn("up", 40, 0.5, 0, motionProfile);
+  const titleOpacity = useFadeIn(0.4, 0, motionProfile);
   const exitStart = (enterDuration + holdDuration) * fps;
   const exitProgress = frame > exitStart ? Math.min(1, (frame - exitStart) / (fps * 0.4)) : 0;
   const exitOpacity = 1 - exitProgress;
   const renderIcon = (index, style) => {
     switch (style) {
       case "numbered":
-        return /* @__PURE__ */ ListScene_jsx(
+        return /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -3889,7 +3835,7 @@ function ListScene({
           }
         );
       case "checkmarks":
-        return /* @__PURE__ */ ListScene_jsx(
+        return /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -3901,7 +3847,7 @@ function ListScene({
               alignItems: "center",
               justifyContent: "center"
             },
-            children: /* @__PURE__ */ ListScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "svg",
               {
                 width: 20,
@@ -3910,13 +3856,13 @@ function ListScene({
                 fill: "none",
                 stroke: colors.accent,
                 strokeWidth: 3,
-                children: /* @__PURE__ */ ListScene_jsx("polyline", { points: "20 6 9 17 4 12" })
+                children: /* @__PURE__ */ (0,jsx_runtime.jsx)("polyline", { points: "20 6 9 17 4 12" })
               }
             )
           }
         );
       default:
-        return /* @__PURE__ */ ListScene_jsx(
+        return /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -3929,7 +3875,7 @@ function ListScene({
         );
     }
   };
-  return /* @__PURE__ */ ListScene_jsx(ListScene_BaseScene, { theme, opacity: exitOpacity, customization, animation, children: /* @__PURE__ */ ListScene_jsxs(
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(BaseScene, { theme, opacity: exitOpacity, customization, animation, children: /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -3940,14 +3886,14 @@ function ListScene({
         gap: 40
       },
       children: [
-        data.title && /* @__PURE__ */ ListScene_jsx(
+        data.title && /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
               transform: `translate(${titleSlide.x}px, ${titleSlide.y}px)`,
               opacity: titleOpacity
             },
-            children: /* @__PURE__ */ ListScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "h2",
               {
                 style: {
@@ -3961,7 +3907,7 @@ function ListScene({
             )
           }
         ),
-        /* @__PURE__ */ ListScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -3971,7 +3917,7 @@ function ListScene({
               justifyContent: "center",
               gap: 24
             },
-            children: data.items.map((item, index) => /* @__PURE__ */ ListScene_jsx(
+            children: data.items.map((item, index) => /* @__PURE__ */ (0,jsx_runtime.jsx)(
               ListItem,
               {
                 item,
@@ -3995,8 +3941,8 @@ function ListItem({
   colors,
   motionProfile
 }) {
-  const stagger = ListScene_useStaggeredEntry(index, 0.12, motionProfile);
-  return /* @__PURE__ */ ListScene_jsxs(
+  const stagger = useStaggeredEntry(index, 0.12, motionProfile);
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -4007,8 +3953,8 @@ function ListItem({
         transform: `translateY(${stagger.translateY}px) scale(${stagger.scale})`
       },
       children: [
-        /* @__PURE__ */ ListScene_jsxs("div", { style: { flexShrink: 0 }, children: [
-          style === "numbered" && /* @__PURE__ */ ListScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsxs)("div", { style: { flexShrink: 0 }, children: [
+          style === "numbered" && /* @__PURE__ */ (0,jsx_runtime.jsx)(
             "div",
             {
               style: {
@@ -4027,7 +3973,7 @@ function ListItem({
               children: index + 1
             }
           ),
-          style === "checkmarks" && /* @__PURE__ */ ListScene_jsx(
+          style === "checkmarks" && /* @__PURE__ */ (0,jsx_runtime.jsx)(
             "div",
             {
               style: {
@@ -4040,7 +3986,7 @@ function ListItem({
                 alignItems: "center",
                 justifyContent: "center"
               },
-              children: /* @__PURE__ */ ListScene_jsx(
+              children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
                 "svg",
                 {
                   width: 20,
@@ -4049,12 +3995,12 @@ function ListItem({
                   fill: "none",
                   stroke: colors.accent,
                   strokeWidth: 3,
-                  children: /* @__PURE__ */ ListScene_jsx("polyline", { points: "20 6 9 17 4 12" })
+                  children: /* @__PURE__ */ (0,jsx_runtime.jsx)("polyline", { points: "20 6 9 17 4 12" })
                 }
               )
             }
           ),
-          style === "bullet" && /* @__PURE__ */ ListScene_jsx(
+          style === "bullet" && /* @__PURE__ */ (0,jsx_runtime.jsx)(
             "div",
             {
               style: {
@@ -4067,7 +4013,7 @@ function ListItem({
             }
           )
         ] }),
-        /* @__PURE__ */ ListScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "span",
           {
             style: {
@@ -4085,16 +4031,6 @@ function ListItem({
 }
 
 ;// ./src/lib/video/components/TimelineScene.tsx
-/* unused harmony import specifier */ var TimelineScene_jsx;
-/* unused harmony import specifier */ var TimelineScene_jsxs;
-/* unused harmony import specifier */ var TimelineScene_useCurrentFrame;
-/* unused harmony import specifier */ var TimelineScene_useVideoConfig;
-/* unused harmony import specifier */ var TimelineScene_extractCustomization;
-/* unused harmony import specifier */ var TimelineScene_BaseScene;
-/* unused harmony import specifier */ var TimelineScene_useSlideIn;
-/* unused harmony import specifier */ var TimelineScene_useFadeIn;
-/* unused harmony import specifier */ var TimelineScene_useStaggeredEntry;
-/* unused harmony import specifier */ var TimelineScene_getTheme;
 
 
 
@@ -4107,19 +4043,19 @@ function TimelineScene({
   motionProfile = "dynamic",
   animation
 }) {
-  const frame = TimelineScene_useCurrentFrame();
-  const { fps } = TimelineScene_useVideoConfig();
-  const colors = TimelineScene_getTheme(theme);
-  const customization = TimelineScene_extractCustomization(data);
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const colors = getTheme(theme);
+  const customization = extractCustomization(data);
   const enterDuration = (animation == null ? void 0 : animation.enter) ?? 0.5;
   const holdDuration = (animation == null ? void 0 : animation.hold) ?? 4;
-  const titleSlide = TimelineScene_useSlideIn("up", 40, 0.5, 0, motionProfile);
-  const titleOpacity = TimelineScene_useFadeIn(0.4, 0, motionProfile);
+  const titleSlide = useSlideIn("up", 40, 0.5, 0, motionProfile);
+  const titleOpacity = useFadeIn(0.4, 0, motionProfile);
   const exitStart = (enterDuration + holdDuration) * fps;
   const exitProgress = frame > exitStart ? Math.min(1, (frame - exitStart) / (fps * 0.4)) : 0;
   const exitOpacity = 1 - exitProgress;
-  const lineProgress = TimelineScene_useFadeIn(0.8, 0.2, motionProfile);
-  return /* @__PURE__ */ TimelineScene_jsx(TimelineScene_BaseScene, { theme, opacity: exitOpacity, customization, animation, children: /* @__PURE__ */ TimelineScene_jsxs(
+  const lineProgress = useFadeIn(0.8, 0.2, motionProfile);
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(BaseScene, { theme, opacity: exitOpacity, customization, animation, children: /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -4130,14 +4066,14 @@ function TimelineScene({
         gap: 30
       },
       children: [
-        data.title && /* @__PURE__ */ TimelineScene_jsx(
+        data.title && /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
               transform: `translate(${titleSlide.x}px, ${titleSlide.y}px)`,
               opacity: titleOpacity
             },
-            children: /* @__PURE__ */ TimelineScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "h2",
               {
                 style: {
@@ -4151,7 +4087,7 @@ function TimelineScene({
             )
           }
         ),
-        /* @__PURE__ */ TimelineScene_jsxs(
+        /* @__PURE__ */ (0,jsx_runtime.jsxs)(
           "div",
           {
             style: {
@@ -4162,7 +4098,7 @@ function TimelineScene({
               paddingLeft: 60
             },
             children: [
-              /* @__PURE__ */ TimelineScene_jsx(
+              /* @__PURE__ */ (0,jsx_runtime.jsx)(
                 "div",
                 {
                   style: {
@@ -4177,7 +4113,7 @@ function TimelineScene({
                   }
                 }
               ),
-              /* @__PURE__ */ TimelineScene_jsx(
+              /* @__PURE__ */ (0,jsx_runtime.jsx)(
                 "div",
                 {
                   style: {
@@ -4185,7 +4121,7 @@ function TimelineScene({
                     flexDirection: "column",
                     gap: 35
                   },
-                  children: data.events.map((event, index) => /* @__PURE__ */ TimelineScene_jsx(
+                  children: data.events.map((event, index) => /* @__PURE__ */ (0,jsx_runtime.jsx)(
                     TimelineEvent,
                     {
                       event,
@@ -4210,8 +4146,8 @@ function TimelineEvent({
   colors,
   motionProfile
 }) {
-  const stagger = TimelineScene_useStaggeredEntry(index, 0.15, motionProfile);
-  return /* @__PURE__ */ TimelineScene_jsxs(
+  const stagger = useStaggeredEntry(index, 0.15, motionProfile);
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -4222,7 +4158,7 @@ function TimelineEvent({
         transform: `translateX(${stagger.translateY}px)`
       },
       children: [
-        /* @__PURE__ */ TimelineScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -4237,14 +4173,14 @@ function TimelineEvent({
             }
           }
         ),
-        /* @__PURE__ */ TimelineScene_jsxs(
+        /* @__PURE__ */ (0,jsx_runtime.jsxs)(
           "div",
           {
             style: {
               marginLeft: 30
             },
             children: [
-              /* @__PURE__ */ TimelineScene_jsx(
+              /* @__PURE__ */ (0,jsx_runtime.jsx)(
                 "div",
                 {
                   style: {
@@ -4254,7 +4190,7 @@ function TimelineEvent({
                     borderRadius: 20,
                     marginBottom: 8
                   },
-                  children: /* @__PURE__ */ TimelineScene_jsx(
+                  children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
                     "span",
                     {
                       style: {
@@ -4267,7 +4203,7 @@ function TimelineEvent({
                   )
                 }
               ),
-              /* @__PURE__ */ TimelineScene_jsx(
+              /* @__PURE__ */ (0,jsx_runtime.jsx)(
                 "h3",
                 {
                   style: {
@@ -4279,7 +4215,7 @@ function TimelineEvent({
                   children: event.title
                 }
               ),
-              event.description && /* @__PURE__ */ TimelineScene_jsx(
+              event.description && /* @__PURE__ */ (0,jsx_runtime.jsx)(
                 "p",
                 {
                   style: {
@@ -4299,16 +4235,6 @@ function TimelineEvent({
 }
 
 ;// ./src/lib/video/components/CalloutScene.tsx
-/* unused harmony import specifier */ var CalloutScene_jsx;
-/* unused harmony import specifier */ var CalloutScene_jsxs;
-/* unused harmony import specifier */ var CalloutScene_useCurrentFrame;
-/* unused harmony import specifier */ var CalloutScene_useVideoConfig;
-/* unused harmony import specifier */ var CalloutScene_extractCustomization;
-/* unused harmony import specifier */ var CalloutScene_BaseScene;
-/* unused harmony import specifier */ var CalloutScene_useScaleIn;
-/* unused harmony import specifier */ var CalloutScene_useFadeIn;
-/* unused harmony import specifier */ var CalloutScene_useSlideIn;
-/* unused harmony import specifier */ var CalloutScene_getTheme;
 
 
 
@@ -4321,18 +4247,18 @@ function CalloutScene({
   motionProfile = "dynamic",
   animation
 }) {
-  const frame = CalloutScene_useCurrentFrame();
-  const { fps } = CalloutScene_useVideoConfig();
-  const colors = CalloutScene_getTheme(theme);
-  const customization = CalloutScene_extractCustomization(data);
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const colors = getTheme(theme);
+  const customization = extractCustomization(data);
   const enterDuration = (animation == null ? void 0 : animation.enter) ?? 0.5;
   const holdDuration = (animation == null ? void 0 : animation.hold) ?? 2.5;
-  const cardScale = CalloutScene_useScaleIn(0.5, 0, motionProfile);
-  const cardOpacity = CalloutScene_useFadeIn(0.4, 0, motionProfile);
-  const titleSlide = CalloutScene_useSlideIn("up", 30, 0.4, 0.1, motionProfile);
-  const titleOpacity = CalloutScene_useFadeIn(0.3, 0.1, motionProfile);
-  const contentSlide = CalloutScene_useSlideIn("up", 20, 0.4, 0.2, motionProfile);
-  const contentOpacity = CalloutScene_useFadeIn(0.3, 0.2, motionProfile);
+  const cardScale = useScaleIn(0.5, 0, motionProfile);
+  const cardOpacity = useFadeIn(0.4, 0, motionProfile);
+  const titleSlide = useSlideIn("up", 30, 0.4, 0.1, motionProfile);
+  const titleOpacity = useFadeIn(0.3, 0.1, motionProfile);
+  const contentSlide = useSlideIn("up", 20, 0.4, 0.2, motionProfile);
+  const contentOpacity = useFadeIn(0.3, 0.2, motionProfile);
   const exitStart = (enterDuration + holdDuration) * fps;
   const exitProgress = frame > exitStart ? Math.min(1, (frame - exitStart) / (fps * 0.4)) : 0;
   const exitOpacity = 1 - exitProgress;
@@ -4359,7 +4285,7 @@ function CalloutScene({
     }
   };
   const variant = variantColors[data.variant ?? "default"];
-  return /* @__PURE__ */ CalloutScene_jsx(CalloutScene_BaseScene, { theme, opacity: exitOpacity, customization, animation, children: /* @__PURE__ */ CalloutScene_jsx(
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(BaseScene, { theme, opacity: exitOpacity, customization, animation, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
     "div",
     {
       style: {
@@ -4369,7 +4295,7 @@ function CalloutScene({
         height: "100%",
         padding: 60
       },
-      children: /* @__PURE__ */ CalloutScene_jsxs(
+      children: /* @__PURE__ */ (0,jsx_runtime.jsxs)(
         "div",
         {
           style: {
@@ -4383,7 +4309,7 @@ function CalloutScene({
             boxShadow: `0 20px 60px ${variant.border}20`
           },
           children: [
-            /* @__PURE__ */ CalloutScene_jsxs(
+            /* @__PURE__ */ (0,jsx_runtime.jsxs)(
               "div",
               {
                 style: {
@@ -4392,25 +4318,25 @@ function CalloutScene({
                   transform: `translate(${titleSlide.x}px, ${titleSlide.y}px)`
                 },
                 children: [
-                  data.variant === "success" && /* @__PURE__ */ CalloutScene_jsxs("svg", { width: 48, height: 48, viewBox: "0 0 24 24", fill: "none", stroke: variant.icon, strokeWidth: 2.5, children: [
-                    /* @__PURE__ */ CalloutScene_jsx("path", { d: "M22 11.08V12a10 10 0 1 1-5.93-9.14" }),
-                    /* @__PURE__ */ CalloutScene_jsx("polyline", { points: "22 4 12 14.01 9 11.01" })
+                  data.variant === "success" && /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: 48, height: 48, viewBox: "0 0 24 24", fill: "none", stroke: variant.icon, strokeWidth: 2.5, children: [
+                    /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M22 11.08V12a10 10 0 1 1-5.93-9.14" }),
+                    /* @__PURE__ */ (0,jsx_runtime.jsx)("polyline", { points: "22 4 12 14.01 9 11.01" })
                   ] }),
-                  data.variant === "warning" && /* @__PURE__ */ CalloutScene_jsxs("svg", { width: 48, height: 48, viewBox: "0 0 24 24", fill: "none", stroke: variant.icon, strokeWidth: 2.5, children: [
-                    /* @__PURE__ */ CalloutScene_jsx("path", { d: "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" }),
-                    /* @__PURE__ */ CalloutScene_jsx("line", { x1: "12", y1: "9", x2: "12", y2: "13" }),
-                    /* @__PURE__ */ CalloutScene_jsx("line", { x1: "12", y1: "17", x2: "12.01", y2: "17" })
+                  data.variant === "warning" && /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: 48, height: 48, viewBox: "0 0 24 24", fill: "none", stroke: variant.icon, strokeWidth: 2.5, children: [
+                    /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" }),
+                    /* @__PURE__ */ (0,jsx_runtime.jsx)("line", { x1: "12", y1: "9", x2: "12", y2: "13" }),
+                    /* @__PURE__ */ (0,jsx_runtime.jsx)("line", { x1: "12", y1: "17", x2: "12.01", y2: "17" })
                   ] }),
-                  data.variant === "info" && /* @__PURE__ */ CalloutScene_jsxs("svg", { width: 48, height: 48, viewBox: "0 0 24 24", fill: "none", stroke: variant.icon, strokeWidth: 2.5, children: [
-                    /* @__PURE__ */ CalloutScene_jsx("circle", { cx: "12", cy: "12", r: "10" }),
-                    /* @__PURE__ */ CalloutScene_jsx("line", { x1: "12", y1: "16", x2: "12", y2: "12" }),
-                    /* @__PURE__ */ CalloutScene_jsx("line", { x1: "12", y1: "8", x2: "12.01", y2: "8" })
+                  data.variant === "info" && /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: 48, height: 48, viewBox: "0 0 24 24", fill: "none", stroke: variant.icon, strokeWidth: 2.5, children: [
+                    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "12", cy: "12", r: "10" }),
+                    /* @__PURE__ */ (0,jsx_runtime.jsx)("line", { x1: "12", y1: "16", x2: "12", y2: "12" }),
+                    /* @__PURE__ */ (0,jsx_runtime.jsx)("line", { x1: "12", y1: "8", x2: "12.01", y2: "8" })
                   ] }),
-                  (!data.variant || data.variant === "default") && /* @__PURE__ */ CalloutScene_jsx("svg", { width: 48, height: 48, viewBox: "0 0 24 24", fill: "none", stroke: variant.icon, strokeWidth: 2.5, children: /* @__PURE__ */ CalloutScene_jsx("polygon", { points: "13 2 3 14 12 14 11 22 21 10 12 10 13 2" }) })
+                  (!data.variant || data.variant === "default") && /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", { width: 48, height: 48, viewBox: "0 0 24 24", fill: "none", stroke: variant.icon, strokeWidth: 2.5, children: /* @__PURE__ */ (0,jsx_runtime.jsx)("polygon", { points: "13 2 3 14 12 14 11 22 21 10 12 10 13 2" }) })
                 ]
               }
             ),
-            /* @__PURE__ */ CalloutScene_jsx(
+            /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "h2",
               {
                 style: {
@@ -4424,7 +4350,7 @@ function CalloutScene({
                 children: data.title
               }
             ),
-            /* @__PURE__ */ CalloutScene_jsx(
+            /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "p",
               {
                 style: {
@@ -4446,15 +4372,6 @@ function CalloutScene({
 }
 
 ;// ./src/lib/video/components/IconListScene.tsx
-/* unused harmony import specifier */ var IconListScene_jsx;
-/* unused harmony import specifier */ var IconListScene_jsxs;
-/* unused harmony import specifier */ var IconListScene_useCurrentFrame;
-/* unused harmony import specifier */ var IconListScene_useVideoConfig;
-/* unused harmony import specifier */ var IconListScene_BaseScene;
-/* unused harmony import specifier */ var IconListScene_useSlideIn;
-/* unused harmony import specifier */ var IconListScene_useFadeIn;
-/* unused harmony import specifier */ var IconListScene_useStaggeredEntry;
-/* unused harmony import specifier */ var IconListScene_getTheme;
 
 
 
@@ -4503,17 +4420,17 @@ function IconListScene({
   motionProfile = "dynamic",
   animation
 }) {
-  const frame = IconListScene_useCurrentFrame();
-  const { fps } = IconListScene_useVideoConfig();
-  const colors = IconListScene_getTheme(theme);
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const colors = getTheme(theme);
   const enterDuration = (animation == null ? void 0 : animation.enter) ?? 0.5;
   const holdDuration = (animation == null ? void 0 : animation.hold) ?? 3;
-  const titleSlide = IconListScene_useSlideIn("up", 40, 0.5, 0, motionProfile);
-  const titleOpacity = IconListScene_useFadeIn(0.4, 0, motionProfile);
+  const titleSlide = useSlideIn("up", 40, 0.5, 0, motionProfile);
+  const titleOpacity = useFadeIn(0.4, 0, motionProfile);
   const exitStart = (enterDuration + holdDuration) * fps;
   const exitProgress = frame > exitStart ? Math.min(1, (frame - exitStart) / (fps * 0.4)) : 0;
   const exitOpacity = 1 - exitProgress;
-  return /* @__PURE__ */ IconListScene_jsx(IconListScene_BaseScene, { theme, opacity: exitOpacity, children: /* @__PURE__ */ IconListScene_jsxs(
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(BaseScene, { theme, opacity: exitOpacity, children: /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -4524,14 +4441,14 @@ function IconListScene({
         gap: 30
       },
       children: [
-        data.title && /* @__PURE__ */ IconListScene_jsx(
+        data.title && /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
               transform: `translate(${titleSlide.x}px, ${titleSlide.y}px)`,
               opacity: titleOpacity
             },
-            children: /* @__PURE__ */ IconListScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "h2",
               {
                 style: {
@@ -4545,7 +4462,7 @@ function IconListScene({
             )
           }
         ),
-        /* @__PURE__ */ IconListScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -4555,7 +4472,7 @@ function IconListScene({
               gap: 30,
               alignItems: "center"
             },
-            children: data.items.map((item, index) => /* @__PURE__ */ IconListScene_jsx(
+            children: data.items.map((item, index) => /* @__PURE__ */ (0,jsx_runtime.jsx)(
               IconListItem,
               {
                 item,
@@ -4577,9 +4494,9 @@ function IconListItem({
   colors,
   motionProfile
 }) {
-  const stagger = IconListScene_useStaggeredEntry(index, 0.12, motionProfile);
+  const stagger = useStaggeredEntry(index, 0.12, motionProfile);
   const iconPath = ICON_PATHS[item.icon.toLowerCase()] || ICON_PATHS.star;
-  return /* @__PURE__ */ IconListScene_jsxs(
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -4594,7 +4511,7 @@ function IconListItem({
         transform: `translateY(${stagger.translateY}px) scale(${stagger.scale})`
       },
       children: [
-        /* @__PURE__ */ IconListScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -4607,7 +4524,7 @@ function IconListItem({
               justifyContent: "center",
               flexShrink: 0
             },
-            children: /* @__PURE__ */ IconListScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "svg",
               {
                 width: 24,
@@ -4623,8 +4540,8 @@ function IconListItem({
             )
           }
         ),
-        /* @__PURE__ */ IconListScene_jsxs("div", { children: [
-          /* @__PURE__ */ IconListScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0,jsx_runtime.jsx)(
             "h3",
             {
               style: {
@@ -4636,7 +4553,7 @@ function IconListItem({
               children: item.title
             }
           ),
-          item.description && /* @__PURE__ */ IconListScene_jsx(
+          item.description && /* @__PURE__ */ (0,jsx_runtime.jsx)(
             "p",
             {
               style: {
@@ -4655,16 +4572,6 @@ function IconListItem({
 }
 
 ;// ./src/lib/video/components/ChartScene.tsx
-/* unused harmony import specifier */ var ChartScene_jsx;
-/* unused harmony import specifier */ var ChartScene_jsxs;
-/* unused harmony import specifier */ var ChartScene_useCurrentFrame;
-/* unused harmony import specifier */ var ChartScene_useVideoConfig;
-/* unused harmony import specifier */ var ChartScene_interpolate;
-/* unused harmony import specifier */ var ChartScene_BaseScene;
-/* unused harmony import specifier */ var ChartScene_useSlideIn;
-/* unused harmony import specifier */ var ChartScene_useFadeIn;
-/* unused harmony import specifier */ var ChartScene_useScaleIn;
-/* unused harmony import specifier */ var ChartScene_getTheme;
 
 
 
@@ -4677,16 +4584,16 @@ function LineChartScene({
   motionProfile = "dynamic",
   animation
 }) {
-  const frame = ChartScene_useCurrentFrame();
-  const { fps } = ChartScene_useVideoConfig();
-  const colors = ChartScene_getTheme(theme);
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const colors = getTheme(theme);
   const enterDuration = (animation == null ? void 0 : animation.enter) ?? 0.5;
   const holdDuration = (animation == null ? void 0 : animation.hold) ?? 4;
-  const titleSlide = ChartScene_useSlideIn("up", 40, 0.5, 0, motionProfile);
-  const titleOpacity = ChartScene_useFadeIn(0.4, 0, motionProfile);
-  const chartOpacity = ChartScene_useFadeIn(0.6, 0.2, motionProfile);
-  const chartScale = ChartScene_useScaleIn(0.3, 0.2, motionProfile);
-  const lineProgress = ChartScene_interpolate(
+  const titleSlide = useSlideIn("up", 40, 0.5, 0, motionProfile);
+  const titleOpacity = useFadeIn(0.4, 0, motionProfile);
+  const chartOpacity = useFadeIn(0.6, 0.2, motionProfile);
+  const chartScale = useScaleIn(0.3, 0.2, motionProfile);
+  const lineProgress = (0,esm.interpolate)(
     frame,
     [0.3 * fps, 1.5 * fps],
     [0, 1],
@@ -4709,7 +4616,7 @@ function LineChartScene({
   const pathD = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
   const totalLength = chartWidth;
   const dashOffset = totalLength * (1 - lineProgress);
-  return /* @__PURE__ */ ChartScene_jsx(ChartScene_BaseScene, { theme, opacity: exitOpacity, children: /* @__PURE__ */ ChartScene_jsxs(
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(BaseScene, { theme, opacity: exitOpacity, children: /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -4720,14 +4627,14 @@ function LineChartScene({
         gap: 30
       },
       children: [
-        data.title && /* @__PURE__ */ ChartScene_jsx(
+        data.title && /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
               transform: `translate(${titleSlide.x}px, ${titleSlide.y}px)`,
               opacity: titleOpacity
             },
-            children: /* @__PURE__ */ ChartScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "h2",
               {
                 style: {
@@ -4741,7 +4648,7 @@ function LineChartScene({
             )
           }
         ),
-        /* @__PURE__ */ ChartScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -4752,10 +4659,10 @@ function LineChartScene({
               opacity: chartOpacity,
               transform: `scale(${chartScale})`
             },
-            children: /* @__PURE__ */ ChartScene_jsxs("svg", { width: chartWidth, height: chartHeight, children: [
+            children: /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: chartWidth, height: chartHeight, children: [
               [0, 0.25, 0.5, 0.75, 1].map((ratio) => {
                 const y = padding + ratio * (chartHeight - 2 * padding);
-                return /* @__PURE__ */ ChartScene_jsx(
+                return /* @__PURE__ */ (0,jsx_runtime.jsx)(
                   "line",
                   {
                     x1: padding,
@@ -4772,7 +4679,7 @@ function LineChartScene({
               [0, 0.5, 1].map((ratio) => {
                 const y = padding + ratio * (chartHeight - 2 * padding);
                 const value = max - ratio * range;
-                return /* @__PURE__ */ ChartScene_jsx(
+                return /* @__PURE__ */ (0,jsx_runtime.jsx)(
                   "text",
                   {
                     x: padding - 15,
@@ -4787,7 +4694,7 @@ function LineChartScene({
               }),
               data.labels && points.map((p, i) => {
                 var _a;
-                return /* @__PURE__ */ ChartScene_jsx(
+                return /* @__PURE__ */ (0,jsx_runtime.jsx)(
                   "text",
                   {
                     x: p.x,
@@ -4800,24 +4707,24 @@ function LineChartScene({
                   i
                 );
               }),
-              /* @__PURE__ */ ChartScene_jsxs("defs", { children: [
-                /* @__PURE__ */ ChartScene_jsxs("linearGradient", { id: "lineGradient", x1: "0%", y1: "0%", x2: "100%", y2: "0%", children: [
-                  /* @__PURE__ */ ChartScene_jsx("stop", { offset: "0%", stopColor: colors.primary }),
-                  /* @__PURE__ */ ChartScene_jsx("stop", { offset: "100%", stopColor: colors.secondary })
+              /* @__PURE__ */ (0,jsx_runtime.jsxs)("defs", { children: [
+                /* @__PURE__ */ (0,jsx_runtime.jsxs)("linearGradient", { id: "lineGradient", x1: "0%", y1: "0%", x2: "100%", y2: "0%", children: [
+                  /* @__PURE__ */ (0,jsx_runtime.jsx)("stop", { offset: "0%", stopColor: colors.primary }),
+                  /* @__PURE__ */ (0,jsx_runtime.jsx)("stop", { offset: "100%", stopColor: colors.secondary })
                 ] }),
-                /* @__PURE__ */ ChartScene_jsxs("linearGradient", { id: "areaGradient", x1: "0%", y1: "0%", x2: "0%", y2: "100%", children: [
-                  /* @__PURE__ */ ChartScene_jsx("stop", { offset: "0%", stopColor: colors.primary, stopOpacity: 0.3 }),
-                  /* @__PURE__ */ ChartScene_jsx("stop", { offset: "100%", stopColor: colors.primary, stopOpacity: 0 })
+                /* @__PURE__ */ (0,jsx_runtime.jsxs)("linearGradient", { id: "areaGradient", x1: "0%", y1: "0%", x2: "0%", y2: "100%", children: [
+                  /* @__PURE__ */ (0,jsx_runtime.jsx)("stop", { offset: "0%", stopColor: colors.primary, stopOpacity: 0.3 }),
+                  /* @__PURE__ */ (0,jsx_runtime.jsx)("stop", { offset: "100%", stopColor: colors.primary, stopOpacity: 0 })
                 ] })
               ] }),
-              /* @__PURE__ */ ChartScene_jsx(
+              /* @__PURE__ */ (0,jsx_runtime.jsx)(
                 "path",
                 {
                   d: `${pathD} L ${points[points.length - 1].x} ${chartHeight - padding} L ${padding} ${chartHeight - padding} Z`,
                   fill: "url(#areaGradient)"
                 }
               ),
-              /* @__PURE__ */ ChartScene_jsx(
+              /* @__PURE__ */ (0,jsx_runtime.jsx)(
                 "path",
                 {
                   d: pathD,
@@ -4830,7 +4737,7 @@ function LineChartScene({
                   strokeDashoffset: dashOffset
                 }
               ),
-              points.map((p, i) => /* @__PURE__ */ ChartScene_jsx(
+              points.map((p, i) => /* @__PURE__ */ (0,jsx_runtime.jsx)(
                 "circle",
                 {
                   cx: p.x,
@@ -4856,15 +4763,15 @@ function PieChartScene({
   motionProfile = "dynamic",
   animation
 }) {
-  const frame = ChartScene_useCurrentFrame();
-  const { fps } = ChartScene_useVideoConfig();
-  const colors = ChartScene_getTheme(theme);
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const colors = getTheme(theme);
   const enterDuration = (animation == null ? void 0 : animation.enter) ?? 0.5;
   const holdDuration = (animation == null ? void 0 : animation.hold) ?? 4;
-  const titleSlide = ChartScene_useSlideIn("up", 40, 0.5, 0, motionProfile);
-  const titleOpacity = ChartScene_useFadeIn(0.4, 0, motionProfile);
-  const chartOpacity = ChartScene_useFadeIn(0.6, 0.2, motionProfile);
-  const chartScale = ChartScene_useScaleIn(0.3, 0.2, motionProfile);
+  const titleSlide = useSlideIn("up", 40, 0.5, 0, motionProfile);
+  const titleOpacity = useFadeIn(0.4, 0, motionProfile);
+  const chartOpacity = useFadeIn(0.6, 0.2, motionProfile);
+  const chartScale = useScaleIn(0.3, 0.2, motionProfile);
   const exitStart = (enterDuration + holdDuration) * fps;
   const exitProgress = frame > exitStart ? Math.min(1, (frame - exitStart) / (fps * 0.4)) : 0;
   const exitOpacity = 1 - exitProgress;
@@ -4872,7 +4779,7 @@ function PieChartScene({
   const radius = 120;
   const circumference = 2 * Math.PI * radius;
   const palette = [colors.primary, colors.secondary, colors.accent, "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4"];
-  return /* @__PURE__ */ ChartScene_jsx(ChartScene_BaseScene, { theme, opacity: exitOpacity, children: /* @__PURE__ */ ChartScene_jsxs(
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(BaseScene, { theme, opacity: exitOpacity, children: /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -4883,14 +4790,14 @@ function PieChartScene({
         gap: 30
       },
       children: [
-        data.title && /* @__PURE__ */ ChartScene_jsx(
+        data.title && /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
               transform: `translate(${titleSlide.x}px, ${titleSlide.y}px)`,
               opacity: titleOpacity
             },
-            children: /* @__PURE__ */ ChartScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "h2",
               {
                 style: {
@@ -4904,7 +4811,7 @@ function PieChartScene({
             )
           }
         ),
-        /* @__PURE__ */ ChartScene_jsxs(
+        /* @__PURE__ */ (0,jsx_runtime.jsxs)(
           "div",
           {
             style: {
@@ -4917,14 +4824,14 @@ function PieChartScene({
               transform: `scale(${chartScale})`
             },
             children: [
-              /* @__PURE__ */ ChartScene_jsxs("div", { style: { position: "relative" }, children: [
-                /* @__PURE__ */ ChartScene_jsx("svg", { width: 300, height: 300, style: { transform: "rotate(-90deg)" }, children: data.segments.map((segment, index) => {
+              /* @__PURE__ */ (0,jsx_runtime.jsxs)("div", { style: { position: "relative" }, children: [
+                /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", { width: 300, height: 300, style: { transform: "rotate(-90deg)" }, children: data.segments.map((segment, index) => {
                   const percentage = segment.value / total;
                   const prevPercentages = data.segments.slice(0, index).reduce((sum, s) => sum + s.value / total, 0);
                   const strokeDasharray = circumference * percentage;
                   const strokeDashoffset = -circumference * prevPercentages;
                   const color = segment.color || palette[index % palette.length];
-                  return /* @__PURE__ */ ChartScene_jsx(
+                  return /* @__PURE__ */ (0,jsx_runtime.jsx)(
                     "circle",
                     {
                       cx: 150,
@@ -4939,7 +4846,7 @@ function PieChartScene({
                     index
                   );
                 }) }),
-                /* @__PURE__ */ ChartScene_jsxs(
+                /* @__PURE__ */ (0,jsx_runtime.jsxs)(
                   "div",
                   {
                     style: {
@@ -4950,7 +4857,7 @@ function PieChartScene({
                       textAlign: "center"
                     },
                     children: [
-                      /* @__PURE__ */ ChartScene_jsx(
+                      /* @__PURE__ */ (0,jsx_runtime.jsx)(
                         "div",
                         {
                           style: {
@@ -4961,7 +4868,7 @@ function PieChartScene({
                           children: total.toLocaleString()
                         }
                       ),
-                      /* @__PURE__ */ ChartScene_jsx(
+                      /* @__PURE__ */ (0,jsx_runtime.jsx)(
                         "div",
                         {
                           style: {
@@ -4975,10 +4882,10 @@ function PieChartScene({
                   }
                 )
               ] }),
-              /* @__PURE__ */ ChartScene_jsx("div", { style: { display: "flex", flexDirection: "column", gap: 16 }, children: data.segments.map((segment, index) => {
+              /* @__PURE__ */ (0,jsx_runtime.jsx)("div", { style: { display: "flex", flexDirection: "column", gap: 16 }, children: data.segments.map((segment, index) => {
                 const color = segment.color || palette[index % palette.length];
                 const percentage = (segment.value / total * 100).toFixed(1);
-                return /* @__PURE__ */ ChartScene_jsxs(
+                return /* @__PURE__ */ (0,jsx_runtime.jsxs)(
                   "div",
                   {
                     style: {
@@ -4987,7 +4894,7 @@ function PieChartScene({
                       gap: 12
                     },
                     children: [
-                      /* @__PURE__ */ ChartScene_jsx(
+                      /* @__PURE__ */ (0,jsx_runtime.jsx)(
                         "div",
                         {
                           style: {
@@ -4998,8 +4905,8 @@ function PieChartScene({
                           }
                         }
                       ),
-                      /* @__PURE__ */ ChartScene_jsx("span", { style: { fontSize: 20, color: colors.foreground }, children: segment.label }),
-                      /* @__PURE__ */ ChartScene_jsxs("span", { style: { fontSize: 18, color: colors.muted }, children: [
+                      /* @__PURE__ */ (0,jsx_runtime.jsx)("span", { style: { fontSize: 20, color: colors.foreground }, children: segment.label }),
+                      /* @__PURE__ */ (0,jsx_runtime.jsxs)("span", { style: { fontSize: 18, color: colors.muted }, children: [
                         percentage,
                         "%"
                       ] })
@@ -5017,15 +4924,6 @@ function PieChartScene({
 }
 
 ;// ./src/lib/video/components/CodeTestimonialScene.tsx
-/* unused harmony import specifier */ var CodeTestimonialScene_jsx;
-/* unused harmony import specifier */ var CodeTestimonialScene_jsxs;
-/* unused harmony import specifier */ var CodeTestimonialScene_useCurrentFrame;
-/* unused harmony import specifier */ var CodeTestimonialScene_useVideoConfig;
-/* unused harmony import specifier */ var CodeTestimonialScene_BaseScene;
-/* unused harmony import specifier */ var CodeTestimonialScene_useSlideIn;
-/* unused harmony import specifier */ var CodeTestimonialScene_useFadeIn;
-/* unused harmony import specifier */ var CodeTestimonialScene_useScaleIn;
-/* unused harmony import specifier */ var CodeTestimonialScene_getTheme;
 
 
 
@@ -5038,15 +4936,15 @@ function CodeScene({
   motionProfile = "subtle",
   animation
 }) {
-  const frame = CodeTestimonialScene_useCurrentFrame();
-  const { fps } = CodeTestimonialScene_useVideoConfig();
-  const colors = CodeTestimonialScene_getTheme(theme);
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const colors = getTheme(theme);
   const enterDuration = (animation == null ? void 0 : animation.enter) ?? 0.5;
   const holdDuration = (animation == null ? void 0 : animation.hold) ?? 4;
-  const titleSlide = CodeTestimonialScene_useSlideIn("up", 30, 0.4, 0, motionProfile);
-  const titleOpacity = CodeTestimonialScene_useFadeIn(0.3, 0, motionProfile);
-  const codeOpacity = CodeTestimonialScene_useFadeIn(0.5, 0.15, motionProfile);
-  const codeScale = CodeTestimonialScene_useScaleIn(0.3, 0.15, motionProfile);
+  const titleSlide = useSlideIn("up", 30, 0.4, 0, motionProfile);
+  const titleOpacity = useFadeIn(0.3, 0, motionProfile);
+  const codeOpacity = useFadeIn(0.5, 0.15, motionProfile);
+  const codeScale = useScaleIn(0.3, 0.15, motionProfile);
   const exitStart = (enterDuration + holdDuration) * fps;
   const exitProgress = frame > exitStart ? Math.min(1, (frame - exitStart) / (fps * 0.4)) : 0;
   const exitOpacity = 1 - exitProgress;
@@ -5058,7 +4956,7 @@ function CodeScene({
     function: "#61afef",
     default: colors.foreground
   };
-  return /* @__PURE__ */ CodeTestimonialScene_jsx(CodeTestimonialScene_BaseScene, { theme, opacity: exitOpacity, children: /* @__PURE__ */ CodeTestimonialScene_jsxs(
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(BaseScene, { theme, opacity: exitOpacity, children: /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -5069,14 +4967,14 @@ function CodeScene({
         gap: 30
       },
       children: [
-        data.title && /* @__PURE__ */ CodeTestimonialScene_jsx(
+        data.title && /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
               transform: `translate(${titleSlide.x}px, ${titleSlide.y}px)`,
               opacity: titleOpacity
             },
-            children: /* @__PURE__ */ CodeTestimonialScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "h2",
               {
                 style: {
@@ -5090,7 +4988,7 @@ function CodeScene({
             )
           }
         ),
-        /* @__PURE__ */ CodeTestimonialScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -5101,7 +4999,7 @@ function CodeScene({
               opacity: codeOpacity,
               transform: `scale(${codeScale})`
             },
-            children: /* @__PURE__ */ CodeTestimonialScene_jsxs(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsxs)(
               "div",
               {
                 style: {
@@ -5113,7 +5011,7 @@ function CodeScene({
                   boxShadow: "0 20px 60px rgba(0,0,0,0.3)"
                 },
                 children: [
-                  /* @__PURE__ */ CodeTestimonialScene_jsxs(
+                  /* @__PURE__ */ (0,jsx_runtime.jsxs)(
                     "div",
                     {
                       style: {
@@ -5125,10 +5023,10 @@ function CodeScene({
                         borderBottom: "1px solid #313244"
                       },
                       children: [
-                        /* @__PURE__ */ CodeTestimonialScene_jsx("div", { style: { width: 12, height: 12, borderRadius: "50%", background: "#f38ba8" } }),
-                        /* @__PURE__ */ CodeTestimonialScene_jsx("div", { style: { width: 12, height: 12, borderRadius: "50%", background: "#f9e2af" } }),
-                        /* @__PURE__ */ CodeTestimonialScene_jsx("div", { style: { width: 12, height: 12, borderRadius: "50%", background: "#a6e3a1" } }),
-                        /* @__PURE__ */ CodeTestimonialScene_jsx(
+                        /* @__PURE__ */ (0,jsx_runtime.jsx)("div", { style: { width: 12, height: 12, borderRadius: "50%", background: "#f38ba8" } }),
+                        /* @__PURE__ */ (0,jsx_runtime.jsx)("div", { style: { width: 12, height: 12, borderRadius: "50%", background: "#f9e2af" } }),
+                        /* @__PURE__ */ (0,jsx_runtime.jsx)("div", { style: { width: 12, height: 12, borderRadius: "50%", background: "#a6e3a1" } }),
+                        /* @__PURE__ */ (0,jsx_runtime.jsx)(
                           "span",
                           {
                             style: {
@@ -5143,7 +5041,7 @@ function CodeScene({
                       ]
                     }
                   ),
-                  /* @__PURE__ */ CodeTestimonialScene_jsx(
+                  /* @__PURE__ */ (0,jsx_runtime.jsx)(
                     "pre",
                     {
                       style: {
@@ -5155,8 +5053,8 @@ function CodeScene({
                         color: syntaxColors.default,
                         overflow: "hidden"
                       },
-                      children: data.code.split("\n").map((line, i) => /* @__PURE__ */ CodeTestimonialScene_jsxs("div", { style: { display: "flex" }, children: [
-                        /* @__PURE__ */ CodeTestimonialScene_jsx(
+                      children: data.code.split("\n").map((line, i) => /* @__PURE__ */ (0,jsx_runtime.jsxs)("div", { style: { display: "flex" }, children: [
+                        /* @__PURE__ */ (0,jsx_runtime.jsx)(
                           "span",
                           {
                             style: {
@@ -5169,7 +5067,7 @@ function CodeScene({
                             children: i + 1
                           }
                         ),
-                        /* @__PURE__ */ CodeTestimonialScene_jsx("span", { style: { flex: 1 }, children: highlightSyntax(line, syntaxColors) })
+                        /* @__PURE__ */ (0,jsx_runtime.jsx)("span", { style: { flex: 1 }, children: highlightSyntax(line, syntaxColors) })
                       ] }, i))
                     }
                   )
@@ -5185,7 +5083,7 @@ function CodeScene({
 function highlightSyntax(line, colors) {
   const keywords = ["const", "let", "var", "function", "return", "if", "else", "for", "while", "class", "import", "export", "from", "async", "await", "try", "catch", "throw", "new", "this", "true", "false", "null", "undefined"];
   let result = line;
-  return /* @__PURE__ */ CodeTestimonialScene_jsx("span", { dangerouslySetInnerHTML: { __html: escapeHtml(line) } });
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)("span", { dangerouslySetInnerHTML: { __html: escapeHtml(line) } });
 }
 function escapeHtml(text) {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -5196,21 +5094,21 @@ function TestimonialScene({
   motionProfile = "dynamic",
   animation
 }) {
-  const frame = CodeTestimonialScene_useCurrentFrame();
-  const { fps } = CodeTestimonialScene_useVideoConfig();
-  const colors = CodeTestimonialScene_getTheme(theme);
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const colors = getTheme(theme);
   const enterDuration = (animation == null ? void 0 : animation.enter) ?? 0.5;
   const holdDuration = (animation == null ? void 0 : animation.hold) ?? 4;
-  const quoteSlide = CodeTestimonialScene_useSlideIn("up", 50, 0.6, 0, motionProfile);
-  const quoteOpacity = CodeTestimonialScene_useFadeIn(0.5, 0, motionProfile);
-  const authorSlide = CodeTestimonialScene_useSlideIn("up", 30, 0.4, 0.3, motionProfile);
-  const authorOpacity = CodeTestimonialScene_useFadeIn(0.4, 0.3, motionProfile);
-  const markScale = CodeTestimonialScene_useScaleIn(0.4, 0, motionProfile);
-  const markOpacity = CodeTestimonialScene_useFadeIn(0.3, 0, motionProfile);
+  const quoteSlide = useSlideIn("up", 50, 0.6, 0, motionProfile);
+  const quoteOpacity = useFadeIn(0.5, 0, motionProfile);
+  const authorSlide = useSlideIn("up", 30, 0.4, 0.3, motionProfile);
+  const authorOpacity = useFadeIn(0.4, 0.3, motionProfile);
+  const markScale = useScaleIn(0.4, 0, motionProfile);
+  const markOpacity = useFadeIn(0.3, 0, motionProfile);
   const exitStart = (enterDuration + holdDuration) * fps;
   const exitProgress = frame > exitStart ? Math.min(1, (frame - exitStart) / (fps * 0.4)) : 0;
   const exitOpacity = 1 - exitProgress;
-  return /* @__PURE__ */ CodeTestimonialScene_jsx(CodeTestimonialScene_BaseScene, { theme, opacity: exitOpacity, children: /* @__PURE__ */ CodeTestimonialScene_jsxs(
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(BaseScene, { theme, opacity: exitOpacity, children: /* @__PURE__ */ (0,jsx_runtime.jsxs)(
     "div",
     {
       style: {
@@ -5223,14 +5121,14 @@ function TestimonialScene({
         gap: 40
       },
       children: [
-        /* @__PURE__ */ CodeTestimonialScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
               transform: `scale(${markScale})`,
               opacity: markOpacity
             },
-            children: /* @__PURE__ */ CodeTestimonialScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "span",
               {
                 style: {
@@ -5244,7 +5142,7 @@ function TestimonialScene({
             )
           }
         ),
-        /* @__PURE__ */ CodeTestimonialScene_jsx(
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
           "div",
           {
             style: {
@@ -5253,7 +5151,7 @@ function TestimonialScene({
               textAlign: "center",
               maxWidth: 900
             },
-            children: /* @__PURE__ */ CodeTestimonialScene_jsx(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "p",
               {
                 style: {
@@ -5269,7 +5167,7 @@ function TestimonialScene({
             )
           }
         ),
-        /* @__PURE__ */ CodeTestimonialScene_jsxs(
+        /* @__PURE__ */ (0,jsx_runtime.jsxs)(
           "div",
           {
             style: {
@@ -5281,7 +5179,7 @@ function TestimonialScene({
               gap: 12
             },
             children: [
-              /* @__PURE__ */ CodeTestimonialScene_jsx(
+              /* @__PURE__ */ (0,jsx_runtime.jsx)(
                 "div",
                 {
                   style: {
@@ -5299,8 +5197,8 @@ function TestimonialScene({
                   children: data.author.charAt(0).toUpperCase()
                 }
               ),
-              /* @__PURE__ */ CodeTestimonialScene_jsxs("div", { style: { textAlign: "center" }, children: [
-                /* @__PURE__ */ CodeTestimonialScene_jsx(
+              /* @__PURE__ */ (0,jsx_runtime.jsxs)("div", { style: { textAlign: "center" }, children: [
+                /* @__PURE__ */ (0,jsx_runtime.jsx)(
                   "div",
                   {
                     style: {
@@ -5311,7 +5209,7 @@ function TestimonialScene({
                     children: data.author
                   }
                 ),
-                data.role && /* @__PURE__ */ CodeTestimonialScene_jsxs(
+                data.role && /* @__PURE__ */ (0,jsx_runtime.jsxs)(
                   "div",
                   {
                     style: {
@@ -5334,16 +5232,6 @@ function TestimonialScene({
 }
 
 ;// ./src/lib/video/components/MotivationalImageScene.tsx
-/* unused harmony import specifier */ var MotivationalImageScene_jsxs;
-/* unused harmony import specifier */ var MotivationalImageScene_jsx;
-/* unused harmony import specifier */ var MotivationalImageScene_Fragment;
-/* unused harmony import specifier */ var MotivationalImageScene_useCurrentFrame;
-/* unused harmony import specifier */ var MotivationalImageScene_useVideoConfig;
-/* unused harmony import specifier */ var MotivationalImageScene_AbsoluteFill;
-/* unused harmony import specifier */ var MotivationalImageScene_Audio;
-/* unused harmony import specifier */ var Img;
-/* unused harmony import specifier */ var MotivationalImageScene_interpolate;
-/* unused harmony import specifier */ var MotivationalImageScene_spring;
 
 
 
@@ -5367,8 +5255,8 @@ function MotivationalImageScene({
   motionProfile = "dynamic",
   animation
 }) {
-  const frame = MotivationalImageScene_useCurrentFrame();
-  const { fps } = MotivationalImageScene_useVideoConfig();
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
   const enterDuration = (animation == null ? void 0 : animation.enter) ?? 1.5;
   const holdDuration = (animation == null ? void 0 : animation.hold) ?? 3;
   const exitDuration = (animation == null ? void 0 : animation.exit) ?? 0.5;
@@ -5384,30 +5272,30 @@ function MotivationalImageScene({
   const overlayOpacity = (colorOverlay == null ? void 0 : colorOverlay.enabled) ? getOverlayOpacity(colorOverlay, frame, fps) : 0;
   const textData = data.text || "";
   const textStyle = data.textStyle || "default";
-  return /* @__PURE__ */ MotivationalImageScene_jsxs(
-    MotivationalImageScene_AbsoluteFill,
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(
+    esm.AbsoluteFill,
     {
       style: {
         backgroundColor: data.backgroundColor || "#000000"
       },
       children: [
-        data.audioSrc && /* @__PURE__ */ MotivationalImageScene_jsx(
-          MotivationalImageScene_Audio,
+        data.audioSrc && /* @__PURE__ */ (0,jsx_runtime.jsx)(
+          esm.Audio,
           {
             src: data.audioSrc,
             volume: data.audioVolume ?? 0.7
           }
         ),
-        /* @__PURE__ */ MotivationalImageScene_jsx(
-          MotivationalImageScene_AbsoluteFill,
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
+          esm.AbsoluteFill,
           {
             style: {
               opacity: imageAnimation.opacity * (1 - exitProgress),
               transform: imageAnimation.transform,
               filter: imageAnimation.filter
             },
-            children: /* @__PURE__ */ MotivationalImageScene_jsx(
-              Img,
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
+              esm.Img,
               {
                 src: data.imageSrc,
                 style: {
@@ -5420,8 +5308,8 @@ function MotivationalImageScene({
             )
           }
         ),
-        (colorOverlay == null ? void 0 : colorOverlay.enabled) && /* @__PURE__ */ MotivationalImageScene_jsx(
-          MotivationalImageScene_AbsoluteFill,
+        (colorOverlay == null ? void 0 : colorOverlay.enabled) && /* @__PURE__ */ (0,jsx_runtime.jsx)(
+          esm.AbsoluteFill,
           {
             style: {
               backgroundColor: colorOverlay.color || "#000000",
@@ -5429,7 +5317,7 @@ function MotivationalImageScene({
             }
           }
         ),
-        textData && /* @__PURE__ */ MotivationalImageScene_jsx(
+        textData && /* @__PURE__ */ (0,jsx_runtime.jsx)(
           TextLayer,
           {
             text: textData,
@@ -5482,8 +5370,8 @@ function TextLayer({
     transform: animationStyles.transform
   };
   const styleSpecifics = getTextStyleSpecifics(textStyle, textColor);
-  return /* @__PURE__ */ MotivationalImageScene_jsx(
-    MotivationalImageScene_AbsoluteFill,
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+    esm.AbsoluteFill,
     {
       style: {
         display: "flex",
@@ -5492,7 +5380,7 @@ function TextLayer({
         padding: "40px",
         pointerEvents: "none"
       },
-      children: /* @__PURE__ */ MotivationalImageScene_jsx("div", { style: { ...baseStyles, ...styleSpecifics }, children: textStyle === "typing" ? /* @__PURE__ */ MotivationalImageScene_jsx(TypewriterText, { text, frame: delayedFrame, fps }) : textStyle === "words" ? /* @__PURE__ */ MotivationalImageScene_jsx(WordByWordText, { text, frame: delayedFrame, fps }) : text })
+      children: /* @__PURE__ */ (0,jsx_runtime.jsx)("div", { style: { ...baseStyles, ...styleSpecifics }, children: textStyle === "typing" ? /* @__PURE__ */ (0,jsx_runtime.jsx)(TypewriterText, { text, frame: delayedFrame, fps }) : textStyle === "words" ? /* @__PURE__ */ (0,jsx_runtime.jsx)(WordByWordText, { text, frame: delayedFrame, fps }) : text })
     }
   );
 }
@@ -5541,34 +5429,34 @@ function getTextAnimation(textStyle, progress, frame, fps) {
       };
     case "quote":
       return {
-        opacity: MotivationalImageScene_interpolate(progress, [0, 0.5, 1], [0, 0.8, 1]),
-        transform: `translateX(${MotivationalImageScene_interpolate(progress, [0, 1], [-30, 0])}px)`
+        opacity: (0,esm.interpolate)(progress, [0, 0.5, 1], [0, 0.8, 1]),
+        transform: `translateX(${(0,esm.interpolate)(progress, [0, 1], [-30, 0])}px)`
       };
     case "glow":
       const pulse = 0.8 + 0.2 * Math.sin(frame / fps * Math.PI * 2);
       return {
-        opacity: MotivationalImageScene_interpolate(progress, [0, 1], [0, 1]) * pulse,
+        opacity: (0,esm.interpolate)(progress, [0, 1], [0, 1]) * pulse,
         transform: "none"
       };
     case "outline":
       return {
-        opacity: MotivationalImageScene_interpolate(progress, [0, 1], [0, 1]),
-        transform: `scale(${MotivationalImageScene_interpolate(progress, [0, 1], [0.9, 1])})`
+        opacity: (0,esm.interpolate)(progress, [0, 1], [0, 1]),
+        transform: `scale(${(0,esm.interpolate)(progress, [0, 1], [0.9, 1])})`
       };
     case "bold-glow":
-      const springProgress = MotivationalImageScene_spring({ frame, fps, config: { damping: 12, stiffness: 100 } });
+      const springProgress = (0,esm.spring)({ frame, fps, config: { damping: 12, stiffness: 100 } });
       return {
-        opacity: MotivationalImageScene_interpolate(progress, [0, 1], [0, 1]),
+        opacity: (0,esm.interpolate)(progress, [0, 1], [0, 1]),
         transform: `scale(${springProgress})`
       };
     case "shadow":
       return {
-        opacity: MotivationalImageScene_interpolate(progress, [0, 1], [0, 1]),
-        transform: `translateY(${MotivationalImageScene_interpolate(progress, [0, 1], [30, 0])}px)`
+        opacity: (0,esm.interpolate)(progress, [0, 1], [0, 1]),
+        transform: `translateY(${(0,esm.interpolate)(progress, [0, 1], [30, 0])}px)`
       };
     default:
       return {
-        opacity: MotivationalImageScene_interpolate(progress, [0, 1], [0, 1]),
+        opacity: (0,esm.interpolate)(progress, [0, 1], [0, 1]),
         transform: "none"
       };
   }
@@ -5580,9 +5468,9 @@ function TypewriterText({ text, frame, fps }) {
   const progress = Math.min(1, frame / fps / duration);
   const visibleChars = Math.floor(progress * totalChars);
   const visibleText = text.slice(0, visibleChars);
-  return /* @__PURE__ */ MotivationalImageScene_jsxs(MotivationalImageScene_Fragment, { children: [
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(jsx_runtime.Fragment, { children: [
     visibleText,
-    progress < 1 && /* @__PURE__ */ MotivationalImageScene_jsx("span", { style: { opacity: 0.8 }, children: "|" })
+    progress < 1 && /* @__PURE__ */ (0,jsx_runtime.jsx)("span", { style: { opacity: 0.8 }, children: "|" })
   ] });
 }
 function WordByWordText({ text, frame, fps }) {
@@ -5591,7 +5479,7 @@ function WordByWordText({ text, frame, fps }) {
   const duration = words.length / wordsPerSecond;
   const progress = Math.min(1, frame / fps / duration);
   const visibleWords = Math.floor(progress * words.length);
-  return /* @__PURE__ */ MotivationalImageScene_jsx(MotivationalImageScene_Fragment, { children: words.map((word, i) => /* @__PURE__ */ MotivationalImageScene_jsx(
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(jsx_runtime.Fragment, { children: words.map((word, i) => /* @__PURE__ */ (0,jsx_runtime.jsx)(
     "span",
     {
       style: {
@@ -5628,32 +5516,32 @@ function useImageAnimation({
       return { opacity: 1, transform: "none", filter: "none" };
     case "fade":
       return {
-        opacity: MotivationalImageScene_interpolate(progress, [0, 1], [0, 1]),
+        opacity: (0,esm.interpolate)(progress, [0, 1], [0, 1]),
         transform: "none",
         filter: "none"
       };
     case "slide-up":
       return {
-        opacity: MotivationalImageScene_interpolate(progress, [0, 0.3, 1], [0, 0.5, 1]),
-        transform: `translateY(${MotivationalImageScene_interpolate(progress, [0, 1], [100, 0])}px)`,
+        opacity: (0,esm.interpolate)(progress, [0, 0.3, 1], [0, 0.5, 1]),
+        transform: `translateY(${(0,esm.interpolate)(progress, [0, 1], [100, 0])}px)`,
         filter: "none"
       };
     case "slide-down":
       return {
-        opacity: MotivationalImageScene_interpolate(progress, [0, 0.3, 1], [0, 0.5, 1]),
-        transform: `translateY(${MotivationalImageScene_interpolate(progress, [0, 1], [-100, 0])}px)`,
+        opacity: (0,esm.interpolate)(progress, [0, 0.3, 1], [0, 0.5, 1]),
+        transform: `translateY(${(0,esm.interpolate)(progress, [0, 1], [-100, 0])}px)`,
         filter: "none"
       };
     case "zoom-in":
       return {
-        opacity: MotivationalImageScene_interpolate(progress, [0, 0.5, 1], [0, 0.5, 1]),
-        transform: `scale(${MotivationalImageScene_interpolate(progress, [0, 1], [0.5, 1])})`,
+        opacity: (0,esm.interpolate)(progress, [0, 0.5, 1], [0, 0.5, 1]),
+        transform: `scale(${(0,esm.interpolate)(progress, [0, 1], [0.5, 1])})`,
         filter: "none"
       };
     case "zoom-out":
       return {
-        opacity: MotivationalImageScene_interpolate(progress, [0, 0.5, 1], [0, 0.5, 1]),
-        transform: `scale(${MotivationalImageScene_interpolate(progress, [0, 1], [1.5, 1])})`,
+        opacity: (0,esm.interpolate)(progress, [0, 0.5, 1], [0, 0.5, 1]),
+        transform: `scale(${(0,esm.interpolate)(progress, [0, 1], [1.5, 1])})`,
         filter: "none"
       };
     case "ken-burns": {
@@ -5662,31 +5550,31 @@ function useImageAnimation({
       const panX = Math.sin(time * 0.2) * 20;
       const panY = Math.cos(time * 0.15) * 15;
       return {
-        opacity: MotivationalImageScene_interpolate(progress, [0, 0.3, 1], [0, 1, 1]),
+        opacity: (0,esm.interpolate)(progress, [0, 0.3, 1], [0, 1, 1]),
         transform: `scale(${zoom}) translate(${panX}px, ${panY}px)`,
         filter: "none"
       };
     }
     case "blur":
       return {
-        opacity: MotivationalImageScene_interpolate(progress, [0, 0.3, 1], [0, 0.7, 1]),
+        opacity: (0,esm.interpolate)(progress, [0, 0.3, 1], [0, 0.7, 1]),
         transform: "none",
-        filter: `blur(${MotivationalImageScene_interpolate(progress, [0, 1], [20, 0])}px)`
+        filter: `blur(${(0,esm.interpolate)(progress, [0, 1], [20, 0])}px)`
       };
     case "rotate":
       return {
-        opacity: MotivationalImageScene_interpolate(progress, [0, 0.5, 1], [0, 0.7, 1]),
-        transform: `rotate(${MotivationalImageScene_interpolate(progress, [0, 1], [-15, 0])}deg) scale(${MotivationalImageScene_interpolate(progress, [0, 1], [1.2, 1])})`,
+        opacity: (0,esm.interpolate)(progress, [0, 0.5, 1], [0, 0.7, 1]),
+        transform: `rotate(${(0,esm.interpolate)(progress, [0, 1], [-15, 0])}deg) scale(${(0,esm.interpolate)(progress, [0, 1], [1.2, 1])})`,
         filter: "none"
       };
     case "bounce": {
-      const bounceProgress = MotivationalImageScene_spring({
+      const bounceProgress = (0,esm.spring)({
         frame,
         fps,
         config: { damping: 10, stiffness: 100, mass: 0.8 }
       });
       return {
-        opacity: MotivationalImageScene_interpolate(progress, [0, 0.3, 1], [0, 0.7, 1]),
+        opacity: (0,esm.interpolate)(progress, [0, 0.3, 1], [0, 0.7, 1]),
         transform: `scale(${bounceProgress})`,
         filter: "none"
       };
@@ -5713,1612 +5601,7 @@ function getOverlayOpacity(overlay, frame, fps) {
 }
 /* harmony default export */ const components_MotivationalImageScene = ((/* unused pure expression or super */ null && (MotivationalImageScene)));
 
-;// ./src/lib/video/components/CounterScene.tsx
-/* unused harmony import specifier */ var CounterScene_jsx;
-/* unused harmony import specifier */ var CounterScene_jsxs;
-/* unused harmony import specifier */ var CounterScene_useCurrentFrame;
-/* unused harmony import specifier */ var CounterScene_spring;
-/* unused harmony import specifier */ var CounterScene_interpolate;
-/* unused harmony import specifier */ var Easing;
-/* unused harmony import specifier */ var CounterScene_extractCustomization;
-/* unused harmony import specifier */ var CounterScene_BaseScene;
-/* unused harmony import specifier */ var CounterScene_getTheme;
-
-
-
-
-
-function CounterScene({ data, theme, motionProfile, animation }) {
-  const frame = CounterScene_useCurrentFrame();
-  const colors = CounterScene_getTheme(theme);
-  const fps = 30;
-  const {
-    label,
-    from = 0,
-    to = 100,
-    duration = 3,
-    prefix = "",
-    suffix = "",
-    decimals = 0,
-    color,
-    animationStyle = "easeOut"
-  } = data;
-  const customization = CounterScene_extractCustomization(data);
-  const progress = Math.min(frame / (duration * fps), 1);
-  let easedProgress;
-  switch (animationStyle) {
-    case "linear":
-      easedProgress = progress;
-      break;
-    case "bounce":
-      easedProgress = CounterScene_spring({
-        frame,
-        fps,
-        config: { damping: 10, stiffness: 100 }
-      });
-      break;
-    case "easeInOut":
-      easedProgress = CounterScene_interpolate(progress, [0, 1], [0, 1], {
-        easing: Easing.inOut(Easing.ease)
-      });
-      break;
-    case "easeOut":
-    default:
-      easedProgress = CounterScene_interpolate(progress, [0, 1], [0, 1], {
-        easing: Easing.out(Easing.ease)
-      });
-  }
-  const currentValue = from + (to - from) * easedProgress;
-  const opacity = CounterScene_interpolate(
-    frame,
-    [0, animation.enter * fps],
-    [0, 1],
-    { extrapolateRight: "clamp" }
-  );
-  const scale = CounterScene_spring({
-    frame,
-    fps,
-    config: { damping: 12, stiffness: 100 }
-  });
-  const y = CounterScene_interpolate(
-    frame,
-    [0, animation.enter * fps],
-    [50, 0],
-    { extrapolateRight: "clamp" }
-  );
-  const formattedValue = decimals > 0 ? currentValue.toFixed(decimals) : Math.round(currentValue).toLocaleString();
-  return /* @__PURE__ */ CounterScene_jsx(CounterScene_BaseScene, { theme, customization, animation, opacity, children: /* @__PURE__ */ CounterScene_jsxs(
-    "div",
-    {
-      style: {
-        transform: `translateY(${y}px) scale(${scale})`,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 16
-      },
-      children: [
-        /* @__PURE__ */ CounterScene_jsxs(
-          "div",
-          {
-            style: {
-              fontSize: 120,
-              fontWeight: 800,
-              fontFamily: "system-ui, sans-serif",
-              color: color || colors.primary,
-              textShadow: `0 0 40px ${color || colors.primary}40`
-            },
-            children: [
-              prefix,
-              formattedValue,
-              suffix
-            ]
-          }
-        ),
-        /* @__PURE__ */ CounterScene_jsx(
-          "div",
-          {
-            style: {
-              fontSize: 36,
-              fontFamily: "system-ui, sans-serif",
-              color: colors.muted,
-              letterSpacing: 1,
-              textTransform: "uppercase"
-            },
-            children: label
-          }
-        )
-      ]
-    }
-  ) });
-}
-
-;// ./src/lib/video/components/ProgressBarScene.tsx
-/* unused harmony import specifier */ var ProgressBarScene_jsx;
-/* unused harmony import specifier */ var ProgressBarScene_jsxs;
-/* unused harmony import specifier */ var ProgressBarScene_useCurrentFrame;
-/* unused harmony import specifier */ var ProgressBarScene_interpolate;
-/* unused harmony import specifier */ var ProgressBarScene_spring;
-/* unused harmony import specifier */ var ProgressBarScene_extractCustomization;
-/* unused harmony import specifier */ var ProgressBarScene_BaseScene;
-/* unused harmony import specifier */ var ProgressBarScene_getTheme;
-
-
-
-
-
-function ProgressBarScene({ data, theme, motionProfile, animation }) {
-  const frame = ProgressBarScene_useCurrentFrame();
-  const colors = ProgressBarScene_getTheme(theme);
-  const fps = 30;
-  const {
-    label,
-    value = 75,
-    color,
-    backgroundColor: barBgColor,
-    height = "medium",
-    showPercentage = true,
-    animated = true,
-    stripes = false
-  } = data;
-  const customization = ProgressBarScene_extractCustomization(data);
-  const heights = { small: 12, medium: 24, large: 40 };
-  const barHeight = heights[height] || 24;
-  const opacity = ProgressBarScene_interpolate(
-    frame,
-    [0, animation.enter * fps],
-    [0, 1],
-    { extrapolateRight: "clamp" }
-  );
-  const scale = ProgressBarScene_spring({
-    frame,
-    fps,
-    config: { damping: 12, stiffness: 100 }
-  });
-  const progressValue = animated ? ProgressBarScene_interpolate(frame, [0, animation.hold * fps * 0.5], [0, value], { extrapolateRight: "clamp" }) : value;
-  const stripeOffset = stripes ? frame % 20 : 0;
-  return /* @__PURE__ */ ProgressBarScene_jsx(ProgressBarScene_BaseScene, { theme, customization, animation, opacity, style: { padding: 40 }, children: /* @__PURE__ */ ProgressBarScene_jsxs(
-    "div",
-    {
-      style: {
-        width: "100%",
-        maxWidth: 600,
-        transform: `scale(${scale})`
-      },
-      children: [
-        label && /* @__PURE__ */ ProgressBarScene_jsx(
-          "div",
-          {
-            style: {
-              fontSize: 32,
-              fontFamily: "system-ui, sans-serif",
-              color: colors.foreground,
-              marginBottom: 16,
-              fontWeight: 600
-            },
-            children: label
-          }
-        ),
-        /* @__PURE__ */ ProgressBarScene_jsx(
-          "div",
-          {
-            style: {
-              width: "100%",
-              height: barHeight,
-              backgroundColor: barBgColor || colors.surface,
-              borderRadius: barHeight / 2,
-              overflow: "hidden",
-              boxShadow: "inset 0 2px 10px rgba(0,0,0,0.3)"
-            },
-            children: /* @__PURE__ */ ProgressBarScene_jsx(
-              "div",
-              {
-                style: {
-                  width: `${progressValue}%`,
-                  height: "100%",
-                  background: stripes ? `repeating-linear-gradient(
-                    -45deg,
-                    ${color || colors.primary},
-                    ${color || colors.primary} 10px,
-                    ${color || colors.primary}cc 10px,
-                    ${color || colors.primary}cc 20px
-                  )` : color || colors.primary,
-                  borderRadius: barHeight / 2,
-                  backgroundPosition: `${stripeOffset}px 0`,
-                  boxShadow: `0 0 20px ${color || colors.primary}60`
-                }
-              }
-            )
-          }
-        ),
-        showPercentage && /* @__PURE__ */ ProgressBarScene_jsxs(
-          "div",
-          {
-            style: {
-              fontSize: 48,
-              fontFamily: "system-ui, sans-serif",
-              color: colors.foreground,
-              marginTop: 20,
-              fontWeight: 700,
-              textAlign: "center"
-            },
-            children: [
-              Math.round(progressValue),
-              "%"
-            ]
-          }
-        )
-      ]
-    }
-  ) });
-}
-
-;// ./src/lib/video/components/QRCodeScene.tsx
-/* unused harmony import specifier */ var QRCodeScene_jsx;
-/* unused harmony import specifier */ var QRCodeScene_jsxs;
-/* unused harmony import specifier */ var QRCodeScene_useCurrentFrame;
-/* unused harmony import specifier */ var QRCodeScene_interpolate;
-/* unused harmony import specifier */ var QRCodeScene_spring;
-/* unused harmony import specifier */ var QRCodeScene_extractCustomization;
-/* unused harmony import specifier */ var QRCodeScene_BaseScene;
-/* unused harmony import specifier */ var QRCodeScene_getTheme;
-
-
-
-
-
-function generateQRPattern(data, modules = 25) {
-  const pattern = [];
-  for (let i = 0; i < modules; i++) {
-    pattern[i] = [];
-    for (let j = 0; j < modules; j++) {
-      const isTopLeft = i < 7 && j < 7;
-      const isTopRight = i < 7 && j >= modules - 7;
-      const isBottomLeft = i >= modules - 7 && j < 7;
-      if (isTopLeft || isTopRight || isBottomLeft) {
-        const localI = isTopLeft ? i : isTopRight ? i : i - (modules - 7);
-        const localJ = isTopLeft ? j : isTopRight ? j - (modules - 7) : j;
-        if (localI === 0 || localI === 6 || localJ === 0 || localJ === 6) {
-          pattern[i][j] = true;
-        } else if (localI >= 2 && localI <= 4 && localJ >= 2 && localJ <= 4) {
-          pattern[i][j] = true;
-        } else {
-          pattern[i][j] = false;
-        }
-      } else {
-        const hash = (data.charCodeAt(i % data.length) + data.charCodeAt(j % data.length)) % 3;
-        pattern[i][j] = hash === 0;
-      }
-    }
-  }
-  return pattern;
-}
-function QRCodeScene({ data, theme, motionProfile, animation }) {
-  const frame = QRCodeScene_useCurrentFrame();
-  const colors = QRCodeScene_getTheme(theme);
-  const fps = 30;
-  const { data: qrData, title, subtitle, size = "medium", fgColor = "#000000", bgColor = "#FFFFFF" } = data;
-  const customization = QRCodeScene_extractCustomization(data);
-  const sizes = { small: 180, medium: 240, large: 320 };
-  const qrSize = sizes[size] || 240;
-  const pattern = generateQRPattern(qrData || "https://example.com");
-  const modules = pattern.length;
-  const moduleSize = qrSize / modules;
-  const opacity = QRCodeScene_interpolate(
-    frame,
-    [0, animation.enter * fps],
-    [0, 1],
-    { extrapolateRight: "clamp" }
-  );
-  const scale = QRCodeScene_spring({
-    frame,
-    fps,
-    config: { damping: 12, stiffness: 80 }
-  });
-  return /* @__PURE__ */ QRCodeScene_jsx(QRCodeScene_BaseScene, { theme, customization, animation, opacity, children: /* @__PURE__ */ QRCodeScene_jsxs(
-    "div",
-    {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 24,
-        transform: `scale(${scale})`
-      },
-      children: [
-        title && /* @__PURE__ */ QRCodeScene_jsx(
-          "div",
-          {
-            style: {
-              fontSize: 36,
-              fontFamily: "system-ui, sans-serif",
-              color: colors.foreground,
-              fontWeight: 700,
-              textAlign: "center"
-            },
-            children: title
-          }
-        ),
-        /* @__PURE__ */ QRCodeScene_jsx(
-          "div",
-          {
-            style: {
-              width: qrSize + 32,
-              height: qrSize + 32,
-              backgroundColor: bgColor,
-              borderRadius: 16,
-              padding: 16,
-              boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center"
-            },
-            children: /* @__PURE__ */ QRCodeScene_jsx("svg", { width: qrSize, height: qrSize, children: pattern.map(
-              (row, i) => row.map((cell, j) => /* @__PURE__ */ QRCodeScene_jsx(
-                "rect",
-                {
-                  x: j * moduleSize,
-                  y: i * moduleSize,
-                  width: moduleSize,
-                  height: moduleSize,
-                  fill: cell ? fgColor : "transparent"
-                },
-                `${i}-${j}`
-              ))
-            ) })
-          }
-        ),
-        subtitle && /* @__PURE__ */ QRCodeScene_jsx(
-          "div",
-          {
-            style: {
-              fontSize: 24,
-              fontFamily: "system-ui, sans-serif",
-              color: colors.muted,
-              textAlign: "center"
-            },
-            children: subtitle
-          }
-        )
-      ]
-    }
-  ) });
-}
-
-;// ./src/lib/video/components/VideoScene.tsx
-/* unused harmony import specifier */ var VideoScene_jsx;
-/* unused harmony import specifier */ var VideoScene_jsxs;
-/* unused harmony import specifier */ var VideoScene_useCurrentFrame;
-/* unused harmony import specifier */ var VideoScene_spring;
-/* unused harmony import specifier */ var VideoScene_AbsoluteFill;
-/* unused harmony import specifier */ var VideoScene_getTheme;
-
-
-
-
-function VideoScene({ data, theme, animation }) {
-  const frame = VideoScene_useCurrentFrame();
-  const colors = VideoScene_getTheme(theme);
-  const fps = 30;
-  const { src, poster, caption, muted = true } = data;
-  const scale = VideoScene_spring({
-    frame,
-    fps,
-    config: { damping: 12, stiffness: 80 }
-  });
-  const opacity = VideoScene_spring({
-    frame,
-    fps,
-    config: { damping: 15, stiffness: 50 }
-  });
-  return /* @__PURE__ */ VideoScene_jsx(
-    VideoScene_AbsoluteFill,
-    {
-      style: {
-        backgroundColor: colors.background,
-        justifyContent: "center",
-        alignItems: "center",
-        opacity
-      },
-      children: /* @__PURE__ */ VideoScene_jsxs(
-        "div",
-        {
-          style: {
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 24,
-            transform: `scale(${scale})`,
-            width: "90%",
-            maxWidth: 800
-          },
-          children: [
-            /* @__PURE__ */ VideoScene_jsx(
-              "div",
-              {
-                style: {
-                  width: "100%",
-                  borderRadius: 20,
-                  overflow: "hidden",
-                  backgroundColor: "#000",
-                  boxShadow: "0 20px 60px rgba(0,0,0,0.4)"
-                },
-                children: /* @__PURE__ */ VideoScene_jsxs(
-                  "div",
-                  {
-                    style: {
-                      width: "100%",
-                      aspectRatio: "16/9",
-                      backgroundColor: "#1a1a1a",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      position: "relative"
-                    },
-                    children: [
-                      poster ? /* @__PURE__ */ VideoScene_jsx(
-                        "img",
-                        {
-                          src: poster,
-                          alt: caption || "Video",
-                          style: { width: "100%", height: "100%", objectFit: "cover" }
-                        }
-                      ) : /* @__PURE__ */ VideoScene_jsx(
-                        "div",
-                        {
-                          style: {
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            width: 80,
-                            height: 80,
-                            borderRadius: "50%",
-                            backgroundColor: "rgba(255,255,255,0.2)"
-                          },
-                          children: /* @__PURE__ */ VideoScene_jsx(
-                            "div",
-                            {
-                              style: {
-                                width: 0,
-                                height: 0,
-                                borderLeft: "24px solid white",
-                                borderTop: "14px solid transparent",
-                                borderBottom: "14px solid transparent",
-                                marginLeft: 6
-                              }
-                            }
-                          )
-                        }
-                      ),
-                      muted && /* @__PURE__ */ VideoScene_jsx(
-                        "div",
-                        {
-                          style: {
-                            position: "absolute",
-                            top: 16,
-                            right: 16,
-                            backgroundColor: "rgba(0,0,0,0.6)",
-                            padding: "8px 12px",
-                            borderRadius: 8,
-                            fontSize: 14,
-                            color: "#FFFFFF",
-                            fontFamily: "system-ui, sans-serif"
-                          },
-                          children: "\u{1F507} Muted"
-                        }
-                      ),
-                      src && /* @__PURE__ */ VideoScene_jsx(
-                        "div",
-                        {
-                          style: {
-                            position: "absolute",
-                            bottom: 16,
-                            left: 16,
-                            backgroundColor: "rgba(0,0,0,0.6)",
-                            padding: "6px 12px",
-                            borderRadius: 6,
-                            fontSize: 12,
-                            color: "#FFFFFF",
-                            fontFamily: "system-ui, sans-serif"
-                          },
-                          children: "\u{1F3AC} Video Block"
-                        }
-                      )
-                    ]
-                  }
-                )
-              }
-            ),
-            caption && /* @__PURE__ */ VideoScene_jsx(
-              "div",
-              {
-                style: {
-                  fontSize: 24,
-                  fontFamily: "system-ui, sans-serif",
-                  color: colors.textSecondary,
-                  textAlign: "center",
-                  maxWidth: 600
-                },
-                children: caption
-              }
-            )
-          ]
-        }
-      )
-    }
-  );
-}
-
-;// ./src/lib/video/components/AvatarGridScene.tsx
-/* unused harmony import specifier */ var AvatarGridScene_jsx;
-/* unused harmony import specifier */ var AvatarGridScene_jsxs;
-/* unused harmony import specifier */ var AvatarGridScene_useCurrentFrame;
-/* unused harmony import specifier */ var AvatarGridScene_spring;
-/* unused harmony import specifier */ var AvatarGridScene_extractCustomization;
-/* unused harmony import specifier */ var AvatarGridScene_BaseScene;
-/* unused harmony import specifier */ var AvatarGridScene_getTheme;
-
-
-
-
-
-function getAvatarColor(name) {
-  const avatarColors = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#06B6D4", "#F97316"];
-  const hash = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return avatarColors[hash % avatarColors.length];
-}
-function getInitials(name) {
-  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
-}
-function AvatarGridScene({ data, theme, motionProfile, animation }) {
-  const frame = AvatarGridScene_useCurrentFrame();
-  const colors = AvatarGridScene_getTheme(theme);
-  const fps = 30;
-  const { title, subtitle, avatars = [], layout = "grid", columns = 3 } = data;
-  const customization = AvatarGridScene_extractCustomization(data);
-  const displayAvatars = avatars.length > 0 ? avatars : [
-    { name: "John Doe", role: "CEO" },
-    { name: "Jane Smith", role: "CTO" },
-    { name: "Bob Wilson", role: "Designer" }
-  ];
-  const scale = AvatarGridScene_spring({
-    frame,
-    fps,
-    config: { damping: 12, stiffness: 100 }
-  });
-  return /* @__PURE__ */ AvatarGridScene_jsx(AvatarGridScene_BaseScene, { theme, customization, animation, style: { padding: 40 }, children: /* @__PURE__ */ AvatarGridScene_jsxs(
-    "div",
-    {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 40,
-        transform: `scale(${scale})`
-      },
-      children: [
-        title && /* @__PURE__ */ AvatarGridScene_jsx(
-          "div",
-          {
-            style: {
-              fontSize: 36,
-              fontFamily: "system-ui, sans-serif",
-              color: colors.foreground,
-              fontWeight: 700,
-              textAlign: "center"
-            },
-            children: title
-          }
-        ),
-        subtitle && /* @__PURE__ */ AvatarGridScene_jsx(
-          "div",
-          {
-            style: {
-              fontSize: 20,
-              fontFamily: "system-ui, sans-serif",
-              color: colors.muted,
-              textAlign: "center"
-            },
-            children: subtitle
-          }
-        ),
-        /* @__PURE__ */ AvatarGridScene_jsx(
-          "div",
-          {
-            style: {
-              display: "grid",
-              gridTemplateColumns: `repeat(${columns}, 1fr)`,
-              gap: 32,
-              maxWidth: 800
-            },
-            children: displayAvatars.map((avatar, index) => {
-              const avatarScale = AvatarGridScene_spring({
-                frame: frame - index * 5,
-                fps,
-                config: { damping: 12, stiffness: 100 }
-              });
-              const avatarColor = getAvatarColor(avatar.name);
-              const initials = getInitials(avatar.name);
-              return /* @__PURE__ */ AvatarGridScene_jsxs(
-                "div",
-                {
-                  style: {
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: 12,
-                    transform: `scale(${avatarScale})`
-                  },
-                  children: [
-                    /* @__PURE__ */ AvatarGridScene_jsx(
-                      "div",
-                      {
-                        style: {
-                          width: 100,
-                          height: 100,
-                          borderRadius: "50%",
-                          backgroundColor: avatar.image ? "transparent" : avatarColor,
-                          overflow: "hidden",
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          fontSize: 36,
-                          fontWeight: 700,
-                          color: "#FFFFFF",
-                          boxShadow: `0 8px 24px ${avatarColor}40`
-                        },
-                        children: avatar.image ? /* @__PURE__ */ AvatarGridScene_jsx(
-                          "img",
-                          {
-                            src: avatar.image,
-                            alt: avatar.name,
-                            style: { width: "100%", height: "100%", objectFit: "cover" }
-                          }
-                        ) : initials
-                      }
-                    ),
-                    /* @__PURE__ */ AvatarGridScene_jsx(
-                      "div",
-                      {
-                        style: {
-                          fontSize: 20,
-                          fontFamily: "system-ui, sans-serif",
-                          color: colors.foreground,
-                          fontWeight: 600,
-                          textAlign: "center"
-                        },
-                        children: avatar.name
-                      }
-                    ),
-                    avatar.role && /* @__PURE__ */ AvatarGridScene_jsx(
-                      "div",
-                      {
-                        style: {
-                          fontSize: 14,
-                          fontFamily: "system-ui, sans-serif",
-                          color: colors.muted,
-                          textAlign: "center"
-                        },
-                        children: avatar.role
-                      }
-                    )
-                  ]
-                },
-                index
-              );
-            })
-          }
-        )
-      ]
-    }
-  ) });
-}
-
-;// ./src/lib/video/components/SocialStatsScene.tsx
-/* unused harmony import specifier */ var SocialStatsScene_jsx;
-/* unused harmony import specifier */ var SocialStatsScene_jsxs;
-/* unused harmony import specifier */ var SocialStatsScene_useCurrentFrame;
-/* unused harmony import specifier */ var SocialStatsScene_spring;
-/* unused harmony import specifier */ var SocialStatsScene_extractCustomization;
-/* unused harmony import specifier */ var SocialStatsScene_BaseScene;
-/* unused harmony import specifier */ var SocialStatsScene_getTheme;
-
-
-
-
-
-const platformConfig = {
-  twitter: { color: "#1DA1F2", icon: "\u{1D54F}" },
-  instagram: { color: "#E4405F", icon: "\u{1F4F7}" },
-  youtube: { color: "#FF0000", icon: "\u25B6\uFE0F" },
-  tiktok: { color: "#000000", icon: "\u{1F3B5}" },
-  linkedin: { color: "#0A66C2", icon: "\u{1F4BC}" },
-  facebook: { color: "#1877F2", icon: "\u{1F4D8}" }
-};
-function SocialStatsScene({ data, theme, motionProfile, animation }) {
-  const frame = SocialStatsScene_useCurrentFrame();
-  const colors = SocialStatsScene_getTheme(theme);
-  const fps = 30;
-  const {
-    platform = "twitter",
-    username = "@username",
-    followers = 5e4,
-    posts,
-    likes,
-    verified = false,
-    showGrowth = true,
-    growthPercentage = 15.5
-  } = data;
-  const customization = SocialStatsScene_extractCustomization(data);
-  const platformData = platformConfig[platform] || platformConfig.twitter;
-  const scale = SocialStatsScene_spring({
-    frame,
-    fps,
-    config: { damping: 12, stiffness: 80 }
-  });
-  const formatNumber = (num) => {
-    if (num >= 1e6) return `${(num / 1e6).toFixed(1)}M`;
-    if (num >= 1e3) return `${(num / 1e3).toFixed(1)}K`;
-    return num.toLocaleString();
-  };
-  return /* @__PURE__ */ SocialStatsScene_jsx(SocialStatsScene_BaseScene, { theme, customization, animation, children: /* @__PURE__ */ SocialStatsScene_jsxs(
-    "div",
-    {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 32,
-        transform: `scale(${scale})`
-      },
-      children: [
-        /* @__PURE__ */ SocialStatsScene_jsxs(
-          "div",
-          {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: 16
-            },
-            children: [
-              /* @__PURE__ */ SocialStatsScene_jsx(
-                "div",
-                {
-                  style: {
-                    width: 64,
-                    height: 64,
-                    borderRadius: "50%",
-                    backgroundColor: platformData.color,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    fontSize: 32
-                  },
-                  children: platformData.icon
-                }
-              ),
-              /* @__PURE__ */ SocialStatsScene_jsxs("div", { children: [
-                /* @__PURE__ */ SocialStatsScene_jsxs(
-                  "div",
-                  {
-                    style: {
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8
-                    },
-                    children: [
-                      /* @__PURE__ */ SocialStatsScene_jsx(
-                        "span",
-                        {
-                          style: {
-                            fontSize: 28,
-                            fontFamily: "system-ui, sans-serif",
-                            color: colors.foreground,
-                            fontWeight: 700
-                          },
-                          children: username
-                        }
-                      ),
-                      verified && /* @__PURE__ */ SocialStatsScene_jsx(
-                        "span",
-                        {
-                          style: {
-                            width: 24,
-                            height: 24,
-                            borderRadius: "50%",
-                            backgroundColor: platformData.color,
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            fontSize: 14,
-                            color: "#FFFFFF"
-                          },
-                          children: "\u2713"
-                        }
-                      )
-                    ]
-                  }
-                ),
-                /* @__PURE__ */ SocialStatsScene_jsx(
-                  "span",
-                  {
-                    style: {
-                      fontSize: 16,
-                      fontFamily: "system-ui, sans-serif",
-                      color: colors.muted
-                    },
-                    children: platform.charAt(0).toUpperCase() + platform.slice(1)
-                  }
-                )
-              ] })
-            ]
-          }
-        ),
-        /* @__PURE__ */ SocialStatsScene_jsxs(
-          "div",
-          {
-            style: {
-              display: "flex",
-              justifyContent: "center",
-              gap: 48
-            },
-            children: [
-              /* @__PURE__ */ SocialStatsScene_jsxs("div", { style: { textAlign: "center" }, children: [
-                /* @__PURE__ */ SocialStatsScene_jsx(
-                  "div",
-                  {
-                    style: {
-                      fontSize: 64,
-                      fontFamily: "system-ui, sans-serif",
-                      color: colors.foreground,
-                      fontWeight: 800
-                    },
-                    children: formatNumber(followers)
-                  }
-                ),
-                /* @__PURE__ */ SocialStatsScene_jsx(
-                  "div",
-                  {
-                    style: {
-                      fontSize: 18,
-                      fontFamily: "system-ui, sans-serif",
-                      color: colors.muted,
-                      textTransform: "uppercase",
-                      letterSpacing: 2
-                    },
-                    children: "Followers"
-                  }
-                ),
-                showGrowth && growthPercentage && /* @__PURE__ */ SocialStatsScene_jsxs(
-                  "div",
-                  {
-                    style: {
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 4,
-                      marginTop: 8,
-                      color: "#10B981",
-                      fontSize: 16,
-                      fontWeight: 600
-                    },
-                    children: [
-                      "\u2191 ",
-                      growthPercentage,
-                      "%"
-                    ]
-                  }
-                )
-              ] }),
-              posts !== void 0 && /* @__PURE__ */ SocialStatsScene_jsxs("div", { style: { textAlign: "center" }, children: [
-                /* @__PURE__ */ SocialStatsScene_jsx(
-                  "div",
-                  {
-                    style: {
-                      fontSize: 40,
-                      fontFamily: "system-ui, sans-serif",
-                      color: colors.muted,
-                      fontWeight: 700
-                    },
-                    children: formatNumber(posts)
-                  }
-                ),
-                /* @__PURE__ */ SocialStatsScene_jsx(
-                  "div",
-                  {
-                    style: {
-                      fontSize: 14,
-                      fontFamily: "system-ui, sans-serif",
-                      color: colors.muted,
-                      textTransform: "uppercase"
-                    },
-                    children: "Posts"
-                  }
-                )
-              ] }),
-              likes !== void 0 && /* @__PURE__ */ SocialStatsScene_jsxs("div", { style: { textAlign: "center" }, children: [
-                /* @__PURE__ */ SocialStatsScene_jsx(
-                  "div",
-                  {
-                    style: {
-                      fontSize: 40,
-                      fontFamily: "system-ui, sans-serif",
-                      color: colors.muted,
-                      fontWeight: 700
-                    },
-                    children: formatNumber(likes)
-                  }
-                ),
-                /* @__PURE__ */ SocialStatsScene_jsx(
-                  "div",
-                  {
-                    style: {
-                      fontSize: 14,
-                      fontFamily: "system-ui, sans-serif",
-                      color: colors.muted,
-                      textTransform: "uppercase"
-                    },
-                    children: "Likes"
-                  }
-                )
-              ] })
-            ]
-          }
-        )
-      ]
-    }
-  ) });
-}
-
-;// ./src/lib/video/components/CTAScene.tsx
-/* unused harmony import specifier */ var CTAScene_jsx;
-/* unused harmony import specifier */ var CTAScene_jsxs;
-/* unused harmony import specifier */ var CTAScene_useCurrentFrame;
-/* unused harmony import specifier */ var CTAScene_interpolate;
-/* unused harmony import specifier */ var CTAScene_spring;
-/* unused harmony import specifier */ var CTAScene_extractCustomization;
-/* unused harmony import specifier */ var CTAScene_BaseScene;
-/* unused harmony import specifier */ var CTAScene_getTheme;
-
-
-
-
-
-function CTAScene({ data, theme, motionProfile, animation }) {
-  const frame = CTAScene_useCurrentFrame();
-  const colors = CTAScene_getTheme(theme);
-  const fps = 30;
-  const {
-    text,
-    description,
-    buttonStyle = "primary",
-    color,
-    size = "large",
-    icon,
-    pulse = true
-  } = data;
-  const customization = CTAScene_extractCustomization(data);
-  const opacity = CTAScene_interpolate(
-    frame,
-    [0, animation.enter * fps],
-    [0, 1],
-    { extrapolateRight: "clamp" }
-  );
-  const y = CTAScene_spring({
-    frame,
-    fps,
-    config: { damping: 12, stiffness: 80 }
-  });
-  const pulseScale = pulse ? 1 + Math.sin(frame * 0.15) * 0.05 : 1;
-  const glowIntensity = pulse ? 0.3 + Math.sin(frame * 0.1) * 0.2 : 0.3;
-  const sizes = {
-    small: { padding: "12px 32px", fontSize: 20, borderRadius: 8 },
-    medium: { padding: "16px 48px", fontSize: 24, borderRadius: 12 },
-    large: { padding: "20px 64px", fontSize: 32, borderRadius: 16 }
-  };
-  const sizeConfig = sizes[size] || sizes.large;
-  const buttonStyles = {
-    primary: {
-      backgroundColor: color || colors.primary,
-      color: "#FFFFFF",
-      border: "none"
-    },
-    secondary: {
-      backgroundColor: colors.surface,
-      color: colors.foreground,
-      border: `2px solid ${colors.border}`
-    },
-    outline: {
-      backgroundColor: "transparent",
-      color: color || colors.primary,
-      border: `3px solid ${color || colors.primary}`
-    },
-    ghost: {
-      backgroundColor: "transparent",
-      color: colors.foreground,
-      border: "none"
-    }
-  };
-  const styleConfig = buttonStyles[buttonStyle] || buttonStyles.primary;
-  return /* @__PURE__ */ CTAScene_jsx(CTAScene_BaseScene, { theme, customization, animation, opacity, children: /* @__PURE__ */ CTAScene_jsxs(
-    "div",
-    {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 32,
-        transform: `translateY(${(1 - y) * 50}px)`
-      },
-      children: [
-        description && /* @__PURE__ */ CTAScene_jsx(
-          "div",
-          {
-            style: {
-              fontSize: 28,
-              fontFamily: "system-ui, sans-serif",
-              color: colors.muted,
-              textAlign: "center",
-              maxWidth: 500,
-              lineHeight: 1.5
-            },
-            children: description
-          }
-        ),
-        /* @__PURE__ */ CTAScene_jsxs(
-          "button",
-          {
-            style: {
-              padding: sizeConfig.padding,
-              fontSize: sizeConfig.fontSize,
-              fontFamily: "system-ui, sans-serif",
-              fontWeight: 700,
-              color: styleConfig.color,
-              backgroundColor: styleConfig.backgroundColor,
-              border: styleConfig.border,
-              borderRadius: sizeConfig.borderRadius,
-              cursor: "pointer",
-              transform: `scale(${pulseScale * y})`,
-              boxShadow: pulse && buttonStyle === "primary" ? `0 0 60px ${color || colors.primary}${Math.round(glowIntensity * 255).toString(16).padStart(2, "0")}` : "0 10px 30px rgba(0,0,0,0.2)",
-              display: "flex",
-              alignItems: "center",
-              gap: 12
-            },
-            children: [
-              icon && /* @__PURE__ */ CTAScene_jsx("span", { style: { fontSize: sizeConfig.fontSize * 1.2 }, children: icon }),
-              text
-            ]
-          }
-        )
-      ]
-    }
-  ) });
-}
-
-;// ./src/lib/video/components/GradientTextScene.tsx
-/* unused harmony import specifier */ var GradientTextScene_jsx;
-/* unused harmony import specifier */ var GradientTextScene_jsxs;
-/* unused harmony import specifier */ var GradientTextScene_useCurrentFrame;
-/* unused harmony import specifier */ var GradientTextScene_interpolate;
-/* unused harmony import specifier */ var GradientTextScene_spring;
-/* unused harmony import specifier */ var GradientTextScene_extractCustomization;
-/* unused harmony import specifier */ var GradientTextScene_BaseScene;
-/* unused harmony import specifier */ var GradientTextScene_getTheme;
-
-
-
-
-
-function GradientTextScene({ data, theme, motionProfile, animation }) {
-  const frame = GradientTextScene_useCurrentFrame();
-  const colors = GradientTextScene_getTheme(theme);
-  const fps = 30;
-  const {
-    text,
-    gradient = ["#3B82F6", "#8B5CF6", "#EC4899"],
-    angle = 45,
-    animate = true,
-    animationSpeed = 3,
-    fontSize: fontSizeName = "xlarge",
-    fontWeight: fontWeightName = "bold"
-  } = data;
-  const customization = GradientTextScene_extractCustomization(data);
-  const fontSizes = {
-    small: 48,
-    medium: 72,
-    large: 96,
-    xlarge: 128,
-    xxlarge: 160
-  };
-  const fontSize = fontSizes[fontSizeName] || 128;
-  const fontWeights = {
-    normal: 400,
-    bold: 700,
-    black: 900
-  };
-  const fontWeight = fontWeights[fontWeightName] || 700;
-  const opacity = GradientTextScene_interpolate(
-    frame,
-    [0, animation.enter * fps],
-    [0, 1],
-    { extrapolateRight: "clamp" }
-  );
-  const y = GradientTextScene_spring({
-    frame,
-    fps,
-    config: { damping: 12, stiffness: 100 }
-  });
-  const currentAngle = animate ? angle + frame / (animationSpeed * fps) * 360 : angle;
-  const gradientString = gradient.length >= 2 ? `linear-gradient(${currentAngle}deg, ${gradient.join(", ")})` : `linear-gradient(${currentAngle}deg, #3B82F6, #8B5CF6)`;
-  return /* @__PURE__ */ GradientTextScene_jsx(GradientTextScene_BaseScene, { theme, customization, animation, opacity, children: /* @__PURE__ */ GradientTextScene_jsxs(
-    "div",
-    {
-      style: {
-        textAlign: "center",
-        padding: "0 40px",
-        transform: `translateY(${(1 - y) * 50}px)`
-      },
-      children: [
-        /* @__PURE__ */ GradientTextScene_jsx(
-          "div",
-          {
-            style: {
-              fontSize,
-              fontFamily: "system-ui, sans-serif",
-              fontWeight,
-              background: gradientString,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              lineHeight: 1.2,
-              maxWidth: 900
-            },
-            children: text
-          }
-        ),
-        /* @__PURE__ */ GradientTextScene_jsx(
-          "div",
-          {
-            style: {
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              zIndex: -1,
-              filter: "blur(40px)",
-              opacity: 0.4
-            },
-            children: /* @__PURE__ */ GradientTextScene_jsx(
-              "div",
-              {
-                style: {
-                  fontSize,
-                  fontFamily: "system-ui, sans-serif",
-                  fontWeight,
-                  background: gradientString,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  lineHeight: 1.2,
-                  maxWidth: 900
-                },
-                children: text
-              }
-            )
-          }
-        )
-      ]
-    }
-  ) });
-}
-
-;// ./src/lib/video/components/AnimatedBgScene.tsx
-/* unused harmony import specifier */ var AnimatedBgScene_jsxs;
-/* unused harmony import specifier */ var AnimatedBgScene_jsx;
-/* unused harmony import specifier */ var AnimatedBgScene_Fragment;
-/* unused harmony import specifier */ var AnimatedBgScene_useCurrentFrame;
-/* unused harmony import specifier */ var AnimatedBgScene_spring;
-/* unused harmony import specifier */ var AnimatedBgScene_AbsoluteFill;
-/* unused harmony import specifier */ var AnimatedBgScene_extractCustomization;
-/* unused harmony import specifier */ var AnimatedBgScene_BaseScene;
-/* unused harmony import specifier */ var AnimatedBgScene_getTheme;
-
-
-
-
-
-function AnimatedBgScene({ data, theme, motionProfile, animation }) {
-  const frame = AnimatedBgScene_useCurrentFrame();
-  const colors = AnimatedBgScene_getTheme(theme);
-  const fps = 30;
-  const {
-    style = "particles",
-    primaryColor = "#3B82F6",
-    secondaryColor = "#8B5CF6",
-    speed = 1,
-    intensity = 0.5,
-    overlay = false,
-    overlayOpacity = 0.3
-  } = data;
-  const customization = AnimatedBgScene_extractCustomization(data);
-  const scale = AnimatedBgScene_spring({
-    frame,
-    fps,
-    config: { damping: 15, stiffness: 50 }
-  });
-  const particleCount = Math.round(20 * intensity);
-  return /* @__PURE__ */ AnimatedBgScene_jsxs(AnimatedBgScene_BaseScene, { theme, customization, animation, children: [
-    /* @__PURE__ */ AnimatedBgScene_jsxs(AnimatedBgScene_AbsoluteFill, { style: { overflow: "hidden" }, children: [
-      style === "particles" && /* @__PURE__ */ AnimatedBgScene_jsx(AnimatedBgScene_Fragment, { children: Array.from({ length: particleCount }).map((_, i) => {
-        const angle = i / particleCount * Math.PI * 2 + frame * 0.01 * speed;
-        const distance = 100 + Math.sin(frame * 0.02 + i) * 50 * intensity;
-        const x = Math.cos(angle) * distance;
-        const y = Math.sin(angle) * distance;
-        const size = 4 + Math.sin(frame * 0.03 + i) * 2;
-        return /* @__PURE__ */ AnimatedBgScene_jsx(
-          "div",
-          {
-            style: {
-              position: "absolute",
-              left: `calc(50% + ${x}px)`,
-              top: `calc(50% + ${y}px)`,
-              width: size,
-              height: size,
-              borderRadius: "50%",
-              backgroundColor: i % 2 === 0 ? primaryColor : secondaryColor,
-              opacity: 0.3 + intensity * 0.5,
-              transform: "translate(-50%, -50%)",
-              boxShadow: `0 0 ${size * 3}px ${i % 2 === 0 ? primaryColor : secondaryColor}`
-            }
-          },
-          i
-        );
-      }) }),
-      style === "waves" && /* @__PURE__ */ AnimatedBgScene_jsx(AnimatedBgScene_Fragment, { children: Array.from({ length: 5 }).map((_, i) => {
-        const offset = i * 20;
-        const waveOpacity = (1 - i / 5) * 0.3 * intensity;
-        const waveSize = 200 + offset + Math.sin(frame * 0.05 * speed) * 50;
-        return /* @__PURE__ */ AnimatedBgScene_jsx(
-          "div",
-          {
-            style: {
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              width: waveSize,
-              height: waveSize,
-              borderRadius: "50%",
-              border: `2px solid ${primaryColor}`,
-              opacity: waveOpacity,
-              transform: "translate(-50%, -50%)"
-            }
-          },
-          i
-        );
-      }) }),
-      style === "gradient" && /* @__PURE__ */ AnimatedBgScene_jsx(
-        "div",
-        {
-          style: {
-            position: "absolute",
-            inset: 0,
-            background: `linear-gradient(${frame * speed}deg, ${primaryColor}, ${secondaryColor}, ${primaryColor})`,
-            backgroundSize: "200% 200%",
-            opacity: intensity
-          }
-        }
-      ),
-      style === "aurora" && /* @__PURE__ */ AnimatedBgScene_jsxs(AnimatedBgScene_Fragment, { children: [
-        /* @__PURE__ */ AnimatedBgScene_jsx(
-          "div",
-          {
-            style: {
-              position: "absolute",
-              top: "-50%",
-              left: "-50%",
-              width: "200%",
-              height: "200%",
-              background: `radial-gradient(ellipse at ${30 + Math.sin(frame * 0.01 * speed) * 20}% ${50 + Math.cos(frame * 0.015 * speed) * 20}%, ${primaryColor}40 0%, transparent 50%)`
-            }
-          }
-        ),
-        /* @__PURE__ */ AnimatedBgScene_jsx(
-          "div",
-          {
-            style: {
-              position: "absolute",
-              top: "-50%",
-              left: "-50%",
-              width: "200%",
-              height: "200%",
-              background: `radial-gradient(ellipse at ${70 + Math.cos(frame * 0.02 * speed) * 20}% ${40 + Math.sin(frame * 0.01 * speed) * 20}%, ${secondaryColor}40 0%, transparent 50%)`
-            }
-          }
-        )
-      ] }),
-      style === "geometric" && /* @__PURE__ */ AnimatedBgScene_jsx(AnimatedBgScene_Fragment, { children: Array.from({ length: 6 }).map((_, i) => {
-        const angle = i * 60 + frame * 0.5 * speed;
-        const distance = 150 + Math.sin(frame * 0.02 + i) * 50;
-        const x = Math.cos(angle * Math.PI / 180) * distance;
-        const y = Math.sin(angle * Math.PI / 180) * distance;
-        const shapes = ["polygon(50% 0%, 100% 100%, 0% 100%)", "circle(50%)"];
-        return /* @__PURE__ */ AnimatedBgScene_jsx(
-          "div",
-          {
-            style: {
-              position: "absolute",
-              left: `calc(50% + ${x}px)`,
-              top: `calc(50% + ${y}px)`,
-              width: 40,
-              height: 40,
-              backgroundColor: i % 2 === 0 ? primaryColor : secondaryColor,
-              clipPath: shapes[i % shapes.length],
-              opacity: 0.3,
-              transform: `translate(-50%, -50%) rotate(${frame * speed * 0.2}deg)`
-            }
-          },
-          i
-        );
-      }) })
-    ] }),
-    overlay && /* @__PURE__ */ AnimatedBgScene_jsx(
-      "div",
-      {
-        style: {
-          position: "absolute",
-          inset: 0,
-          backgroundColor: "rgba(0,0,0,0.8)",
-          opacity: overlayOpacity
-        }
-      }
-    ),
-    /* @__PURE__ */ AnimatedBgScene_jsx(
-      "div",
-      {
-        style: {
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          transform: `scale(${scale})`
-        },
-        children: /* @__PURE__ */ AnimatedBgScene_jsx(
-          "div",
-          {
-            style: {
-              fontSize: 48,
-              fontFamily: "system-ui, sans-serif",
-              color: colors.foreground,
-              fontWeight: 700,
-              textShadow: "0 4px 20px rgba(0,0,0,0.5)"
-            },
-            children: "Animated Background"
-          }
-        )
-      }
-    )
-  ] });
-}
-
-;// ./src/lib/video/components/CountdownScene.tsx
-/* unused harmony import specifier */ var CountdownScene_jsx;
-/* unused harmony import specifier */ var CountdownScene_jsxs;
-/* unused harmony import specifier */ var CountdownScene_useCurrentFrame;
-/* unused harmony import specifier */ var CountdownScene_interpolate;
-/* unused harmony import specifier */ var CountdownScene_spring;
-/* unused harmony import specifier */ var CountdownScene_extractCustomization;
-/* unused harmony import specifier */ var CountdownScene_BaseScene;
-/* unused harmony import specifier */ var CountdownScene_getTheme;
-
-
-
-
-
-function CountdownScene({ data, theme, motionProfile, animation }) {
-  const frame = CountdownScene_useCurrentFrame();
-  const colors = CountdownScene_getTheme(theme);
-  const fps = 30;
-  const {
-    title,
-    days = 0,
-    hours = 0,
-    minutes = 0,
-    seconds = 0,
-    style = "modern",
-    color,
-    showLabels = true
-  } = data;
-  const customization = CountdownScene_extractCustomization(data);
-  const opacity = CountdownScene_interpolate(
-    frame,
-    [0, animation.enter * fps],
-    [0, 1],
-    { extrapolateRight: "clamp" }
-  );
-  const scale = CountdownScene_spring({
-    frame,
-    fps,
-    config: { damping: 12, stiffness: 80 }
-  });
-  const timeUnits = [
-    { value: days, label: "Days" },
-    { value: hours, label: "Hours" },
-    { value: minutes, label: "Minutes" },
-    { value: seconds, label: "Seconds" }
-  ].filter((u, idx) => u.value > 0 || idx < 2);
-  const styles = {
-    modern: {
-      gap: 24,
-      boxBg: colors.surface,
-      borderRadius: 16,
-      padding: "24px 32px",
-      boxShadow: "0 10px 40px rgba(0,0,0,0.3)"
-    },
-    classic: {
-      gap: 16,
-      boxBg: colors.background,
-      borderRadius: 8,
-      padding: "20px 24px",
-      boxShadow: "none",
-      border: `2px solid ${color || colors.primary}`
-    },
-    minimal: {
-      gap: 40,
-      boxBg: "transparent",
-      borderRadius: 0,
-      padding: "16px 24px",
-      boxShadow: "none"
-    },
-    flip: {
-      gap: 20,
-      boxBg: colors.surface,
-      borderRadius: 12,
-      padding: "20px 28px",
-      boxShadow: "0 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)"
-    }
-  };
-  const styleConfig = styles[style] || styles.modern;
-  return /* @__PURE__ */ CountdownScene_jsx(CountdownScene_BaseScene, { theme, customization, animation, opacity, children: /* @__PURE__ */ CountdownScene_jsxs(
-    "div",
-    {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 48,
-        transform: `scale(${scale})`
-      },
-      children: [
-        title && /* @__PURE__ */ CountdownScene_jsx(
-          "div",
-          {
-            style: {
-              fontSize: 36,
-              fontFamily: "system-ui, sans-serif",
-              color: colors.muted,
-              fontWeight: 600,
-              textAlign: "center",
-              textTransform: "uppercase",
-              letterSpacing: 3
-            },
-            children: title
-          }
-        ),
-        /* @__PURE__ */ CountdownScene_jsx(
-          "div",
-          {
-            style: {
-              display: "flex",
-              justifyContent: "center",
-              gap: styleConfig.gap
-            },
-            children: timeUnits.map((unit, index) => {
-              const unitScale = CountdownScene_spring({
-                frame: frame - index * 5,
-                fps,
-                config: { damping: 12, stiffness: 100 }
-              });
-              return /* @__PURE__ */ CountdownScene_jsxs(
-                "div",
-                {
-                  style: {
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    backgroundColor: styleConfig.boxBg,
-                    borderRadius: styleConfig.borderRadius,
-                    padding: styleConfig.padding,
-                    boxShadow: styleConfig.boxShadow,
-                    border: styleConfig.border || "none",
-                    transform: `scale(${unitScale})`
-                  },
-                  children: [
-                    /* @__PURE__ */ CountdownScene_jsx(
-                      "div",
-                      {
-                        style: {
-                          fontFamily: "system-ui, sans-serif",
-                          color: color || colors.foreground,
-                          fontSize: 72,
-                          fontWeight: 800
-                        },
-                        children: String(unit.value).padStart(2, "0")
-                      }
-                    ),
-                    showLabels && /* @__PURE__ */ CountdownScene_jsx(
-                      "div",
-                      {
-                        style: {
-                          fontFamily: "system-ui, sans-serif",
-                          color: colors.muted,
-                          fontSize: 16,
-                          textTransform: "uppercase",
-                          letterSpacing: 2
-                        },
-                        children: unit.label
-                      }
-                    )
-                  ]
-                },
-                unit.label
-              );
-            })
-          }
-        )
-      ]
-    }
-  ) });
-}
-
-;// ./src/lib/video/compositions/DynamicVideo.tsx
-/* unused harmony import specifier */ var DynamicVideo_jsxs;
-/* unused harmony import specifier */ var DynamicVideo_jsx;
-/* unused harmony import specifier */ var DynamicVideo_AbsoluteFill;
-/* unused harmony import specifier */ var DynamicVideo_Sequence;
-/* unused harmony import specifier */ var DynamicVideo_Intro;
-/* unused harmony import specifier */ var DynamicVideo_Outro;
-/* unused harmony import specifier */ var DynamicVideo_StatScene;
-/* unused harmony import specifier */ var DynamicVideo_ComparisonScene;
-/* unused harmony import specifier */ var DynamicVideo_TextScene;
-/* unused harmony import specifier */ var DynamicVideo_QuoteScene;
-/* unused harmony import specifier */ var DynamicVideo_ListScene;
-/* unused harmony import specifier */ var DynamicVideo_TimelineScene;
-/* unused harmony import specifier */ var DynamicVideo_CalloutScene;
-/* unused harmony import specifier */ var DynamicVideo_IconListScene;
-/* unused harmony import specifier */ var DynamicVideo_LineChartScene;
-/* unused harmony import specifier */ var DynamicVideo_PieChartScene;
-/* unused harmony import specifier */ var DynamicVideo_CodeScene;
-/* unused harmony import specifier */ var DynamicVideo_TestimonialScene;
-/* unused harmony import specifier */ var DynamicVideo_WhatsAppChatScene;
-/* unused harmony import specifier */ var DynamicVideo_MotivationalImageScene;
-/* unused harmony import specifier */ var DynamicVideo_CounterScene;
-/* unused harmony import specifier */ var DynamicVideo_ProgressBarScene;
-/* unused harmony import specifier */ var DynamicVideo_QRCodeScene;
-/* unused harmony import specifier */ var DynamicVideo_VideoScene;
-/* unused harmony import specifier */ var DynamicVideo_AvatarGridScene;
-/* unused harmony import specifier */ var DynamicVideo_SocialStatsScene;
-/* unused harmony import specifier */ var DynamicVideo_CTAScene;
-/* unused harmony import specifier */ var DynamicVideo_GradientTextScene;
-/* unused harmony import specifier */ var DynamicVideo_AnimatedBgScene;
-/* unused harmony import specifier */ var DynamicVideo_CountdownScene;
-/* unused harmony import specifier */ var DynamicVideo_WeatherScene;
-/* unused harmony import specifier */ var DynamicVideo_TowerChart3DScene;
-/* unused harmony import specifier */ var DynamicVideo_COMPONENT_IDS;
-/* unused harmony import specifier */ var DynamicVideo_getTheme;
-
-
-
-
-
-
-
-
-
-
-
-
+;// ./src/video/composition.tsx
 
 
 
@@ -7335,519 +5618,98 @@ function CountdownScene({ data, theme, motionProfile, animation }) {
 
 function DynamicVideo({
   input,
-  plan
+  plan,
+  title = "Video Report",
+  subtitle = ""
 }) {
-  const { videoMeta, contentBlocks } = input;
-  const { decisions, suggestedTransitions } = plan;
-  const colors = DynamicVideo_getTheme(videoMeta.theme);
-  const introConfig = videoMeta.intro || {};
-  const outroConfig = videoMeta.outro || {};
-  const introTitle = introConfig.title || "Video Report";
-  const introSubtitle = introConfig.subtitle || "";
-  const introDuration = introConfig.duration || 2;
-  const outroMessage = outroConfig.title || "Thank You";
-  const outroCta = outroConfig.subtitle || "";
-  const outroDuration = outroConfig.duration || 2;
-  const timeline = buildTimeline(
-    contentBlocks,
-    decisions,
-    introDuration,
-    outroDuration,
-    videoMeta.fps
-  );
-  return /* @__PURE__ */ DynamicVideo_jsxs(
-    DynamicVideo_AbsoluteFill,
-    {
-      style: {
-        backgroundColor: colors.background
-      },
-      children: [
-        /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_Sequence, { from: 0, durationInFrames: DynamicVideo_frames(introDuration, videoMeta.fps), children: /* @__PURE__ */ DynamicVideo_jsx(
-          DynamicVideo_Intro,
-          {
-            title: introTitle,
-            subtitle: introSubtitle,
-            theme: videoMeta.theme,
-            logoUrl: introConfig.logoUrl
-          }
-        ) }),
-        timeline.scenes.map((scene, index) => /* @__PURE__ */ DynamicVideo_jsx(
-          DynamicVideo_Sequence,
-          {
-            from: scene.startFrame,
-            durationInFrames: scene.durationFrames,
-            children: /* @__PURE__ */ DynamicVideo_jsx(
-              SceneRenderer,
-              {
-                block: scene.block,
-                decision: scene.decision,
-                theme: videoMeta.theme,
-                transition: suggestedTransitions == null ? void 0 : suggestedTransitions[index]
-              }
-            )
-          },
-          `scene-${index}`
-        )),
-        /* @__PURE__ */ DynamicVideo_jsx(
-          DynamicVideo_Sequence,
-          {
-            from: timeline.totalFrames - DynamicVideo_frames(outroDuration, videoMeta.fps),
-            durationInFrames: DynamicVideo_frames(outroDuration, videoMeta.fps),
-            children: /* @__PURE__ */ DynamicVideo_jsx(
-              DynamicVideo_Outro,
-              {
-                message: outroMessage,
-                cta: outroCta,
-                theme: videoMeta.theme,
-                logoUrl: outroConfig.logoUrl
-              }
-            )
-          }
-        )
-      ]
-    }
-  );
-}
-function SceneRenderer({
-  block,
-  decision,
-  theme
-}) {
-  const motionProfile = decision.motionProfile;
-  const animation = decision.animation ?? {
-    enter: 0.4,
-    hold: decision.duration - 0.6,
-    exit: 0.2
-  };
-  switch (decision.componentId) {
-    case DynamicVideo_COMPONENT_IDS.STAT:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_StatScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.COMPARISON:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_ComparisonScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.TEXT:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_TextScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.QUOTE:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_QuoteScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.LIST:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_ListScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.TIMELINE:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_TimelineScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.CALLOUT:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_CalloutScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.ICON_LIST:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_IconListScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.LINE_CHART:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_LineChartScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.PIE_CHART:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_PieChartScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.CODE:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_CodeScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.TESTIMONIAL:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_TestimonialScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.WHATSAPP_CHAT:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_WhatsAppChatScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.MOTIVATIONAL_IMAGE:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_MotivationalImageScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    // New blocks
-    case DynamicVideo_COMPONENT_IDS.COUNTER:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_CounterScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.PROGRESS_BAR:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_ProgressBarScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.QR_CODE:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_QRCodeScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.VIDEO:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_VideoScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.AVATAR_GRID:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_AvatarGridScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.SOCIAL_STATS:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_SocialStatsScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.CTA:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_CTAScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.GRADIENT_TEXT:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_GradientTextScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.ANIMATED_BG:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_AnimatedBgScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.COUNTDOWN:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_CountdownScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.WEATHER:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_WeatherScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    case DynamicVideo_COMPONENT_IDS.TOWER_CHART_3D:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_TowerChart3DScene,
-        {
-          data: block,
-          theme,
-          motionProfile,
-          animation
-        }
-      );
-    default:
-      return renderByBlockType(block, theme, motionProfile, animation);
+  if (!input || !plan) {
+    return /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.AbsoluteFill, { style: { backgroundColor: "#0a0a0f", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0,jsx_runtime.jsxs)("div", { style: { textAlign: "center" }, children: [
+      /* @__PURE__ */ (0,jsx_runtime.jsx)("h1", { style: { fontSize: 48, margin: 0 }, children: "Loading..." }),
+      /* @__PURE__ */ (0,jsx_runtime.jsx)("p", { style: { color: "#666" }, children: "Waiting for props" })
+    ] }) });
   }
+  const { videoMeta, contentBlocks } = input;
+  const { decisions } = plan;
+  const colors = getTheme(videoMeta.theme);
+  const { fps } = (0,esm.useVideoConfig)();
+  const introDuration = 2;
+  const outroDuration = 2;
+  const timeline = buildTimeline(contentBlocks, decisions, introDuration, outroDuration, fps);
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { backgroundColor: colors.background }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.Sequence, { from: 0, durationInFrames: composition_frames(introDuration, fps), children: /* @__PURE__ */ (0,jsx_runtime.jsx)(Intro, { title, subtitle, theme: videoMeta.theme }) }),
+    timeline.scenes.map((scene, index) => /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      esm.Sequence,
+      {
+        from: scene.startFrame,
+        durationInFrames: scene.durationFrames,
+        children: /* @__PURE__ */ (0,jsx_runtime.jsx)(SceneRenderer, { block: scene.block, decision: scene.decision, theme: videoMeta.theme })
+      },
+      `scene-${index}`
+    )),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.Sequence, { from: timeline.totalFrames - composition_frames(outroDuration, fps), durationInFrames: composition_frames(outroDuration, fps), children: /* @__PURE__ */ (0,jsx_runtime.jsx)(Outro, { theme: videoMeta.theme }) })
+  ] });
 }
-function renderByBlockType(block, theme, motionProfile, animation) {
-  switch (block.type) {
-    case "stat":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_StatScene, { data: block, theme, motionProfile, animation });
-    case "comparison":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_ComparisonScene, { data: block, theme, motionProfile, animation });
-    case "text":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_TextScene, { data: block, theme, motionProfile, animation });
-    case "quote":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_QuoteScene, { data: block, theme, motionProfile, animation });
-    case "list":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_ListScene, { data: block, theme, motionProfile, animation });
-    case "timeline":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_TimelineScene, { data: block, theme, motionProfile, animation });
-    case "callout":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_CalloutScene, { data: block, theme, motionProfile, animation });
-    case "icon-list":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_IconListScene, { data: block, theme, motionProfile, animation });
-    case "line-chart":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_LineChartScene, { data: block, theme, motionProfile, animation });
-    case "pie-chart":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_PieChartScene, { data: block, theme, motionProfile, animation });
-    case "code":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_CodeScene, { data: block, theme, motionProfile, animation });
-    case "testimonial":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_TestimonialScene, { data: block, theme, motionProfile, animation });
-    case "whatsapp-chat":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_WhatsAppChatScene, { data: block, theme, motionProfile, animation });
-    case "motivational-image":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_MotivationalImageScene, { data: block, theme, motionProfile, animation });
-    // New blocks
-    case "counter":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_CounterScene, { data: block, theme, motionProfile, animation });
-    case "progress-bar":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_ProgressBarScene, { data: block, theme, motionProfile, animation });
-    case "qr-code":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_QRCodeScene, { data: block, theme, motionProfile, animation });
-    case "video":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_VideoScene, { data: block, theme, motionProfile, animation });
-    case "avatar-grid":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_AvatarGridScene, { data: block, theme, motionProfile, animation });
-    case "social-stats":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_SocialStatsScene, { data: block, theme, motionProfile, animation });
-    case "cta":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_CTAScene, { data: block, theme, motionProfile, animation });
-    case "gradient-text":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_GradientTextScene, { data: block, theme, motionProfile, animation });
-    case "animated-bg":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_AnimatedBgScene, { data: block, theme, motionProfile, animation });
-    case "countdown":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_CountdownScene, { data: block, theme, motionProfile, animation });
-    case "weather-block":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_WeatherScene, { data: block, theme, motionProfile, animation });
-    case "tower-chart-3d":
-      return /* @__PURE__ */ DynamicVideo_jsx(DynamicVideo_TowerChart3DScene, { data: block, theme, motionProfile, animation });
+function SceneRenderer({ block, decision, theme }) {
+  const motionProfile = decision.motionProfile;
+  const animation = decision.animation ?? { enter: 0.4, hold: decision.duration - 0.6, exit: 0.2 };
+  const props = { theme, motionProfile, animation };
+  switch (decision.componentId) {
+    case COMPONENT_IDS.STAT:
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(StatScene, { data: block, ...props });
+    case COMPONENT_IDS.COMPARISON:
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(ComparisonScene, { data: block, ...props });
+    case COMPONENT_IDS.TEXT:
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(TextScene, { data: block, ...props });
+    case COMPONENT_IDS.QUOTE:
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(QuoteScene, { data: block, ...props });
+    case COMPONENT_IDS.LIST:
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(ListScene, { data: block, ...props });
+    case COMPONENT_IDS.TIMELINE:
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(TimelineScene, { data: block, ...props });
+    case COMPONENT_IDS.CALLOUT:
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(CalloutScene, { data: block, ...props });
+    case COMPONENT_IDS.ICON_LIST:
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(IconListScene, { data: block, ...props });
+    case COMPONENT_IDS.LINE_CHART:
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(LineChartScene, { data: block, ...props });
+    case COMPONENT_IDS.PIE_CHART:
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(PieChartScene, { data: block, ...props });
+    case COMPONENT_IDS.CODE:
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(CodeScene, { data: block, ...props });
+    case COMPONENT_IDS.TESTIMONIAL:
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(TestimonialScene, { data: block, ...props });
+    case COMPONENT_IDS.WHATSAPP_CHAT:
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(WhatsAppChatScene, { data: block, ...props });
+    case COMPONENT_IDS.MOTIVATIONAL_IMAGE:
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(MotivationalImageScene, { data: block, ...props });
     default:
-      return /* @__PURE__ */ DynamicVideo_jsx(
-        DynamicVideo_TextScene,
-        {
-          data: { type: "text", content: "Unsupported content type" },
-          theme,
-          motionProfile,
-          animation
-        }
-      );
+      if (block.type === "whatsapp-chat") {
+        return /* @__PURE__ */ (0,jsx_runtime.jsx)(WhatsAppChatScene, { data: block, ...props });
+      }
+      if (block.type === "motivational-image") {
+        return /* @__PURE__ */ (0,jsx_runtime.jsx)(MotivationalImageScene, { data: block, ...props });
+      }
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(TextScene, { data: { type: "text", content: "Unsupported block" }, ...props });
   }
 }
 function buildTimeline(blocks, decisions, introDuration, outroDuration, fps) {
   const scenes = [];
-  let currentFrame = DynamicVideo_frames(introDuration, fps);
+  let currentFrame = composition_frames(introDuration, fps);
   blocks.forEach((block, index) => {
     const decision = decisions[index];
-    const durationFrames = DynamicVideo_frames(decision.duration, fps);
     scenes.push({
       block,
       decision,
       startFrame: currentFrame,
-      durationFrames
+      durationFrames: composition_frames(decision.duration, fps)
     });
-    currentFrame += durationFrames;
+    currentFrame += composition_frames(decision.duration, fps);
   });
-  const totalFrames = currentFrame + DynamicVideo_frames(outroDuration, fps);
-  return { scenes, totalFrames };
+  return { scenes, totalFrames: currentFrame + composition_frames(outroDuration, fps) };
 }
-function DynamicVideo_frames(seconds, fps) {
+function composition_frames(seconds, fps) {
   return Math.round(seconds * fps);
 }
-function getCompositionConfig(input, plan) {
-  var _a, _b;
-  const dimensions = DynamicVideo_getAspectRatioDimensions(input.videoMeta.aspectRatio);
-  const introDuration = ((_a = input.videoMeta.intro) == null ? void 0 : _a.duration) || 2;
-  const outroDuration = ((_b = input.videoMeta.outro) == null ? void 0 : _b.duration) || 2;
-  const contentDuration = plan.decisions.reduce((sum, d) => sum + d.duration, 0);
-  const totalDuration = introDuration + contentDuration + outroDuration;
-  return {
-    width: dimensions.width,
-    height: dimensions.height,
-    fps: input.videoMeta.fps,
-    durationInFrames: Math.round(totalDuration * input.videoMeta.fps)
-  };
-}
-function DynamicVideo_getAspectRatioDimensions(ratio) {
-  const ratios = {
-    "16:9": { width: 1920, height: 1080 },
-    "9:16": { width: 1080, height: 1920 },
-    "1:1": { width: 1080, height: 1080 },
-    "4:5": { width: 1080, height: 1350 }
-  };
-  return ratios[ratio] ?? ratios["9:16"];
-}
-
-;// ./src/lib/video/register-composition.tsx
-/* unused harmony import specifier */ var registerRoot;
-/* unused harmony import specifier */ var register_composition_DynamicVideo;
-
-
-
-const defaultProps = {
-  input: {
-    videoMeta: {
-      aspectRatio: "9:16",
-      theme: "dark_modern",
-      fps: 30
-    },
-    contentBlocks: [
-      {
-        type: "stat",
-        heading: "Revenue",
-        value: "400K",
-        subtext: "Year over year growth"
-      },
-      {
-        type: "comparison",
-        title: "Market Share",
-        items: [
-          { label: "Product A", value: 45 },
-          { label: "Product B", value: 30 },
-          { label: "Product C", value: 25 }
-        ]
-      }
-    ]
-  },
-  plan: {
-    decisions: [
-      {
-        componentId: "stat-scene",
-        motionProfile: "dynamic",
-        duration: 3,
-        animation: { enter: 0.4, hold: 2.2, exit: 0.4 }
-      },
-      {
-        componentId: "comparison-scene",
-        motionProfile: "dynamic",
-        duration: 4,
-        animation: { enter: 0.4, hold: 3.2, exit: 0.4 }
-      }
-    ],
-    totalDuration: 7,
-    suggestedTransitions: ["fade"]
-  },
-  title: "Video Report",
-  subtitle: ""
-};
 function getCompositionConfigFromProps(props) {
   const { input, plan } = props;
   const aspectRatios = {
@@ -7863,25 +5725,85 @@ function getCompositionConfigFromProps(props) {
   const totalDuration = introDuration + contentDuration + outroDuration;
   return {
     id: "DynamicVideo",
-    component: register_composition_DynamicVideo,
     durationInFrames: Math.round(totalDuration * input.videoMeta.fps),
     fps: input.videoMeta.fps,
     width: dimensions.width,
-    height: dimensions.height,
-    defaultProps
+    height: dimensions.height
   };
 }
-function registerComposition() {
-  if (typeof window !== "undefined") {
-    registerRoot(() => {
-      const config = getCompositionConfigFromProps(defaultProps);
-      return {
-        compositions: [config]
-      };
-    });
-  }
+function calculateCompositionConfig(input, plan) {
+  return getCompositionConfigFromProps({ input, plan });
 }
 
+;// ./src/video/index.tsx
+
+
+
+
+const defaultProps = {
+  input: {
+    videoMeta: {
+      aspectRatio: "9:16",
+      theme: "dark_modern",
+      fps: 30
+    },
+    contentBlocks: [
+      {
+        type: "whatsapp-chat",
+        person1: {
+          name: "You",
+          avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+          isOnline: true
+        },
+        person2: {
+          name: "Sarah Johnson",
+          avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face",
+          isOnline: true
+        },
+        messages: [
+          { from: "person2", text: "Hey! Did you see the new project updates?", time: "10:30 AM" },
+          { from: "person1", text: "Yes! The results look amazing \u{1F389}", time: "10:31 AM" },
+          { from: "person2", text: "Revenue is up 400K this quarter!", time: "10:32 AM" },
+          { from: "person1", text: "That's incredible! Great work everyone \u{1F4AA}", time: "10:33 AM" },
+          { from: "person2", text: "Let's celebrate this win! \u{1F680}", time: "10:34 AM" }
+        ],
+        showTypingIndicator: true,
+        lastSeen: "online"
+      },
+      {
+        type: "stat",
+        heading: "Revenue",
+        value: "400K",
+        subtext: "Year over year growth"
+      }
+    ]
+  },
+  plan: {
+    decisions: [
+      { componentId: "whatsapp-chat-scene", motionProfile: "subtle", duration: 8, animation: { enter: 0.5, hold: 7, exit: 0.5 } },
+      { componentId: "stat-scene", motionProfile: "dynamic", duration: 3, animation: { enter: 0.4, hold: 2.2, exit: 0.4 } }
+    ],
+    totalDuration: 11,
+    suggestedTransitions: ["fade"]
+  },
+  title: "Video Report",
+  subtitle: ""
+};
+const RemotionStudio = () => {
+  const config = getCompositionConfigFromProps(defaultProps);
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(jsx_runtime.Fragment, { children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
+    esm.Composition,
+    {
+      id: "DynamicVideo",
+      component: DynamicVideo,
+      durationInFrames: config.durationInFrames,
+      fps: config.fps,
+      width: config.width,
+      height: config.height
+    }
+  ) });
+};
+(0,esm.registerRoot)(RemotionStudio);
 
 
 /***/ },
@@ -39080,7 +37002,7 @@ var z = /*#__PURE__*/Object.freeze({
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
 /******/ 	__webpack_require__(6507);
-/******/ 	__webpack_require__(4243);
+/******/ 	__webpack_require__(896);
 /******/ 	__webpack_require__(3610);
 /******/ 	var __webpack_exports__ = __webpack_require__(3482);
 /******/ 	
