@@ -300,7 +300,7 @@ export function TimelineEditor() {
               strategy={horizontalListSortingStrategy}
             >
               <ScrollArea className="h-full">
-                <div className="flex gap-3 pb-2">
+                <div className="flex gap-3 px-2 pt-2 pb-3">
                   <AnimatePresence>
                     {videoInput.contentBlocks.map((block, index) => (
                       <SortableBlock
