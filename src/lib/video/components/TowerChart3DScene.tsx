@@ -1,11 +1,11 @@
 // ============================================================================
 // TOWER CHART 3D SCENE - 3D Ranking visualization with Three.js
-// GPU-SAFE: No useFrame, all calculations done BEFORE Canvas
+// FRAME-SYNC: Camera position synchronized with Remotion frame capture
 // ============================================================================
 
-import React, { useMemo, useEffect, useState, Suspense, useRef } from 'react';
+import React, { useMemo, useEffect, useState, Suspense, useRef, useCallback } from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, delayRender, continueRender } from 'remotion';
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas, useThree, useFrame, invalidate } from '@react-three/fiber';
 import { Text, Box, Plane, Billboard, Stars, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import type { TowerChart3DBlock, AnimationPhase } from '../schemas';
@@ -43,7 +43,7 @@ function formatValue(value: number): string {
 }
 
 // ============================================================================
-// CALCULATE CAMERA STATE - Pure function
+// CALCULATE CAMERA STATE - Pure function, must match frames exactly
 // ============================================================================
 
 function calculateCameraState(
@@ -61,7 +61,7 @@ function calculateCameraState(
   const nextIndex = Math.min(currentIndex + 1, towers.length - 1);
   const nextTower = towers[nextIndex];
   
-  // Ease-in-out
+  // Ease-in-out for smooth movement
   const easedProgress = progress < 0.5 
     ? 2 * progress * progress 
     : 1 - Math.pow(-2 * progress + 2, 2) / 2;
@@ -99,11 +99,9 @@ function StarField() {
 }
 
 function FloatingParticles() {
-  // Use seeded random for deterministic positions
   const count = 30;
   const positions = useMemo(() => {
     const pos = new Float32Array(count * 3);
-    // Use a seed for reproducible random positions
     let seed = 12345;
     const seededRandom = () => {
       seed = (seed * 16807) % 2147483647;
@@ -223,25 +221,45 @@ function Ground({ color }: { color: string }) {
 }
 
 // ============================================================================
-// CAMERA SETTER - Sets camera SYNCHRONOUSLY during render (no useFrame)
+// FRAME-SYNCED CAMERA - Updates on EVERY Remotion frame
 // ============================================================================
 
-function CameraSetter({ position, lookAt }: { 
-  position: [number, number, number]; 
+function FrameSyncedCamera({ 
+  cameraPosition, 
+  lookAt,
+  remotionFrame 
+}: { 
+  cameraPosition: [number, number, number]; 
   lookAt: [number, number, number];
+  remotionFrame: number;
 }) {
   const { camera, gl } = useThree();
+  const lastFrame = useRef(-1);
   
-  // Set camera IMMEDIATELY during render - not in useFrame
-  // This happens synchronously before the frame is captured
-  camera.position.set(...position);
+  // This runs on every Three.js render frame
+  useFrame(() => {
+    // Only update if Remotion frame changed
+    if (remotionFrame !== lastFrame.current) {
+      lastFrame.current = remotionFrame;
+      
+      // Set camera position exactly
+      camera.position.set(...cameraPosition);
+      camera.lookAt(...lookAt);
+      
+      // Update projection matrix
+      camera.updateProjectionMatrix();
+      
+      // Force GPU to finish all commands before this frame is captured
+      const ctx = gl.getContext();
+      if (ctx) {
+        ctx.finish();
+      }
+    }
+  });
+  
+  // Also set camera immediately during React render
+  camera.position.set(...cameraPosition);
   camera.lookAt(...lookAt);
-  
-  // Force WebGL to finish - call synchronously
-  const ctx = gl.getContext();
-  if (ctx) {
-    ctx.finish();
-  }
   
   return null;
 }
@@ -254,6 +272,7 @@ function TowerChartScene({
   towers,
   cameraPosition,
   lookAt,
+  remotionFrame,
   visibleStart,
   visibleEnd,
   currentIndex,
@@ -273,6 +292,7 @@ function TowerChartScene({
   towers: ReturnType<typeof calculateTowers>;
   cameraPosition: [number, number, number];
   lookAt: [number, number, number];
+  remotionFrame: number;
   visibleStart: number;
   visibleEnd: number;
   currentIndex: number;
@@ -316,8 +336,12 @@ function TowerChartScene({
         </Suspense>
       )}
       
-      {/* Camera setter - SYNCHRONOUS, no useFrame */}
-      <CameraSetter position={cameraPosition} lookAt={lookAt} />
+      {/* Frame-synced camera - receives Remotion frame number */}
+      <FrameSyncedCamera 
+        cameraPosition={cameraPosition} 
+        lookAt={lookAt}
+        remotionFrame={remotionFrame}
+      />
       
       {towers.map((tower, index) => {
         const inVisibleRange = index >= visibleStart && index <= visibleEnd;
@@ -423,9 +447,9 @@ export interface TowerChart3DSceneProps {
 export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.ReactElement {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
-  const glRef = useRef<WebGLRenderingContext | null>(null);
   const [renderHandle] = useState(() => delayRender('Initializing 3D scene'));
-  const hasInitialized = useRef(false);
+  const canvasRef = useRef<any>(null);
+  const [ready, setReady] = useState(false);
   
   const {
     title = 'Rankings',
@@ -486,7 +510,7 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
     [items, towerSpacing, baseHeight, maxHeight, gradientStart, gradientEnd, useGradientByRank, animationDirection]
   );
   
-  // Calculate camera state
+  // Calculate camera state - KEY: this changes every frame
   const cameraState = useMemo(() => 
     calculateCameraState(
       towers.map(t => ({ position: t.position, height: t.height })),
@@ -502,23 +526,22 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
     ? [customModelPosition.x, customModelPosition.y, customModelPosition.z] 
     : [0, 35, -60];
   
-  // Continue render after GL context is ready
-  useEffect(() => {
-    if (glRef.current && !hasInitialized.current) {
-      hasInitialized.current = true;
-      continueRender(renderHandle);
-    }
-  }, [glRef.current, renderHandle]);
-  
   // Callback when Canvas is created
-  const onCreated = ({ gl }: { gl: THREE.WebGLRenderer }) => {
+  const onCreated = useCallback(({ gl }: { gl: THREE.WebGLRenderer }) => {
     const ctx = gl.getContext();
     if (ctx) {
-      glRef.current = ctx;
-      // Finish any pending operations
       ctx.finish();
     }
-  };
+    setReady(true);
+    continueRender(renderHandle);
+  }, [renderHandle]);
+  
+  // Force re-render when frame changes
+  useEffect(() => {
+    if (canvasRef.current) {
+      invalidate();
+    }
+  }, [frame]);
   
   const titleOpacity = interpolate(frame, [0, 25], [0, 1], { extrapolateRight: 'clamp' });
   const titleY = interpolate(frame, [0, 25], [-35, 0], { extrapolateRight: 'clamp' });
@@ -526,6 +549,7 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
   return (
     <AbsoluteFill style={{ backgroundColor }}>
       <Canvas
+        ref={canvasRef}
         camera={{ 
           position: cameraState.position, 
           fov: 50, 
@@ -540,13 +564,14 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
           powerPreference: 'high-performance',
         }}
         dpr={1}
-        frameloop="demand"
+        frameloop="always"
         onCreated={onCreated}
       >
         <TowerChartScene 
           towers={towers}
           cameraPosition={cameraState.position}
           lookAt={cameraState.lookAt}
+          remotionFrame={frame}
           visibleStart={visibleStart}
           visibleEnd={visibleEnd}
           currentIndex={currentIndex}
