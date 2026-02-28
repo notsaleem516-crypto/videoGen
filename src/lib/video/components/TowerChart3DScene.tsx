@@ -217,22 +217,38 @@ function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, ran
         />
       </Box>
       
-      {image && texture && (
-        <Billboard position={[0, height + 3, 0]} follow={true}>
-          <mesh>
-            <planeGeometry args={[2.8, 2.8]} />
-            <meshBasicMaterial map={texture} transparent opacity={opacity} side={THREE.DoubleSide} />
-          </mesh>
-        </Billboard>
-      )}
+{image && texture && (
+  <Billboard position={[0, height + 5, 0]} follow={true}>
+    {/* Real 3D box for depth/thickness */}
+    <mesh position={[0, 0, -0.3]} renderOrder={996}>
+      <boxGeometry args={[3.0, 3.0, 0.6]} />
+      <meshStandardMaterial color={color} metalness={0.7} roughness={0.2} emissive={color} emissiveIntensity={0.3} />
+    </mesh>
+    {/* White border face */}
+    <mesh position={[0, 0, 0.01]} renderOrder={997}>
+      <planeGeometry args={[3.0, 3.0]} />
+      <meshBasicMaterial color="#ffffff" depthTest={false} depthWrite={false} />
+    </mesh>
+    {/* Main image */}
+    <mesh position={[0, 0, 0.02]} renderOrder={999}>
+      <planeGeometry args={[2.8, 2.8]} />
+      <meshBasicMaterial map={texture} transparent opacity={opacity} side={THREE.DoubleSide} depthTest={false} depthWrite={false} />
+    </mesh>
+    {/* Shine */}
+    <mesh position={[-0.4, 0.4, 0.03]} renderOrder={1000}>
+      <planeGeometry args={[1.2, 1.2]} />
+      <meshBasicMaterial color="#ffffff" transparent opacity={0.15 * opacity} depthTest={false} depthWrite={false} />
+    </mesh>
+  </Billboard>
+)}
       
-      {showLabel && (
-        <Billboard position={[0, height + (image && texture ? 5 : 3), 0]} follow={true}>
-          <Text position={[-width/2 - 1.2, 1.2, 0]} fontSize={0.9} color="#FFD700" anchorX="center" anchorY="middle" fontWeight="bold" outlineWidth={0.06} outlineColor="#000000">#{rank}</Text>
-          <Text position={[0, 0.5, 0]} fontSize={0.75} color="#FFFFFF" anchorX="center" anchorY="middle" fontWeight="bold" outlineWidth={0.05} outlineColor="#000000" maxWidth={7}>{name}</Text>
-          <Text position={[0, -0.5, 0]} fontSize={0.65} color="#4ADE80" anchorX="center" anchorY="middle" outlineWidth={0.04} outlineColor="#000000">{value}</Text>
-          {subtitle && <Text position={[0, -1.2, 0]} fontSize={0.45} color="#9CA3AF" anchorX="center" anchorY="middle">{subtitle}</Text>}
-        </Billboard>
+     {showLabel && (
+  <Billboard position={[0, height + (image && texture ? 2 : 3), 0]} follow={true}>
+  <Text position={[-1.8, 0.5, 0]} fontSize={0.75} color="#FFD700" anchorX="right" anchorY="middle" fontWeight="bold" outlineWidth={0.06} outlineColor="#000000">#{rank}</Text>
+<Text position={[-1.4, 0.5, 0]} fontSize={0.65} color="#FFFFFF" anchorX="left" anchorY="middle" fontWeight="bold" outlineWidth={0.05} outlineColor="#000000" maxWidth={20} whiteSpace="nowrap">{name}</Text>
+  <Text position={[0, -0.5, 0]} fontSize={0.65} color="#4ADE80" anchorX="center" anchorY="middle" outlineWidth={0.04} outlineColor="#000000">{value}</Text>
+  {subtitle && <Text position={[0, -1.2, 0]} fontSize={0.45} color="#9CA3AF" anchorX="center" anchorY="middle">{subtitle}</Text>}
+</Billboard>
       )}
     </group>
   );
