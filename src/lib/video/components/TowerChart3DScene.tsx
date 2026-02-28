@@ -366,7 +366,7 @@ function TowerChartScene({
             value={tower.valueFormatted}
             subtitle={tower.subtitle}
             image={tower.image}
-            showLabel={showLabels3D && itemReveal > 0.25 && inVisibleRange}
+            showLabel={showLabels3D && itemReveal > 0.25}
             isHighlighted={isHighlighted}
             visible={inVisibleRange || itemReveal > 0}
           />
