@@ -1729,6 +1729,17 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
     }
   }, [glReady, handle]);
   
+  // Safety timeout - ensure continueRender is called even if Canvas fails
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!glReady) {
+        console.warn('Canvas initialization timeout, continuing render anyway');
+        setGlReady(true);
+      }
+    }, 5000);
+    return () => clearTimeout(timeout);
+  }, [glReady]);
+  
   // Canvas ready callback
   const onCreated = useCallback(({ gl }: { gl: THREE.WebGLRenderer }) => {
     const ctx = gl.getContext();

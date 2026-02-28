@@ -3781,6 +3781,15 @@ function TowerChart3DScene({ data }) {
       continueRender(handle);
     }
   }, [glReady, handle]);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!glReady) {
+        console.warn("Canvas initialization timeout, continuing render anyway");
+        setGlReady(true);
+      }
+    }, 5e3);
+    return () => clearTimeout(timeout);
+  }, [glReady]);
   const onCreated = useCallback(({ gl }) => {
     const ctx = gl.getContext();
     if (ctx) {
