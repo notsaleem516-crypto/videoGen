@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { 
   useCurrentFrame, 
   useVideoConfig, 
@@ -7,10 +7,6 @@ import {
   spring,
   Img,
   Audio,
-  delayRender,
-  continueRender,
-  cancelRender,
-  staticFile,
 } from 'remotion';
 import { 
   type MotivationalImageBlock,
@@ -19,14 +15,6 @@ import {
   type AnimationPhase 
 } from '../schemas';
 import { type MotionProfileType } from '../utils/animations';
-
-// ============================================================================
-// CONFIGURATION
-// ============================================================================
-
-const RESOURCE_TIMEOUT_MS = 30000; // 30 seconds max wait for resources
-const IMAGE_LOAD_TIMEOUT_MS = 15000; // 15 seconds for images
-const AUDIO_LOAD_TIMEOUT_MS = 20000; // 20 seconds for audio
 
 // ============================================================================
 // MOTIVATIONAL IMAGE SCENE - Image with Text Overlay for Motivational Videos
@@ -66,122 +54,6 @@ export function MotivationalImageScene({
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
-  // Resource loading state
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
-  const [audioLoaded, setAudioLoaded] = useState(false);
-  const [audioError, setAudioError] = useState(false);
-  const loadedRef = useRef({ image: false, audio: false });
-  
-  // delayRender handle for resource loading
-  const [handle] = useState(() => delayRender('Loading MotivationalImage resources', {
-    timeoutInMilliseconds: RESOURCE_TIMEOUT_MS,
-  }));
-  
-  // Preload image with timeout
-  useEffect(() => {
-    if (!data.imageSrc) {
-      setImageLoaded(true);
-      loadedRef.current.image = true;
-      checkAllLoaded();
-      return;
-    }
-    
-    let cancelled = false;
-    const img = new Image();
-    
-    // Timeout fallback
-    const timeout = setTimeout(() => {
-      if (!cancelled && !loadedRef.current.image) {
-        console.warn(`[MotivationalImage] Image load timeout: ${data.imageSrc}`);
-        setImageError(true);
-        loadedRef.current.image = true;
-        checkAllLoaded();
-      }
-    }, IMAGE_LOAD_TIMEOUT_MS);
-    
-    img.onload = () => {
-      if (cancelled) return;
-      clearTimeout(timeout);
-      setImageLoaded(true);
-      setImageError(false);
-      loadedRef.current.image = true;
-      checkAllLoaded();
-    };
-    
-    img.onerror = () => {
-      if (cancelled) return;
-      clearTimeout(timeout);
-      console.warn(`[MotivationalImage] Image load failed: ${data.imageSrc}`);
-      setImageError(true);
-      loadedRef.current.image = true;
-      checkAllLoaded();
-    };
-    
-    img.src = data.imageSrc;
-    
-    return () => {
-      cancelled = true;
-      clearTimeout(timeout);
-    };
-  }, [data.imageSrc]);
-  
-  // Preload audio with timeout
-  useEffect(() => {
-    if (!data.audioSrc) {
-      setAudioLoaded(true);
-      loadedRef.current.audio = true;
-      checkAllLoaded();
-      return;
-    }
-    
-    let cancelled = false;
-    const audio = new Audio();
-    
-    // Timeout fallback
-    const timeout = setTimeout(() => {
-      if (!cancelled && !loadedRef.current.audio) {
-        console.warn(`[MotivationalImage] Audio load timeout: ${data.audioSrc}`);
-        setAudioError(true);
-        loadedRef.current.audio = true;
-        checkAllLoaded();
-      }
-    }, AUDIO_LOAD_TIMEOUT_MS);
-    
-    audio.oncanplaythrough = () => {
-      if (cancelled) return;
-      clearTimeout(timeout);
-      setAudioLoaded(true);
-      setAudioError(false);
-      loadedRef.current.audio = true;
-      checkAllLoaded();
-    };
-    
-    audio.onerror = () => {
-      if (cancelled) return;
-      clearTimeout(timeout);
-      console.warn(`[MotivationalImage] Audio load failed: ${data.audioSrc}`);
-      setAudioError(true);
-      loadedRef.current.audio = true;
-      checkAllLoaded();
-    };
-    
-    audio.src = data.audioSrc;
-    audio.load();
-    
-    return () => {
-      cancelled = true;
-      clearTimeout(timeout);
-    };
-  }, [data.audioSrc]);
-  
-  // Check if all resources are loaded, then continue render
-  const checkAllLoaded = () => {
-    if (loadedRef.current.image && loadedRef.current.audio) {
-      continueRender(handle);
-    }
-  };
-  
   // Animation timings
   const enterDuration = animation?.enter ?? 1.5;
   const holdDuration = animation?.hold ?? 3;
@@ -219,14 +91,14 @@ export function MotivationalImageScene({
       }}
     >
       {/* Audio Layer - Plays background audio if provided */}
-      {data.audioSrc && !audioError && (
+      {data.audioSrc && (
         <Audio
           src={data.audioSrc}
           volume={data.audioVolume ?? 0.7}
         />
       )}
       
-      {/* Image Layer - Show fallback on error */}
+      {/* Image Layer */}
       <AbsoluteFill
         style={{
           opacity: imageAnimation.opacity * (1 - exitProgress),
@@ -234,24 +106,15 @@ export function MotivationalImageScene({
           filter: imageAnimation.filter,
         }}
       >
-        {imageError ? (
-          // Fallback: Gradient background when image fails
-          <AbsoluteFill
-            style={{
-              background: `linear-gradient(135deg, ${data.backgroundColor || '#000000'} 0%, #1a1a2e 50%, #16213e 100%)`,
-            }}
-          />
-        ) : (
-          <Img
-            src={data.imageSrc}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: data.imageFit || 'cover',
-              objectPosition: IMAGE_POSITIONS[data.imagePosition || 'center'],
-            }}
-          />
-        )}
+        <Img
+          src={data.imageSrc}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: data.imageFit || 'cover',
+            objectPosition: IMAGE_POSITIONS[data.imagePosition || 'center'],
+          }}
+        />
       </AbsoluteFill>
       
       {/* Color Overlay Layer */}

@@ -104089,10 +104089,6 @@ function TestimonialScene({
 
 
 
-
-const RESOURCE_TIMEOUT_MS = 3e4;
-const IMAGE_LOAD_TIMEOUT_MS = 15e3;
-const AUDIO_LOAD_TIMEOUT_MS = 2e4;
 const FONT_SIZES = {
   small: 32,
   medium: 48,
@@ -104115,98 +104111,6 @@ function MotivationalImageScene({
 }) {
   const frame = (0,esm.useCurrentFrame)();
   const { fps } = (0,esm.useVideoConfig)();
-  const [imageLoaded, setImageLoaded] = (0,react.useState)(false);
-  const [imageError, setImageError] = (0,react.useState)(false);
-  const [audioLoaded, setAudioLoaded] = (0,react.useState)(false);
-  const [audioError, setAudioError] = (0,react.useState)(false);
-  const loadedRef = (0,react.useRef)({ image: false, audio: false });
-  const [handle] = (0,react.useState)(() => (0,esm.delayRender)("Loading MotivationalImage resources", {
-    timeoutInMilliseconds: RESOURCE_TIMEOUT_MS
-  }));
-  (0,react.useEffect)(() => {
-    if (!data.imageSrc) {
-      setImageLoaded(true);
-      loadedRef.current.image = true;
-      checkAllLoaded();
-      return;
-    }
-    let cancelled = false;
-    const img = new Image();
-    const timeout = setTimeout(() => {
-      if (!cancelled && !loadedRef.current.image) {
-        console.warn(`[MotivationalImage] Image load timeout: ${data.imageSrc}`);
-        setImageError(true);
-        loadedRef.current.image = true;
-        checkAllLoaded();
-      }
-    }, IMAGE_LOAD_TIMEOUT_MS);
-    img.onload = () => {
-      if (cancelled) return;
-      clearTimeout(timeout);
-      setImageLoaded(true);
-      setImageError(false);
-      loadedRef.current.image = true;
-      checkAllLoaded();
-    };
-    img.onerror = () => {
-      if (cancelled) return;
-      clearTimeout(timeout);
-      console.warn(`[MotivationalImage] Image load failed: ${data.imageSrc}`);
-      setImageError(true);
-      loadedRef.current.image = true;
-      checkAllLoaded();
-    };
-    img.src = data.imageSrc;
-    return () => {
-      cancelled = true;
-      clearTimeout(timeout);
-    };
-  }, [data.imageSrc]);
-  (0,react.useEffect)(() => {
-    if (!data.audioSrc) {
-      setAudioLoaded(true);
-      loadedRef.current.audio = true;
-      checkAllLoaded();
-      return;
-    }
-    let cancelled = false;
-    const audio = new esm.Audio();
-    const timeout = setTimeout(() => {
-      if (!cancelled && !loadedRef.current.audio) {
-        console.warn(`[MotivationalImage] Audio load timeout: ${data.audioSrc}`);
-        setAudioError(true);
-        loadedRef.current.audio = true;
-        checkAllLoaded();
-      }
-    }, AUDIO_LOAD_TIMEOUT_MS);
-    audio.oncanplaythrough = () => {
-      if (cancelled) return;
-      clearTimeout(timeout);
-      setAudioLoaded(true);
-      setAudioError(false);
-      loadedRef.current.audio = true;
-      checkAllLoaded();
-    };
-    audio.onerror = () => {
-      if (cancelled) return;
-      clearTimeout(timeout);
-      console.warn(`[MotivationalImage] Audio load failed: ${data.audioSrc}`);
-      setAudioError(true);
-      loadedRef.current.audio = true;
-      checkAllLoaded();
-    };
-    audio.src = data.audioSrc;
-    audio.load();
-    return () => {
-      cancelled = true;
-      clearTimeout(timeout);
-    };
-  }, [data.audioSrc]);
-  const checkAllLoaded = () => {
-    if (loadedRef.current.image && loadedRef.current.audio) {
-      (0,esm.continueRender)(handle);
-    }
-  };
   const enterDuration = (animation == null ? void 0 : animation.enter) ?? 1.5;
   const holdDuration = (animation == null ? void 0 : animation.hold) ?? 3;
   const exitDuration = (animation == null ? void 0 : animation.exit) ?? 0.5;
@@ -104229,7 +104133,7 @@ function MotivationalImageScene({
         backgroundColor: data.backgroundColor || "#000000"
       },
       children: [
-        data.audioSrc && !audioError && /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        data.audioSrc && /* @__PURE__ */ (0,jsx_runtime.jsx)(
           esm.Audio,
           {
             src: data.audioSrc,
@@ -104244,17 +104148,7 @@ function MotivationalImageScene({
               transform: imageAnimation.transform,
               filter: imageAnimation.filter
             },
-            children: imageError ? (
-              // Fallback: Gradient background when image fails
-              /* @__PURE__ */ (0,jsx_runtime.jsx)(
-                esm.AbsoluteFill,
-                {
-                  style: {
-                    background: `linear-gradient(135deg, ${data.backgroundColor || "#000000"} 0%, #1a1a2e 50%, #16213e 100%)`
-                  }
-                }
-              )
-            ) : /* @__PURE__ */ (0,jsx_runtime.jsx)(
+            children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
               esm.Img,
               {
                 src: data.imageSrc,
