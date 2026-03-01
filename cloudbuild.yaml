@@ -1,0 +1,39 @@
+# Cloud Build Configuration for Video Renderer
+# Deploy from GitHub to Google Cloud with GPU support
+
+steps:
+  # 1. Build the video bundle first
+  - name: 'oven/bun:1'
+    args: ['bun', 'run', 'video:bundle']
+    dir: 'videoGen'
+
+  # 2. Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/video-renderer:$COMMIT_SHA', '-f', 'Dockerfile.video-renderer', '.']
+
+  # 3. Push to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/video-renderer:$COMMIT_SHA']
+
+  # 4. Deploy to Compute Engine (GPU VM)
+  # Note: This requires a pre-provisioned GPU instance
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud compute instances update-container video-renderer-vm \
+          --container-image=gcr.io/$PROJECT_ID/video-renderer:$COMMIT_SHA \
+          --zone=us-central1-a \
+          --container-mount-host-path=mount-host-path=/bundle,mode=ro,path=/app/bundle
+
+images:
+  - 'gcr.io/$PROJECT_ID/video-renderer:$COMMIT_SHA'
+
+options:
+  machineType: 'E2_HIGHCPU_8'
+
+substitutions:
+  _BRANCH_NAME: 'main'
+
+timeout: 1200s
