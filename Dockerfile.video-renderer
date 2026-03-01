@@ -2,22 +2,9 @@
 # Video Renderer Service Dockerfile
 # Optimized for GPU rendering with NVIDIA
 # ============================================================================
-FROM oven/bun:1-debian AS production
+FROM oven/bun:1-debian AS builder
 
-# ----------------------
-# Environment variables
-# ----------------------
-ENV DEBIAN_FRONTEND=noninteractive
-ENV PUID=1000
-ENV PGID=1000
-ENV CHROME_PATH=/usr/bin/google-chrome
-ENV REMOTION_CHROMIUM_PATH=/usr/bin/google-chrome
-ENV NVIDIA_VISIBLE_DEVICES=all
-ENV NVIDIA_DRIVER_CAPABILITIES=all
-
-# ----------------------
 # Install system dependencies
-# ----------------------
 RUN apt-get update && apt-get install -y \
     curl unzip bash git wget gnupg \
     libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
@@ -27,9 +14,7 @@ RUN apt-get update && apt-get install -y \
     ffmpeg ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# ----------------------
 # Install Google Chrome
-# ----------------------
 RUN wget -q https://dl.google.com/linux/linux_signing_key.pub -O /usr/share/keyrings/google-linux.gpg \
     && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
     > /etc/apt/sources.list.d/google-chrome.list \
@@ -37,12 +22,45 @@ RUN wget -q https://dl.google.com/linux/linux_signing_key.pub -O /usr/share/keyr
     && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
-# ----------------------
-# App setup
-# ----------------------
 WORKDIR /app
 
-# Copy and install dependencies
+# Copy and build the video bundle
+COPY package.json ./package.json
+RUN bun install && bun run video:bundle
+
+# ============================================================================
+# Production stage
+# ============================================================================
+FROM oven/bun:1-debian AS production
+
+# Environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV CHROME_PATH=/usr/bin/google-chrome
+ENV REMOTION_CHROMIUM_PATH=/usr/bin/google-chrome
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=all
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl unzip bash git wget gnupg \
+    libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+    libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
+    libxrandr2 libgbm1 libasound2 libpango-1.0-0 \
+    libpangocairo-1.0-0 libx11-6 libxext6 libxrender1 \
+    ffmpeg ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Google Chrome
+RUN wget -q https://dl.google.com/linux/linux_signing_key.pub -O /usr/share/keyrings/google-linux.gpg \
+    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
+    > /etc/apt/sources.list.d/google-chrome.list \
+    && apt-get update \
+    && apt-get install -y google-chrome-stable \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy package files
 COPY mini-services/video-renderer/package.json ./package.json
 RUN bun install --frozen-lockfile
 

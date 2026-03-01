@@ -16,11 +16,11 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/video-renderer:$COMMIT_SHA', '-f', 'Dockerfile.video-renderer', '.']
 
-  # 3. Push to Container Registry
+  # 2. Push to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/video-renderer:$COMMIT_SHA']
 
-  # 4. Deploy to Cloud Run with GPU
+  # 3. Deploy to Cloud Run with GPU
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'gcloud'
     args:
