@@ -2338,6 +2338,9 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
 
+  // Detect preview mode (small dimensions) vs full render
+  const isPreview = width < 500;
+
   const [handle] = useState(() => delayRender('Initializing 3D scene'));
   const [glReady, setGlReady] = useState(false);
 
@@ -2400,15 +2403,18 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
     [items, towerSpacing, baseHeight, maxHeight, gradientStart, gradientEnd, useGradientByRank, animationDirection]
   );
 
+  // Use closer camera for preview (25), further for render (35)
+  const effectiveCameraDistance = isPreview ? 25 : cameraDistance;
+
   const cameraState = useMemo(() =>
     calculateCameraState(
       towers.map(t => ({ position: t.position, height: t.height })),
       currentIndex,
       itemProgress,
-      cameraDistance,
+      effectiveCameraDistance,
       cameraAngle
     ),
-    [towers, currentIndex, itemProgress, cameraDistance, cameraAngle]
+    [towers, currentIndex, itemProgress, effectiveCameraDistance, cameraAngle]
   );
 
   const modelPos: [number, number, number] = customModelPosition

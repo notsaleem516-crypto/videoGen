@@ -1,5 +1,5 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, spring } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, spring, Video } from 'remotion';
 import { getTheme } from '../utils/theme';
 import type { MotionProfileType } from '../utils/animations';
 
@@ -25,22 +25,27 @@ export function VideoScene({ data, theme, animation }: VideoSceneProps) {
   const frame = useCurrentFrame();
   const colors = getTheme(theme);
   const fps = 30;
-  
-  const { src, poster, caption, muted = true } = data;
-  
+
+  const { src, poster, caption, muted = true, loop = true } = data;
+
   // Entrance animation
   const scale = spring({
     frame,
     fps,
     config: { damping: 12, stiffness: 80 },
   });
-  
+
   const opacity = spring({
     frame,
     fps,
     config: { damping: 15, stiffness: 50 },
   });
-  
+
+  // Use Remotion's Video component for server-side rendering compatibility
+  // For browser preview, it will play the video
+  // For server-side render, it will include the video in the output
+  const videoSrc = src;
+
   return (
     <AbsoluteFill
       style={{
@@ -71,25 +76,55 @@ export function VideoScene({ data, theme, animation }: VideoSceneProps) {
             boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
           }}
         >
-          {/* Video Preview / Poster */}
-          <div
-            style={{
-              width: '100%',
-              aspectRatio: '16/9',
-              backgroundColor: '#1a1a1a',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              position: 'relative',
-            }}
-          >
-            {poster ? (
-              <img
-                src={poster}
-                alt={caption || 'Video'}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          {videoSrc ? (
+            <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9' }}>
+              <Video
+                src={videoSrc}
+                muted={muted}
+                loop={loop}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
               />
-            ) : (
+              {/* Muted indicator */}
+              {muted && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 16,
+                    right: 16,
+                    backgroundColor: 'rgba(0,0,0,0.6)',
+                    padding: '8px 12px',
+                    borderRadius: 8,
+                    fontSize: 14,
+                    color: '#FFFFFF',
+                    fontFamily: 'system-ui, sans-serif',
+                  }}
+                >
+                  🔇 Muted
+                </div>
+              )}
+            </div>
+          ) : poster ? (
+            <img
+              src={poster}
+              alt={caption || 'Video'}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          ) : (
+            <div
+              style={{
+                width: '100%',
+                aspectRatio: '16/9',
+                backgroundColor: '#1a1a1a',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                position: 'relative',
+              }}
+            >
               <div
                 style={{
                   display: 'flex',
@@ -112,48 +147,11 @@ export function VideoScene({ data, theme, animation }: VideoSceneProps) {
                   }}
                 />
               </div>
-            )}
-            
-            {/* Muted indicator */}
-            {muted && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 16,
-                  right: 16,
-                  backgroundColor: 'rgba(0,0,0,0.6)',
-                  padding: '8px 12px',
-                  borderRadius: 8,
-                  fontSize: 14,
-                  color: '#FFFFFF',
-                  fontFamily: 'system-ui, sans-serif',
-                }}
-              >
-                🔇 Muted
-              </div>
-            )}
-            
-            {/* Video source indicator */}
-            {src && (
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: 16,
-                  left: 16,
-                  backgroundColor: 'rgba(0,0,0,0.6)',
-                  padding: '6px 12px',
-                  borderRadius: 6,
-                  fontSize: 12,
-                  color: '#FFFFFF',
-                  fontFamily: 'system-ui, sans-serif',
-                }}
-              >
-                🎬 Video Block
-              </div>
-            )}
-          </div>
+            </div>
+          )}
+
         </div>
-        
+
         {/* Caption */}
         {caption && (
           <div

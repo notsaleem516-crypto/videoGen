@@ -285,6 +285,18 @@ const BlockCustomizationSchema = z.object({
   margin: z.number().min(0).max(50).optional(),
 });
 
+const AudioTrackSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().default('Audio Track'),
+  src: z.string(),
+  volume: z.number().min(0).max(1).default(0.7),
+  startTime: z.number().min(0).default(0),
+  fadeIn: z.number().min(0).max(10).default(0),
+  fadeOut: z.number().min(0).max(10).default(0),
+  loop: z.boolean().default(true),
+  muted: z.boolean().default(false),
+});
+
 const VideoMetaSchema = z.object({
   aspectRatio: z.enum(['16:9', '9:16', '1:1', '4:5']).default('9:16'),
   theme: z.enum(['dark_modern', 'light_clean', 'gradient_vibrant', 'minimal_bw']).default('dark_modern'),
@@ -292,6 +304,7 @@ const VideoMetaSchema = z.object({
   duration: z.number().optional(),
   intro: IntroOutroSchema.optional(),
   outro: IntroOutroSchema.optional(),
+  audioTracks: z.array(AudioTrackSchema).optional().default([]),
 });
 
 const ContentBlockSchema = z.discriminatedUnion('type', [
@@ -1034,6 +1047,7 @@ serve({
             props: props,
           },
           codec: 'h264',
+          audioCodec: 'aac',
           outputLocation: outputPath,
           inputProps: props,
           crf,
@@ -1135,6 +1149,7 @@ serve({
         
         console.log('🎥 Full render requested...');
         console.log('  Content blocks:', input.contentBlocks.length);
+        console.log('  Audio tracks:', input.videoMeta.audioTracks?.length || 0);
         console.log('  Duration:', `${(compositionConfig.durationInFrames / compositionConfig.fps).toFixed(1)}s`);
         console.log('  Resolution:', `${compositionConfig.width}x${compositionConfig.height}`);
         console.log('  GPU Mode:', GPU_INFO.hasGPU ? 'Enabled' : 'Disabled');
@@ -1179,6 +1194,7 @@ serve({
             props: props,
           },
           codec: 'h264',
+          audioCodec: 'aac',
           outputLocation: outputPath,
           inputProps: props,
           crf,

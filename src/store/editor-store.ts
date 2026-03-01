@@ -689,10 +689,12 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   // Export video
   exportVideo: async () => {
     try {
+      const videoInput = get().videoInput;
+      console.log('Exporting video with audioTracks:', videoInput.videoMeta.audioTracks);
       const response = await fetch('http://localhost:3031/render-full', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(get().videoInput),
+        body: JSON.stringify(videoInput),
       });
       
       if (!response.ok) {

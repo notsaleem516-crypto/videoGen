@@ -1,10 +1,11 @@
 import React from 'react';
-import { 
-  AbsoluteFill, 
+import {
+  AbsoluteFill,
   Sequence,
   useCurrentFrame,
   interpolate,
   spring,
+  Audio,
 } from 'remotion';
 import {
   Intro,
@@ -91,19 +92,22 @@ export function DynamicVideo({
   const { videoMeta, contentBlocks } = input;
   const { decisions, suggestedTransitions } = plan;
   const colors = getTheme(videoMeta.theme);
-  
+
+  // Get audio tracks
+  const audioTracks = videoMeta.audioTracks || [];
+
   // Get intro/outro config with defaults
   const introConfig = videoMeta.intro || {};
   const outroConfig = videoMeta.outro || {};
-  
+
   const introTitle = introConfig.title || 'Video Report';
   const introSubtitle = introConfig.subtitle || '';
   const introDuration = introConfig.duration || 2;
-  
+
   const outroMessage = outroConfig.title || 'Thank You';
   const outroCta = outroConfig.subtitle || '';
   const outroDuration = outroConfig.duration || 2;
-  
+
   // Build timeline
   const timeline = buildTimeline(
     contentBlocks,
@@ -112,13 +116,24 @@ export function DynamicVideo({
     outroDuration,
     videoMeta.fps
   );
-  
+
   return (
     <AbsoluteFill
       style={{
         backgroundColor: colors.background,
       }}
     >
+      {/* Audio Tracks - render all non-muted tracks */}
+      {audioTracks.map((track, index) => !track.muted && (
+        <Audio
+          key={track.id || `audio-${index}`}
+          src={track.src}
+          volume={track.volume}
+          startFrom={Math.round(track.startTime * videoMeta.fps)}
+          loop={track.loop}
+        />
+      ))}
+
       {/* Intro */}
       <Sequence from={0} durationInFrames={frames(introDuration, videoMeta.fps)}>
         <Intro
@@ -128,7 +143,7 @@ export function DynamicVideo({
           logoUrl={introConfig.logoUrl}
         />
       </Sequence>
-      
+
       {/* Dynamic Content Scenes */}
       {timeline.scenes.map((scene, index) => (
         <Sequence
@@ -144,13 +159,13 @@ export function DynamicVideo({
           />
         </Sequence>
       ))}
-      
+
       {/* Outro */}
       <Sequence
         from={timeline.totalFrames - frames(outroDuration, videoMeta.fps)}
         durationInFrames={frames(outroDuration, videoMeta.fps)}
       >
-        <Outro 
+        <Outro
           message={outroMessage}
           cta={outroCta}
           theme={videoMeta.theme}
