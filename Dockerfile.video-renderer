@@ -3,52 +3,22 @@
 # Optimized for GPU rendering with NVIDIA
 # ============================================================================
 
-# Build stage
-FROM oven/bun:1-alpine AS builder
-
-WORKDIR /app
-
-# Install build dependencies
-RUN apk add --no-cache \
-    git \
-    python3 \
-    make \
-    g++ \
-    # Chromium dependencies
-    chromium \
-    nss \
-    freetype \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
-    udev
-
-# Copy package files
-COPY mini-services/video-renderer/package.json ./package.json
-
-# Install dependencies
-RUN bun install --frozen-lockfile
-
-# Copy source
-COPY mini-services/video-renderer/index.ts ./index.ts
-
-# ============================================================================
-# Production stage
-# ============================================================================
-FROM nvidia/cuda:12.4.0-runtime-ubuntu22.04 AS production
+# Use official bun image with Ubuntu for GPU compatibility
+FROM oven/bun:1-debian AS production
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PUID=1000
 ENV PGID=1000
 
-# Install system dependencies
+# Install system dependencies including CUDA/GPU support
 RUN apt-get update && apt-get install -y \
-    # Node.js and Bun
+    # Core utilities
     curl \
     unzip \
     bash \
+    git \
     # Chromium and dependencies for GPU rendering
-    chromium-browser \
+    chromium \
     libnss3 \
     libatk1.0-0 \
     libatk-bridge2.0-0 \
@@ -65,18 +35,11 @@ RUN apt-get update && apt-get install -y \
     libpangocairo-1.0-0 \
     # FFmpeg for audio/video processing
     ffmpeg \
+    # NVIDIA/CUDA libraries
+    libcuda1 \
     # Utilities
     ca-certificates \
-    fonts-freefont-ttf \
     && rm -rf /var/lib/apt/lists/*
-
-# Install Bun (fallback to npm if bun fails)
-RUN curl -fsSL https://bun.sh/install | bash || npm install -g bun
-ENV BUN_INSTALL="/root/.bun"
-ENV PATH="$BUN_INSTALL/bin:$PATH"
-
-# Verify bun is installed
-RUN which bun || echo "Bun not found in PATH"
 
 WORKDIR /app
 
@@ -99,8 +62,8 @@ RUN if [ -d "out/bundle" ]; then cp -r out/bundle/* ./bundle/; fi
 EXPOSE 3031
 
 # Set environment variables for GPU rendering
-ENV CHROME_PATH=/usr/bin/chromium-browser
-ENV REMOTION_CHROMIUM_PATH=/usr/bin/chromium-browser
+ENV CHROME_PATH=/usr/bin/chromium
+ENV REMOTION_CHROMIUM_PATH=/usr/bin/chromium
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
 
