@@ -2,83 +2,78 @@
 # Video Renderer Service Dockerfile
 # Optimized for GPU rendering with NVIDIA
 # ============================================================================
-
-# Use official bun image with Debian for GPU compatibility
 FROM oven/bun:1-debian AS production
 
+# ----------------------
+# Environment variables
+# ----------------------
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PUID=1000
 ENV PGID=1000
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    # Core utilities
-    curl \
-    unzip \
-    bash \
-    git \
-    wget \
-    gnupg \
-    # Chromium dependencies
-    libnss3 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libxkbcommon0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxrandr2 \
-    libgbm1 \
-    libasound2 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    # FFmpeg for audio/video processing
-    ffmpeg \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Chrome for rendering
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
-    && apt-get update \
-    && apt-get install -y google-chrome-stable \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-# Copy package files
-COPY mini-services/video-renderer/package.json ./package.json
-
-# Install dependencies
-RUN bun install --frozen-lockfile
-
-# Copy source
-COPY mini-services/video-renderer/index.ts ./index.ts
-
-# Create bundle directory (should be mounted or copied)
-RUN mkdir -p /app/bundle
-
-# Copy bundle if exists (otherwise mount it at runtime)
-RUN if [ -d "out/bundle" ]; then cp -r out/bundle/* ./bundle/; fi
-
-# Expose port
-EXPOSE 3031
-
-# Set environment variables for GPU rendering
 ENV CHROME_PATH=/usr/bin/google-chrome
 ENV REMOTION_CHROMIUM_PATH=/usr/bin/google-chrome
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
 
-# Run as non-root user
+# ----------------------
+# Install system dependencies
+# ----------------------
+RUN apt-get update && apt-get install -y \
+    curl unzip bash git wget gnupg \
+    # Chromium dependencies
+    libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+    libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
+    libxrandr2 libgbm1 libasound2 libpango-1.0-0 \
+    libpangocairo-1.0-0 libx11-6 libxext6 libxrender1 \
+    # FFmpeg for audio/video processing
+    ffmpeg ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# ----------------------
+# Install Google Chrome
+# ----------------------
+RUN wget -q https://dl.google.com/linux/linux_signing_key.pub -O /usr/share/keyrings/google-linux.gpg \
+    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
+    > /etc/apt/sources.list.d/google-chrome.list \
+    && apt-get update \
+    && apt-get install -y google-chrome-stable \
+    && rm -rf /var/lib/apt/lists/*
+
+# ----------------------
+# App setup
+# ----------------------
+WORKDIR /app
+
+# Copy package files for bun
+COPY mini-services/video-renderer/package.json ./package.json
+COPY mini-services/video-renderer/bun.lockb ./bun.lockb
+
+# Install dependencies
+RUN bun install --frozen-lockfile
+
+# Copy source code
+COPY mini-services/video-renderer/index.ts ./index.ts
+
+# Bundle directory (mount at runtime or copy if exists)
+RUN mkdir -p /app/bundle
+# Optional: copy prebuilt bundle if exists
+# COPY mini-services/video-renderer/out/bundle ./bundle
+
+# ----------------------
+# Create non-root user
+# ----------------------
 RUN useradd -m -u 1000 -s /bin/bash appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Health check
+# ----------------------
+# Expose port and healthcheck
+# ----------------------
+EXPOSE 3031
+
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:3031/health || exit 1
 
+# ----------------------
 # Start the service
+# ----------------------
 CMD ["bun", "index.ts"]
