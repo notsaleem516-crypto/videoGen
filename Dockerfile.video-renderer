@@ -45,6 +45,7 @@ ENV PGID=1000
 RUN apt-get update && apt-get install -y \
     # Node.js and Bun
     curl \
+    unzip \
     # Chromium and dependencies for GPU rendering
     chromium-browser \
     libnss3 \
@@ -87,7 +88,7 @@ COPY mini-services/video-renderer/index.ts ./index.ts
 RUN mkdir -p /app/bundle
 
 # Copy bundle if exists (otherwise mount it at runtime)
-COPY --chown=1000:1000 out/bundle ./bundle 2>/dev/null || true
+RUN if [ -d "out/bundle" ]; then cp -r out/bundle/* ./bundle/; fi
 
 # Expose port
 EXPOSE 3031
