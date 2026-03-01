@@ -2457,7 +2457,14 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
           near: 0.1,
           far: 600
         }}
-        style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
+        style={{
+          width: '100%',
+          height: '100%',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          backgroundColor: backgroundColor, // Prevent white flash during init
+        }}
         gl={{
           antialias: true,
           alpha: false,

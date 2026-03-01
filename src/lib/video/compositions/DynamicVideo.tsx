@@ -100,7 +100,7 @@ export function DynamicVideo({
   const introConfig = videoMeta.intro || {};
   const outroConfig = videoMeta.outro || {};
 
-  const introTitle = introConfig.title || 'Video Report';
+  const introTitle = introConfig.title || 'SKYGEN';
   const introSubtitle = introConfig.subtitle || '';
   const introDuration = introConfig.duration || 2;
 
