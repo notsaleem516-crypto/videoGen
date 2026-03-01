@@ -26,6 +26,7 @@ WORKDIR /app
 
 # Copy and build the video bundle
 COPY package.json ./package.json
+COPY remotion-entry.tsx ./remotion-entry.tsx
 RUN bun install && bun run video:bundle
 
 # ============================================================================
@@ -68,7 +69,7 @@ RUN bun install --frozen-lockfile
 COPY mini-services/video-renderer/index.ts ./index.ts
 
 # Copy bundle from builder stage
-COPY --from=builder /app/out/bundle ./bundle/
+COPY --from=builder /app/mini-services/video-renderer/bundle ./bundle/
 
 # Fix permissions
 RUN chown -R bun:bun /app
