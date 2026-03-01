@@ -16,6 +16,7 @@ ENV NVIDIA_DRIVER_CAPABILITIES=all
 # ----------------------
 # Install system dependencies
 # ----------------------
+
 RUN apt-get update && apt-get install -y \
     curl unzip bash git wget gnupg \
     libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
@@ -24,7 +25,9 @@ RUN apt-get update && apt-get install -y \
     libpangocairo-1.0-0 libx11-6 libxext6 libxrender1 \
     ffmpeg ca-certificates jq \
     libvulkan1 mesa-vulkan-drivers \
+    libegl1 libegl-mesa0 libgl1-mesa-dri \
     && rm -rf /var/lib/apt/lists/*
+
 
 # ----------------------
 # Install Chrome for Testing (v130.0.6723.91)

@@ -206,13 +206,13 @@ function getChromiumOptions(useGPU: boolean) {
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--use-gl=angle',           // ← was 'swiftshader'
-        '--use-angle=swangle',      // ← SWANGLE = ANGLE on top of Vulkan/SwiftShader
+        '--use-gl=egl',      // ← SWANGLE = ANGLE on top of Vulkan/SwiftShader
         '--enable-webgl',           // ← explicitly enable WebGL
         '--ignore-gpu-blocklist',   // ← bypass GPU blocklist
         '--disable-gpu-sandbox',
         '--disable-dev-shm-usage',
       ],
-      gl: 'angle' as const,        // ← was 'swiftshader'
+     gl: 'egl' as const,      // ← was 'swiftshader'
     };
   }
 }
