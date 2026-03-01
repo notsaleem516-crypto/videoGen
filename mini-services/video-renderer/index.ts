@@ -11,7 +11,7 @@ import { execSync } from 'child_process';
 // VIDEO RENDERER SERVICE - Standalone service for rendering videos
 // ============================================================================
 
-const PORT = 3031;
+const PORT = parseInt(process.env.PORT || '3031', 10);
 
 // ============================================================================
 // GPU DETECTION - Detect GPU for hardware acceleration
