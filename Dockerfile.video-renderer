@@ -46,7 +46,7 @@ WORKDIR /app
 
 # Copy package files for bun
 COPY mini-services/video-renderer/package.json ./package.json
-COPY mini-services/video-renderer/bun.lockb ./bun.lockb
+COPY mini-services/video-renderer/bun.lock ./bun.lock
 
 # Install dependencies
 RUN bun install --frozen-lockfile
