@@ -55,14 +55,14 @@ RUN bun install --frozen-lockfile
 COPY mini-services/video-renderer/index.ts ./index.ts
 
 # Bundle directory (mount at runtime or copy if exists)
-RUN mkdir -p /app/bundle
+RUN mkdir -p /app/bundle && chmod 777 /app/bundle
 # Optional: copy prebuilt bundle if exists
 # COPY mini-services/video-renderer/out/bundle ./bundle
 
 # ----------------------
-# Create non-root user
+# Fix permissions - give bun user ownership of app directory
 # ----------------------
-USER bun
+RUN chown -R bun:bun /app
 
 # ----------------------
 # Expose port and healthcheck
