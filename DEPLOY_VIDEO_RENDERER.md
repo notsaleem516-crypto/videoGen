@@ -16,7 +16,7 @@ bun run video:bundle
 
 ### 2. Build Docker image
 ```bash
-docker build -t video-renderer -f Dockerfile.video-renderer .
+docker build -t video-renderer -f Dockerfile.video-renderer videoGen
 ```
 
 ### 3. Run with docker-compose (recommended)
@@ -27,7 +27,7 @@ docker-compose -f docker-compose.video-renderer.yml up -d
 ### 4. Or run directly with GPU
 ```bash
 docker run --gpus all -p 3031:3031 \
-  -v ./bundle:/app/bundle:ro \
+  -v ./mini-services/video-renderer/bundle:/app/bundle:ro \
   video-renderer
 ```
 
@@ -103,6 +103,7 @@ Check server logs:
   gpuName: "NVIDIA GeForce RTX 4090",
   ...
 }
+[GPU] Attempting GPU acceleration with Vulkan
 ```
 
 ## Troubleshooting
@@ -114,7 +115,13 @@ docker run --rm --gpus all nvidia/cuda:12.4.0-base-ubuntu22.04 nvidia-smi
 ```
 
 ### Bundle not found
-Make sure `./bundle` directory exists with Remotion bundle before running:
+Make sure `./mini-services/video-renderer/bundle` directory exists with Remotion bundle before running:
 ```bash
-ls -la bundle/
+ls -la mini-services/video-renderer/bundle/
 ```
+
+### WebGL not working in Cloud Run
+The service now uses Chrome for Testing with Vulkan. If WebGL still fails:
+1. Check logs for Vulkan initialization errors
+2. Falls back to software rendering (SwiftShader) if GPU not available
+3. For Cloud Run GPU, ensure L4 GPU is properly attached

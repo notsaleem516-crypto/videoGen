@@ -2,9 +2,9 @@
 # Deploy from GitHub to Google Cloud with GPU support
 
 steps:
-  # 1. Build Docker image (bundle built inside Dockerfile)
+  # 1. Build Docker image from videoGen directory
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/video-renderer:$COMMIT_SHA', '-f', 'Dockerfile.video-renderer', '.']
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/video-renderer:$COMMIT_SHA', '-f', 'videoGen/Dockerfile.video-renderer', 'videoGen']
 
   # 2. Push to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
@@ -27,10 +27,6 @@ steps:
       - '4'
       - '--memory'
       - '16Gi'
-      - '--gpu'
-      - '1'
-      - '--gpu-type'
-      - 'nvidia-l4'
       - '--allow-unauthenticated'
       - '--port'
       - '3031'

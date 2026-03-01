@@ -172,11 +172,13 @@ function getChromiumOptions(useGPU: boolean) {
     '--disable-threaded-scrolling',
     '--disable-checker-imaging',
     '--disable-new-content-rendering-timeout',
+    // Chrome for Testing mode
+    '--chrome-mode=chrome-for-testing',
   ];
-  
+
   if (useGPU) {
-    // GPU-enabled options - try GPU first
-    console.log('[GPU] Attempting GPU acceleration');
+    // GPU-enabled options - try vulkan first, then egl
+    console.log('[GPU] Attempting GPU acceleration with Vulkan');
     return {
       args: [
         ...baseArgs,
@@ -185,8 +187,9 @@ function getChromiumOptions(useGPU: boolean) {
         '--enable-gpu-rasterization',
         '--enable-zero-copy',
         '--enable-native-gpu-memory-buffers',
-        '--use-gl=egl',
-        '--use-angle=egl',
+        '--use-gl=vulkan',
+        '--use-angle=vulkan',
+        '--enable-vulkan',
         '--disable-software-rasterizer',
         '--disable-gpu-vsync',
         '--disable-gl-error-limiting',
@@ -194,7 +197,7 @@ function getChromiumOptions(useGPU: boolean) {
         '--ignore-gpu-blocklist',
         '--disable-dev-shm-usage',
       ],
-      gl: 'egl' as const,
+      gl: 'vulkan' as const,
     };
   } else {
     // CPU-only options (SwiftShader) - most deterministic
