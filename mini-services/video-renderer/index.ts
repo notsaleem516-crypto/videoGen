@@ -177,8 +177,8 @@ function getChromiumOptions(useGPU: boolean) {
   ];
 
   if (useGPU) {
-    // GPU-enabled options - try vulkan first, then egl
-    console.log('[GPU] Attempting GPU acceleration with Vulkan');
+    // GPU-enabled options - use angle-egl (recommended for Docker/Cloud GPU)
+    console.log('[GPU] Attempting GPU acceleration with angle-egl');
     return {
       args: [
         ...baseArgs,
@@ -187,17 +187,15 @@ function getChromiumOptions(useGPU: boolean) {
         '--enable-gpu-rasterization',
         '--enable-zero-copy',
         '--enable-native-gpu-memory-buffers',
-        '--use-gl=vulkan',
-        '--use-angle=vulkan',
-        '--enable-vulkan',
+        '--use-gl=angle-egl',
+        '--use-angle=angle-egl',
+        '--enable-webgl',
+        '--ignore-gpu-blocklist',
         '--disable-software-rasterizer',
         '--disable-gpu-vsync',
-        '--disable-gl-error-limiting',
-        '--enable-webgl-draft-extensions',
-        '--ignore-gpu-blocklist',
         '--disable-dev-shm-usage',
       ],
-      gl: 'vulkan' as const,
+      gl: 'angle-egl' as const,
     };
   } else {
     // CPU-only options (SwiftShader) - most deterministic

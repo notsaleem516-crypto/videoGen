@@ -342,6 +342,18 @@ const defaultVideoMeta: VideoMeta = {
   theme: 'dark_modern',
   fps: 30,
   audioTracks: [],
+  intro: {
+    title: 'SKYGEN',
+    subtitle: '',
+    duration: 2,
+    logoUrl: 'https://your-logo-url.com/logo.png', // Replace with your SKYGEN logo URL
+  },
+  outro: {
+    title: 'Thank You',
+    subtitle: 'Learn More',
+    duration: 2,
+    logoUrl: 'https://your-logo-url.com/logo.png', // Replace with your SKYGEN logo URL
+  },
 };
 
 const defaultVideoInput: VideoInput = {
@@ -691,7 +703,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     try {
       const videoInput = get().videoInput;
       console.log('Exporting video with audioTracks:', videoInput.videoMeta.audioTracks);
-      const response = await fetch('https://videogen-959405900602.europe-west1.run.app/render-full', {
+      const response = await fetch(' https://supermagnificent-unraffled-rashad.ngrok-free.dev/render-full', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(videoInput),
