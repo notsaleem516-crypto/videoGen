@@ -175,11 +175,13 @@ function getChromiumOptions(useGPU: boolean) {
   ];
   
   if (useGPU) {
-    // GPU-enabled options with deterministic rendering
-    console.log('[GPU] Using GPU acceleration');
+    // GPU-enabled options - try GPU first
+    console.log('[GPU] Attempting GPU acceleration');
     return {
       args: [
         ...baseArgs,
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
         '--enable-gpu-rasterization',
         '--enable-zero-copy',
         '--enable-native-gpu-memory-buffers',
@@ -187,9 +189,10 @@ function getChromiumOptions(useGPU: boolean) {
         '--use-angle=egl',
         '--disable-software-rasterizer',
         '--disable-gpu-vsync',
-        // Additional GPU sync options
         '--disable-gl-error-limiting',
         '--enable-webgl-draft-extensions',
+        '--ignore-gpu-blocklist',
+        '--disable-dev-shm-usage',
       ],
       gl: 'egl' as const,
     };
@@ -199,10 +202,13 @@ function getChromiumOptions(useGPU: boolean) {
     return {
       args: [
         ...baseArgs,
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
         '--use-gl=swiftshader',
         '--use-angle=swiftshader',
         '--disable-gpu',
         '--disable-gpu-compositing',
+        '--disable-dev-shm-usage',
       ],
       gl: 'swiftshader' as const,
     };
