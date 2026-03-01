@@ -691,7 +691,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     try {
       const videoInput = get().videoInput;
       console.log('Exporting video with audioTracks:', videoInput.videoMeta.audioTracks);
-      const response = await fetch('http://localhost:3031/render-full', {
+      const response = await fetch('https://videogen-959405900602.europe-west1.run.app/render-full', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(videoInput),

@@ -20,12 +20,10 @@ ENV NVIDIA_DRIVER_CAPABILITIES=all
 # ----------------------
 RUN apt-get update && apt-get install -y \
     curl unzip bash git wget gnupg \
-    # Chromium dependencies
     libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
     libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
     libxrandr2 libgbm1 libasound2 libpango-1.0-0 \
     libpangocairo-1.0-0 libx11-6 libxext6 libxrender1 \
-    # FFmpeg for audio/video processing
     ffmpeg ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
@@ -44,35 +42,24 @@ RUN wget -q https://dl.google.com/linux/linux_signing_key.pub -O /usr/share/keyr
 # ----------------------
 WORKDIR /app
 
-# Copy package files for bun
+# Copy and install dependencies
 COPY mini-services/video-renderer/package.json ./package.json
-COPY mini-services/video-renderer/bun.lock ./bun.lock
-
-# Install dependencies
 RUN bun install --frozen-lockfile
 
 # Copy source code
 COPY mini-services/video-renderer/index.ts ./index.ts
 
-# Bundle directory (mount at runtime or copy if exists)
-RUN mkdir -p /app/bundle && chmod 777 /app/bundle
-# Optional: copy prebuilt bundle if exists
-# COPY mini-services/video-renderer/out/bundle ./bundle
+# Create bundle directory
+RUN mkdir -p /app/bundle
 
-# ----------------------
-# Fix permissions - give bun user ownership of app directory
-# ----------------------
+# Fix permissions
 RUN chown -R bun:bun /app
 
-# ----------------------
-# Expose port and healthcheck
-# ----------------------
+# Expose port
 EXPOSE 3031
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:3031/health || exit 1
 
-# ----------------------
 # Start the service
-# ----------------------
 CMD ["bun", "index.ts"]

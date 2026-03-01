@@ -4,28 +4,46 @@
 steps:
   # 1. Build the video bundle first
   - name: 'oven/bun:1'
-    args: ['bun', 'run', 'video:bundle']
-    dir: 'videoGen'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        cd videoGen
+        bun install
+        bun run video:bundle
 
   # 2. Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/video-renderer:$COMMIT_SHA', '-f', 'Dockerfile.video-renderer', '.']
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/video-renderer:$COMMIT_SHA', '-f', 'videoGen/Dockerfile.video-renderer', '.']
 
   # 3. Push to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/video-renderer:$COMMIT_SHA']
 
-  # 4. Deploy to Compute Engine (GPU VM)
-  # Note: This requires a pre-provisioned GPU instance
+  # 4. Deploy to Cloud Run with GPU
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
+    entrypoint: 'gcloud'
     args:
-      - '-c'
-      - |
-        gcloud compute instances update-container video-renderer-vm \
-          --container-image=gcr.io/$PROJECT_ID/video-renderer:$COMMIT_SHA \
-          --zone=us-central1-a \
-          --container-mount-host-path=mount-host-path=/bundle,mode=ro,path=/app/bundle
+      - 'run'
+      - 'deploy'
+      - 'videogen'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/video-renderer:$COMMIT_SHA'
+      - '--platform'
+      - 'managed'
+      - '--region'
+      - 'europe-west1'
+      - '--cpu'
+      - '4'
+      - '--memory'
+      - '16Gi'
+      - '--gpu'
+      - '1'
+      - '--gpu-type'
+      - 'nvidia-l4'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '3031'
 
 images:
   - 'gcr.io/$PROJECT_ID/video-renderer:$COMMIT_SHA'
@@ -36,4 +54,4 @@ options:
 substitutions:
   _BRANCH_NAME: 'main'
 
-timeout: 1200s
+timeout: 1800s
