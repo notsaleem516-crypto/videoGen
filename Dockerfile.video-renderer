@@ -53,6 +53,9 @@ COPY mini-services/video-renderer/bundle ./bundle/
 # Fix permissions
 RUN chown -R bun:bun /app
 
+# GPU environment variables
+ENV LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/nvidia/lib:$LD_LIBRARY_PATH
+
 # Expose port
 EXPOSE 3031
 
