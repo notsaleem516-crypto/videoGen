@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000 2>&1",
-    "build": "next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ && mkdir -p mini-services/video-renderer/bundle && cp -r out/bundle/* mini-services/video-renderer/bundle/ 2>/dev/null || true",
+    "build": "next build",
     "start": "bun run mini-services/video-renderer/index.ts & sleep 2 && NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
     "lint": "eslint .",
     "db:push": "prisma db push",
