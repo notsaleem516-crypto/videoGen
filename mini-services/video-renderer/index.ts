@@ -201,17 +201,18 @@ function getChromiumOptions(useGPU: boolean) {
     // CPU-only options (SwiftShader) - most deterministic
     console.log('[GPU] Using software rendering (SwiftShader)');
     return {
-      args: [
+       args: [
         ...baseArgs,
         '--no-sandbox',
         '--disable-setuid-sandbox',
-        '--use-gl=swiftshader',
-        '--use-angle=swiftshader',
-        '--disable-gpu',
-        '--disable-gpu-compositing',
+        '--use-gl=angle',           // ← was 'swiftshader'
+        '--use-angle=swangle',      // ← SWANGLE = ANGLE on top of Vulkan/SwiftShader
+        '--enable-webgl',           // ← explicitly enable WebGL
+        '--ignore-gpu-blocklist',   // ← bypass GPU blocklist
+        '--disable-gpu-sandbox',
         '--disable-dev-shm-usage',
       ],
-      gl: 'swiftshader' as const,
+      gl: 'angle' as const,        // ← was 'swiftshader'
     };
   }
 }
