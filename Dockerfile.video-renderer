@@ -26,11 +26,10 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # ----------------------
-# Install Chrome for Testing
+# Install Chrome for Testing (v130.0.6723.91)
 # ----------------------
-RUN CHROME_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_130" | jq -r '.versions[0].version') \
-    && echo "Installing Chrome for Testing version: ${CHROME_VERSION}" \
-    && curl -s "https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chrome-linux64.zip" -o /tmp/chrome.zip \
+ENV CHROME_VERSION=130.0.6723.91
+RUN curl -s "https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chrome-linux64.zip" -o /tmp/chrome.zip \
     && unzip -q /tmp/chrome.zip -d /opt/chrome \
     && rm /tmp/chrome.zip \
     && chmod +x /opt/chrome/chrome-linux64/chrome \
