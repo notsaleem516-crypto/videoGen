@@ -12,6 +12,14 @@ steps:
         bun install
         bun run video:bundle
 
+  # 1.5. Copy bundle to root for Docker build
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        cp -r videoGen/out/bundle ./bundle
+
   # 2. Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/video-renderer:$COMMIT_SHA', '-f', 'Dockerfile.video-renderer', '.']

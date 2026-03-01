@@ -52,6 +52,9 @@ COPY mini-services/video-renderer/index.ts ./index.ts
 # Create bundle directory
 RUN mkdir -p /app/bundle
 
+# Copy the pre-built bundle
+COPY bundle /app/bundle/
+
 # Fix permissions
 RUN chown -R bun:bun /app
 
