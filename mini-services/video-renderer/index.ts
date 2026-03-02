@@ -1,4 +1,5 @@
 import { renderMedia, getCompositions } from '@remotion/renderer';
+import { renderMediaOnLambda, getRenderProgress } from '@remotion/lambda/client';
 import { serve } from 'bun';
 import path from 'path';
 import fs from 'fs';
@@ -7,6 +8,8 @@ import crypto from 'crypto';
 import { z } from 'zod';
 import { execSync } from 'child_process';
 
+// Bun automatically loads .env file from project root
+
 // ============================================================================
 // VIDEO RENDERER SERVICE - Standalone service for rendering videos
 // ============================================================================
@@ -14,7 +17,26 @@ import { execSync } from 'child_process';
 const PORT = parseInt(process.env.PORT || '3031', 10);
 
 // ============================================================================
-// GPU DETECTION - Detect GPU for hardware acceleration
+// REMOTION LAMBDA CONFIGURATION
+// ============================================================================
+
+const LAMBDA_FUNCTION_NAME = process.env.LAMBDA_FUNCTION_NAME;
+const LAMBDA_SITE_URL = process.env.LAMBDA_SITE_URL;
+const LAMBDA_REGION = process.env.LAMBDA_REGION || 'us-east-1';
+
+const useLambda = !!(LAMBDA_FUNCTION_NAME && LAMBDA_SITE_URL);
+
+if (useLambda) {
+  console.log('🎬 Using Remotion Lambda for rendering');
+  console.log(`  Function: ${LAMBDA_FUNCTION_NAME}`);
+  console.log(`  Site: ${LAMBDA_SITE_URL}`);
+  console.log(`  Region: ${LAMBDA_REGION}`);
+} else {
+  console.log('🎬 Using local rendering (set LAMBDA_* env vars for Lambda)');
+}
+
+// ============================================================================
+// GPU DETECTION
 // ============================================================================
 
 interface GPUInfo {
@@ -26,47 +48,34 @@ interface GPUInfo {
 
 function detectGPU(): GPUInfo {
   const platform = os.platform();
-  
+
   try {
     if (platform === 'win32') {
-      // Windows: Use WMIC or nvidia-smi
       try {
-        // Try nvidia-smi first (for NVIDIA GPUs)
         const nvidiaSmiPaths = [
           'C:\\Windows\\System32\\nvidia-smi.exe',
           'nvidia-smi',
         ];
-        
+
         for (const nvidiaSmi of nvidiaSmiPaths) {
           try {
-            const result = execSync(`"${nvidiaSmi}" --query-gpu=name,memory.total --format=csv,noheader,nounits`, {
-              encoding: 'utf-8',
-              timeout: 5000,
-              windowsHide: true,
-            });
-            
+            const result = execSync(
+              `"${nvidiaSmi}" --query-gpu=name,memory.total --format=csv,noheader,nounits`,
+              { encoding: 'utf-8', timeout: 5000, windowsHide: true }
+            );
             const [name, vram] = result.trim().split(',').map(s => s.trim());
             if (name) {
               console.log(`[GPU] Detected NVIDIA GPU: ${name} with ${vram}MB VRAM`);
-              return {
-                hasGPU: true,
-                gpuName: name,
-                vram: parseInt(vram),
-                vendor: 'NVIDIA',
-              };
+              return { hasGPU: true, gpuName: name, vram: parseInt(vram), vendor: 'NVIDIA' };
             }
           } catch {
-            // nvidia-smi not found or failed, try WMIC
+            // try next path
           }
         }
-        
-        // Fallback to WMIC for any GPU
+
         const wmicResult = execSync('wmic path win32_VideoController get name', {
-          encoding: 'utf-8',
-          timeout: 5000,
-          windowsHide: true,
+          encoding: 'utf-8', timeout: 5000, windowsHide: true,
         });
-        
         const lines = wmicResult.split('\n').filter(l => l.trim() && !l.includes('Name'));
         if (lines.length > 0) {
           const gpuName = lines[0].trim();
@@ -74,57 +83,40 @@ function detectGPU(): GPUInfo {
           return {
             hasGPU: true,
             gpuName,
-            vendor: gpuName.toLowerCase().includes('nvidia') ? 'NVIDIA' 
-                   : gpuName.toLowerCase().includes('amd') ? 'AMD' 
-                   : gpuName.toLowerCase().includes('intel') ? 'Intel' : 'Unknown',
+            vendor: gpuName.toLowerCase().includes('nvidia') ? 'NVIDIA'
+              : gpuName.toLowerCase().includes('amd') ? 'AMD'
+              : gpuName.toLowerCase().includes('intel') ? 'Intel' : 'Unknown',
           };
         }
       } catch (e) {
         console.log('[GPU] Windows GPU detection failed:', e);
       }
     } else if (platform === 'linux') {
-      // Linux: Check for NVIDIA GPU
       try {
-        const result = execSync('nvidia-smi --query-gpu=name,memory.total --format=csv,noheader,nounits 2>/dev/null', {
-          encoding: 'utf-8',
-          timeout: 5000,
-        });
-        
+        const result = execSync(
+          'nvidia-smi --query-gpu=name,memory.total --format=csv,noheader,nounits 2>/dev/null',
+          { encoding: 'utf-8', timeout: 5000 }
+        );
         const [name, vram] = result.trim().split(',').map(s => s.trim());
         if (name) {
           console.log(`[GPU] Detected NVIDIA GPU: ${name} with ${vram}MB VRAM`);
-          return {
-            hasGPU: true,
-            gpuName: name,
-            vram: parseInt(vram),
-            vendor: 'NVIDIA',
-          };
+          return { hasGPU: true, gpuName: name, vram: parseInt(vram), vendor: 'NVIDIA' };
         }
       } catch {
-        // No NVIDIA GPU, check for other GPUs
         try {
-          const lspciResult = execSync('lspci | grep -i vga', {
-            encoding: 'utf-8',
-            timeout: 5000,
-          });
+          const lspciResult = execSync('lspci | grep -i vga', { encoding: 'utf-8', timeout: 5000 });
           if (lspciResult.trim()) {
             console.log(`[GPU] Detected GPU via lspci: ${lspciResult.trim()}`);
-            return {
-              hasGPU: true,
-              gpuName: lspciResult.trim(),
-              vendor: 'Unknown',
-            };
+            return { hasGPU: true, gpuName: lspciResult.trim(), vendor: 'Unknown' };
           }
         } catch {
           // No GPU found
         }
       }
     } else if (platform === 'darwin') {
-      // macOS: Check for GPU
       try {
         const result = execSync('system_profiler SPDisplaysDataType | grep "Chipset Model"', {
-          encoding: 'utf-8',
-          timeout: 10000,
+          encoding: 'utf-8', timeout: 10000,
         });
         const match = result.match(/Chipset Model:\s*(.+)/);
         if (match) {
@@ -132,9 +124,9 @@ function detectGPU(): GPUInfo {
           return {
             hasGPU: true,
             gpuName: match[1].trim(),
-            vendor: match[1].toLowerCase().includes('apple') ? 'Apple' 
-                   : match[1].toLowerCase().includes('amd') ? 'AMD' 
-                   : match[1].toLowerCase().includes('intel') ? 'Intel' : 'Unknown',
+            vendor: match[1].toLowerCase().includes('apple') ? 'Apple'
+              : match[1].toLowerCase().includes('amd') ? 'AMD'
+              : match[1].toLowerCase().includes('intel') ? 'Intel' : 'Unknown',
           };
         }
       } catch {
@@ -144,17 +136,97 @@ function detectGPU(): GPUInfo {
   } catch (e) {
     console.log('[GPU] GPU detection failed:', e);
   }
-  
+
   console.log('[GPU] No dedicated GPU detected, using software rendering');
   return { hasGPU: false };
 }
 
-// Detect GPU at startup
 const GPU_INFO = detectGPU();
 console.log(`[GPU] GPU Info:`, GPU_INFO);
 
 // ============================================================================
-// CHROMIUM OPTIONS FOR GPU RENDERING
+// LAMBDA RENDER HELPERS
+// ============================================================================
+
+async function waitForLambdaRender(
+  region: string,
+  renderId: string,
+  bucketName: string,
+  timeoutMs: number = 9000000
+): Promise<string> {
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < timeoutMs) {
+    const progress = await getRenderProgress({
+      region: region as 'us-east-1',
+      functionName: LAMBDA_FUNCTION_NAME!,
+      renderId,
+      bucketName,
+    });
+
+    const percent = Math.round((progress.overallProgress ?? 0) * 100);
+    console.log(`  Lambda progress: ${percent}% | done: ${progress.done} | error: ${progress.fatalErrorEncountered}`);
+
+    if (progress.done) {
+      if (progress.outputFile) {
+        return progress.outputFile;
+      }
+      throw new Error('Render done but no output file returned');
+    }
+
+    if (progress.fatalErrorEncountered) {
+      throw new Error(
+        `Lambda render failed: ${progress.errors?.[0]?.message || 'Unknown error'}`
+      );
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 5000));
+  }
+
+  throw new Error('Lambda render timed out after 5 minutes');
+}
+
+async function renderWithLambda(
+  props: any,
+  compositionConfig: { durationInFrames: number; fps: number; width: number; height: number },
+  crf: number = 23
+): Promise<Buffer> {
+  console.log('🎬 Starting Lambda render...');
+  console.log(`  Composition: DynamicVideo`);
+  console.log(`  Duration: ${compositionConfig.durationInFrames} frames @ ${compositionConfig.fps}fps`);
+  console.log(`  Resolution: ${compositionConfig.width}x${compositionConfig.height}`);
+
+  const { renderId, bucketName } = await renderMediaOnLambda({
+    region: LAMBDA_REGION as 'us-east-1',
+    functionName: LAMBDA_FUNCTION_NAME!,
+    serveUrl: LAMBDA_SITE_URL!,
+    composition: 'DynamicVideo',
+    inputProps: props,
+    codec: 'h264',
+    audioCodec: 'aac',
+    imageFormat: 'jpeg',
+    maxRetries: 1,
+    framesPerLambda: 120,
+    privacy: 'public',
+    outName: `video-${Date.now()}.mp4`,
+  });
+
+  console.log(`  Render ID: ${renderId}`);
+  console.log(`  Bucket: ${bucketName}`);
+
+  const outputUrl = await waitForLambdaRender(LAMBDA_REGION, renderId, bucketName);
+  console.log(`  Output URL: ${outputUrl}`);
+
+  const response = await fetch(outputUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to download rendered video: ${response.status} ${response.statusText}`);
+  }
+
+  return Buffer.from(await response.arrayBuffer());
+}
+
+// ============================================================================
+// CHROMIUM OPTIONS
 // ============================================================================
 
 function getChromiumOptions(useGPU: boolean) {
@@ -167,18 +239,15 @@ function getChromiumOptions(useGPU: boolean) {
     '--disable-renderer-backgrounding',
     '--disable-frame-rate-limit',
     '--disable-gpu-sandbox',
-    // Deterministic rendering options
     '--disable-threaded-animation',
     '--disable-threaded-scrolling',
     '--disable-checker-imaging',
     '--disable-new-content-rendering-timeout',
-    // Chrome for Testing mode
     '--chrome-mode=chrome-for-testing',
   ];
 
   if (useGPU) {
-    // GPU-enabled options - use angle-egl (recommended for Docker/Cloud GPU)
-    console.log('[GPU] Attempting GPU acceleration with angle-egl');
+    console.log('[GPU] Using GPU acceleration with angle/gl-egl');
     return {
       args: [
         ...baseArgs,
@@ -186,54 +255,53 @@ function getChromiumOptions(useGPU: boolean) {
         '--disable-setuid-sandbox',
         '--enable-gpu-rasterization',
         '--enable-zero-copy',
-        '--enable-native-gpu-memory-buffers',
-        '--use-gl=angle-egl',
-        '--use-angle=angle-egl',
+        '--use-gl=angle',
+        '--use-angle=gl-egl',
         '--enable-webgl',
         '--ignore-gpu-blocklist',
         '--disable-software-rasterizer',
         '--disable-gpu-vsync',
         '--disable-dev-shm-usage',
       ],
-      gl: 'angle-egl' as const,
+      gl: 'angle' as const,
     };
   } else {
-    // CPU-only options (SwiftShader) - most deterministic
-    console.log('[GPU] Using software rendering (SwiftShader)');
+    console.log('[GPU] Using software rendering (angle/egl)');
     return {
-       args: [
+      args: [
         ...baseArgs,
         '--no-sandbox',
         '--disable-setuid-sandbox',
-        '--use-gl=angle',           // ← was 'swiftshader'
-        '--use-gl=egl',      // ← SWANGLE = ANGLE on top of Vulkan/SwiftShader
-        '--enable-webgl',           // ← explicitly enable WebGL
-        '--ignore-gpu-blocklist',   // ← bypass GPU blocklist
+        '--disable-vulkan',
+        '--use-gl=angle',
+        '--use-angle=gl',
+        '--enable-webgl',
+        '--ignore-gpu-blocklist',
         '--disable-gpu-sandbox',
         '--disable-dev-shm-usage',
       ],
-     gl: 'egl' as const,      // ← was 'swiftshader'
+      gl: 'angle' as const,
     };
   }
 }
 
-// Try multiple bundle locations (development vs production)
-// Priority: Check local bundle folder first (self-contained), then other locations
+// ============================================================================
+// BUNDLE PATH RESOLUTION
+// ============================================================================
+
 const BUNDLE_PATHS = [
-  path.join(process.cwd(), 'bundle'),                         // Self-contained: bundle in same directory
-  '/app/mini-services-dist/video-renderer/bundle',            // Published: mini-services-dist
-  path.join(process.cwd(), '..', '..', 'out', 'bundle'),      // Development: from mini-services/video-renderer
-  path.join(process.cwd(), '..', '..', 'bundle'),             // Development alternative
-  path.join(process.cwd(), '..', 'out', 'bundle'),            // Alternative
-  '/out/bundle',                                              // Published: absolute path
-  '/app/out/bundle',                                          // Published: alternative
-  '/app/next-service-dist/out/bundle',                        // Published: next-service-dist
+  path.join(process.cwd(), 'bundle'),
+  '/app/mini-services-dist/video-renderer/bundle',
+  path.join(process.cwd(), '..', '..', 'out', 'bundle'),
+  path.join(process.cwd(), '..', '..', 'bundle'),
+  path.join(process.cwd(), '..', 'out', 'bundle'),
+  '/out/bundle',
+  '/app/out/bundle',
+  '/app/next-service-dist/out/bundle',
 ];
 
-// Find the first existing path
 let BUNDLE_PATH = BUNDLE_PATHS.find(p => fs.existsSync(p));
 if (!BUNDLE_PATH) {
-  // Last resort: check relative to this file
   BUNDLE_PATH = path.join(__dirname, 'bundle');
 }
 
@@ -246,7 +314,10 @@ BUNDLE_PATHS.forEach(p => {
 console.log(`📁 Using bundle path: ${BUNDLE_PATH}`);
 console.log(`📁 Bundle exists: ${fs.existsSync(BUNDLE_PATH)}`);
 
-// Quality settings for H264
+// ============================================================================
+// QUALITY SETTINGS
+// ============================================================================
+
 const QUALITY_SETTINGS: Record<string, { crf: number }> = {
   low: { crf: 28 },
   medium: { crf: 23 },
@@ -254,7 +325,7 @@ const QUALITY_SETTINGS: Record<string, { crf: number }> = {
 };
 
 // ============================================================================
-// SCHEMAS (copied to avoid React context issues)
+// SCHEMAS
 // ============================================================================
 
 const IntroOutroSchema = z.object({
@@ -264,31 +335,21 @@ const IntroOutroSchema = z.object({
   duration: z.number().min(1).max(5).optional().default(2),
 });
 
-// Block customization schema - shared styling options
 const BlockCustomizationSchema = z.object({
-  // Position/Alignment settings
   verticalAlign: z.enum(['top', 'center', 'bottom']).optional(),
   horizontalAlign: z.enum(['left', 'center', 'right']).optional(),
-  
-  // Animation settings
   enterAnimation: z.enum(['fade', 'slide-up', 'slide-down', 'slide-left', 'slide-right', 'zoom', 'bounce', 'rotate', 'flip', 'none']).optional(),
   exitAnimation: z.enum(['fade', 'slide-up', 'slide-down', 'slide-left', 'slide-right', 'zoom', 'bounce', 'rotate', 'flip', 'none']).optional(),
   animationDuration: z.number().min(0.1).max(2).optional(),
-  
-  // Background settings
   backgroundColor: z.string().optional(),
   backgroundImage: z.string().optional(),
   backgroundBlur: z.number().min(0).max(20).optional(),
-  
-  // Border settings
   borderColor: z.string().optional(),
   borderWidth: z.number().min(0).max(10).optional(),
   borderRadius: z.number().min(0).max(100).optional(),
   shadowEnabled: z.boolean().optional(),
   shadowColor: z.string().optional(),
   shadowBlur: z.number().min(0).max(50).optional(),
-  
-  // Spacing settings
   padding: z.number().min(0).max(100).optional(),
   margin: z.number().min(0).max(50).optional(),
 });
@@ -403,7 +464,6 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     alt: z.string().optional(),
     caption: z.string().optional(),
   }).merge(BlockCustomizationSchema),
-  // WhatsApp Chat block
   z.object({
     type: z.literal('whatsapp-chat'),
     title: z.string().max(100).optional(),
@@ -426,7 +486,6 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     showTypingIndicator: z.boolean().optional().default(true),
     lastSeen: z.string().max(50).optional(),
   }).merge(BlockCustomizationSchema),
-  // Motivational Image block
   z.object({
     type: z.literal('motivational-image'),
     imageSrc: z.string().min(1),
@@ -459,11 +518,6 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     audioVolume: z.number().min(0).max(1).default(0.7),
     duration: z.number().min(1).max(120).optional(),
   }).merge(BlockCustomizationSchema),
-  // ========================================================================
-  // NEW ADVANCED BLOCK SCHEMAS
-  // ========================================================================
-
-  // Counter Block - Animated counting numbers
   z.object({
     type: z.literal('counter'),
     label: z.string().max(100),
@@ -476,8 +530,6 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     color: z.string().default('#3B82F6'),
     animationStyle: z.enum(['linear', 'easeOut', 'easeInOut', 'bounce']).default('easeOut'),
   }).merge(BlockCustomizationSchema),
-
-  // Progress Bar Block
   z.object({
     type: z.literal('progress-bar'),
     label: z.string().max(100).optional(),
@@ -489,8 +541,6 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     animated: z.boolean().default(true),
     stripes: z.boolean().default(false),
   }).merge(BlockCustomizationSchema),
-
-  // QR Code Block
   z.object({
     type: z.literal('qr-code'),
     data: z.string().min(1).max(500),
@@ -500,8 +550,6 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     fgColor: z.string().default('#000000'),
     bgColor: z.string().default('#FFFFFF'),
   }).merge(BlockCustomizationSchema),
-
-  // Video/GIF Block
   z.object({
     type: z.literal('video'),
     src: z.string().min(1),
@@ -512,8 +560,6 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     controls: z.boolean().default(false),
     caption: z.string().max(200).optional(),
   }).merge(BlockCustomizationSchema),
-
-  // Avatar Grid Block
   z.object({
     type: z.literal('avatar-grid'),
     title: z.string().max(100).optional(),
@@ -526,8 +572,6 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     layout: z.enum(['grid', 'carousel', 'stacked']).default('grid'),
     columns: z.number().min(2).max(6).default(3),
   }).merge(BlockCustomizationSchema),
-
-  // Social Stats Block
   z.object({
     type: z.literal('social-stats'),
     platform: z.enum(['twitter', 'instagram', 'youtube', 'tiktok', 'linkedin', 'facebook']),
@@ -539,8 +583,6 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     showGrowth: z.boolean().default(true),
     growthPercentage: z.number().optional(),
   }).merge(BlockCustomizationSchema),
-
-  // CTA Button Block
   z.object({
     type: z.literal('cta'),
     text: z.string().max(50),
@@ -551,8 +593,6 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     icon: z.string().optional(),
     pulse: z.boolean().default(true),
   }).merge(BlockCustomizationSchema),
-
-  // Gradient Text Block
   z.object({
     type: z.literal('gradient-text'),
     text: z.string().max(200),
@@ -563,8 +603,6 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     fontSize: z.enum(['small', 'medium', 'large', 'xlarge', 'xxlarge']).default('xlarge'),
     fontWeight: z.enum(['normal', 'bold', 'black']).default('bold'),
   }).merge(BlockCustomizationSchema),
-
-  // Animated Background Block
   z.object({
     type: z.literal('animated-bg'),
     style: z.enum(['particles', 'waves', 'gradient', 'noise', 'geometric', 'aurora']),
@@ -575,8 +613,6 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     overlay: z.boolean().default(false),
     overlayOpacity: z.number().min(0).max(1).default(0.3),
   }).merge(BlockCustomizationSchema),
-
-  // Countdown Timer Block
   z.object({
     type: z.literal('countdown'),
     title: z.string().max(100).optional(),
@@ -589,7 +625,6 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     color: z.string().default('#FFFFFF'),
     showLabels: z.boolean().default(true),
   }).merge(BlockCustomizationSchema),
-  // Tower Chart 3D Block - 3D ranking visualization
   z.object({
     type: z.literal('tower-chart-3d'),
     title: z.string().max(100).default('Top Rankings'),
@@ -647,132 +682,87 @@ const VideoInputSchema = z.object({
 
 function calculateCompositionConfig(input: z.infer<typeof VideoInputSchema>) {
   const { videoMeta, contentBlocks } = input;
-  
-  // Calculate dimensions based on aspect ratio
+
   const aspectRatios: Record<string, { width: number; height: number }> = {
     '16:9': { width: 1920, height: 1080 },
     '9:16': { width: 1080, height: 1920 },
     '1:1': { width: 1080, height: 1080 },
     '4:5': { width: 1080, height: 1350 },
   };
-  
+
   const { width, height } = aspectRatios[videoMeta.aspectRatio] || aspectRatios['9:16'];
-  
-  // Use intro/outro durations from videoMeta
   const introDuration = videoMeta.intro?.duration || 2;
   const outroDuration = videoMeta.outro?.duration || 2;
-  
-  // Calculate content duration based on block types
+
   let contentDuration = 0;
   contentBlocks.forEach(block => {
     const blockType = (block as { type: string }).type;
     if (blockType === 'whatsapp-chat') {
-      // Chat duration calculation based on actual component timing:
-      // - Adaptive message delay: fewer messages = slower, more messages = faster
       const messages = (block as { messages?: unknown[] }).messages || [];
       const messageCount = messages.length;
-      const messageDelay = messageCount <= 5 ? 2.0 
-        : messageCount <= 15 ? 1.5 
-        : messageCount <= 30 ? 1.0 
-        : 0.8; // 0.8s for 30+ messages
-      const typingDuration = 2.5;
-      const chatDuration = 0.5 + typingDuration + messageCount * messageDelay + 1.5;
-      contentDuration += Math.min(60, chatDuration); // Cap at 60 seconds
+      const messageDelay = messageCount <= 5 ? 2.0
+        : messageCount <= 15 ? 1.5
+        : messageCount <= 30 ? 1.0
+        : 0.8;
+      contentDuration += Math.min(60, 0.5 + 2.5 + messageCount * messageDelay + 1.5);
     } else if (blockType === 'motivational-image') {
-      // Motivational image duration logic:
-      // 1. If duration is provided → use it directly
-      // 2. If audioSrc provided but no duration → calculate from text + extra for audio
-      // 3. If no audio, no duration → calculate from text length
-      const motivationalBlock = block as { duration?: number; audioSrc?: string; text?: string };
-      if (motivationalBlock.duration) {
-        // Duration explicitly provided - use it
-        contentDuration += motivationalBlock.duration;
-      } else if (motivationalBlock.audioSrc) {
-        // Audio provided but no duration - calculate from text + buffer for audio
-        const textLength = motivationalBlock.text?.length || 0;
-        const readingTime = Math.ceil(textLength / 20); // ~20 chars per second with audio
-        contentDuration += Math.max(5, readingTime + 3); // At least 5s, with buffer
+      const b = block as { duration?: number; audioSrc?: string; text?: string };
+      if (b.duration) {
+        contentDuration += b.duration;
+      } else if (b.audioSrc) {
+        contentDuration += Math.max(5, Math.ceil((b.text?.length || 0) / 20) + 3);
       } else {
-        // No audio, no duration - calculate from text length
-        const textLength = motivationalBlock.text?.length || 0;
-        const readingTime = Math.ceil(textLength / 30);
-        contentDuration += Math.min(10, 4 + readingTime);
+        contentDuration += Math.min(10, 4 + Math.ceil((b.text?.length || 0) / 30));
       }
     } else if (blockType === 'code') {
-      const code = (block as { code?: string }).code || '';
-      contentDuration += Math.min(8, Math.ceil(code.length / 100));
+      contentDuration += Math.min(8, Math.ceil(((block as { code?: string }).code || '').length / 100));
     } else if (blockType === 'timeline') {
-      const events = (block as { events?: unknown[] }).events || [];
-      contentDuration += 4 + Math.ceil(events.length * 0.5);
+      contentDuration += 4 + Math.ceil(((block as { events?: unknown[] }).events || []).length * 0.5);
     } else if (blockType === 'list') {
-      const items = (block as { items?: unknown[] }).items || [];
-      contentDuration += 3 + Math.ceil(items.length * 0.5);
+      contentDuration += 3 + Math.ceil(((block as { items?: unknown[] }).items || []).length * 0.5);
     } else if (blockType === 'counter') {
-      // Counter duration is based on the duration field or defaults to 3 seconds
-      const counterBlock = block as { duration?: number };
-      contentDuration += counterBlock.duration || 3;
+      contentDuration += (block as { duration?: number }).duration || 3;
     } else if (blockType === 'progress-bar') {
-      // Progress bar animation takes about 2-4 seconds
       contentDuration += 3;
     } else if (blockType === 'qr-code') {
-      // QR code display is typically 3-5 seconds
       contentDuration += 4;
     } else if (blockType === 'video') {
-      // Video block - default to 5 seconds unless it's a loop
-      const videoBlock = block as { loop?: boolean };
-      contentDuration += videoBlock.loop ? 10 : 5;
+      contentDuration += (block as { loop?: boolean }).loop ? 10 : 5;
     } else if (blockType === 'avatar-grid') {
-      // Avatar grid depends on number of avatars
-      const avatars = (block as { avatars?: unknown[] }).avatars || [];
-      contentDuration += 3 + Math.ceil(avatars.length * 0.2);
+      contentDuration += 3 + Math.ceil(((block as { avatars?: unknown[] }).avatars || []).length * 0.2);
     } else if (blockType === 'social-stats') {
-      // Social stats display is typically 3-4 seconds
       contentDuration += 4;
     } else if (blockType === 'cta') {
-      // CTA button with pulse animation - 3-5 seconds
       contentDuration += 4;
     } else if (blockType === 'gradient-text') {
-      // Gradient text with animation
-      const gradientBlock = block as { animationSpeed?: number };
-      contentDuration += gradientBlock.animationSpeed || 3;
+      contentDuration += (block as { animationSpeed?: number }).animationSpeed || 3;
     } else if (blockType === 'animated-bg') {
-      // Animated background is typically a visual effect - 4-6 seconds
       contentDuration += 5;
     } else if (blockType === 'countdown') {
-      // Countdown typically shows for 5-10 seconds
       contentDuration += 6;
     } else if (blockType === 'tower-chart-3d') {
-      // Tower chart 3D duration based on number of items
-      const towerBlock = block as { items?: unknown[]; cameraPauseDuration?: number; cameraMoveSpeed?: number };
-      const itemCount = towerBlock.items?.length || 5;
-      const pauseDuration = towerBlock.cameraPauseDuration || 0.4;
-      const moveSpeed = towerBlock.cameraMoveSpeed || 0.8;
-      contentDuration += 1.5 + itemCount * (pauseDuration + moveSpeed) + 1;
+      const b = block as { items?: unknown[]; cameraPauseDuration?: number; cameraMoveSpeed?: number };
+      const itemCount = (b.items || []).length;
+      contentDuration += 1.5 + itemCount * ((b.cameraPauseDuration || 0.4) + (b.cameraMoveSpeed || 0.8)) + 1;
     } else {
-      contentDuration += 3; // default 3 seconds per block
+      contentDuration += 3;
     }
   });
-  
-  const totalDurationSeconds = introDuration + contentDuration + outroDuration;
-  
-  // Use provided duration or calculated
-  const totalDuration = videoMeta.duration || totalDurationSeconds;
+
+  const totalDuration = videoMeta.duration || (introDuration + contentDuration + outroDuration);
   const durationInFrames = Math.round(totalDuration * videoMeta.fps);
-  
-  return {
-    width,
-    height,
-    fps: videoMeta.fps,
-    durationInFrames,
-  };
+
+  return { width, height, fps: videoMeta.fps, durationInFrames };
 }
 
 // ============================================================================
-// AI DECISION ROUTER (simplified)
+// VIDEO PLAN GENERATOR
 // ============================================================================
 
-async function generateVideoPlan(videoMeta: z.infer<typeof VideoMetaSchema>, contentBlocks: z.infer<typeof ContentBlockSchema>[]) {
-  // Map block types to component IDs (must match COMPONENT_IDS in schemas)
+async function generateVideoPlan(
+  videoMeta: z.infer<typeof VideoMetaSchema>,
+  contentBlocks: z.infer<typeof ContentBlockSchema>[]
+) {
   const typeToComponentId: Record<string, string> = {
     'stat': 'stat-scene',
     'comparison': 'comparison-scene',
@@ -789,7 +779,6 @@ async function generateVideoPlan(videoMeta: z.infer<typeof VideoMetaSchema>, con
     'image': 'image-scene',
     'whatsapp-chat': 'whatsapp-chat-scene',
     'motivational-image': 'motivational-image-scene',
-    // New block types
     'counter': 'counter-scene',
     'progress-bar': 'progress-bar-scene',
     'qr-code': 'qr-code-scene',
@@ -802,120 +791,76 @@ async function generateVideoPlan(videoMeta: z.infer<typeof VideoMetaSchema>, con
     'countdown': 'countdown-scene',
     'tower-chart-3d': 'tower-chart-3d-scene',
   };
-  
-  // Create decisions for each block
+
   const decisions = contentBlocks.map((block, index) => {
     const blockType = (block as { type: string }).type;
-    
-    // Calculate duration based on block type
-    let duration = 2; // default 2 seconds
-    
+    let duration = 2;
+
     if (blockType === 'whatsapp-chat') {
-      // Chat duration calculation based on actual component timing:
-      // - Adaptive message delay: fewer messages = slower, more messages = faster
       const messages = (block as { messages?: unknown[] }).messages || [];
       const messageCount = messages.length;
-      const messageDelay = messageCount <= 5 ? 2.0 
-        : messageCount <= 15 ? 1.5 
-        : messageCount <= 30 ? 1.0 
-        : 0.8; // 0.8s for 30+ messages
-      const typingDuration = 2.5;
-      const chatDuration = 0.5 + typingDuration + messageCount * messageDelay + 1.5;
-      duration = Math.min(60, chatDuration); // Cap at 60 seconds
+      const messageDelay = messageCount <= 5 ? 2.0
+        : messageCount <= 15 ? 1.5
+        : messageCount <= 30 ? 1.0
+        : 0.8;
+      duration = Math.min(60, 0.5 + 2.5 + messageCount * messageDelay + 1.5);
     } else if (blockType === 'motivational-image') {
-      // Motivational image duration logic:
-      // 1. If duration is provided → use it directly
-      // 2. If audioSrc provided but no duration → calculate from text + extra for audio
-      // 3. If no audio, no duration → calculate from text length
-      const motivationalBlock = block as { duration?: number; audioSrc?: string; text?: string };
-      if (motivationalBlock.duration) {
-        // Duration explicitly provided - use it
-        duration = motivationalBlock.duration;
-      } else if (motivationalBlock.audioSrc) {
-        // Audio provided but no duration - calculate from text + buffer for audio
-        const textLength = motivationalBlock.text?.length || 0;
-        const readingTime = Math.ceil(textLength / 20); // ~20 chars per second with audio
-        duration = Math.max(5, readingTime + 3); // At least 5s, with buffer
+      const b = block as { duration?: number; audioSrc?: string; text?: string };
+      if (b.duration) {
+        duration = b.duration;
+      } else if (b.audioSrc) {
+        duration = Math.max(5, Math.ceil((b.text?.length || 0) / 20) + 3);
       } else {
-        // No audio, no duration - calculate from text length
-        const textLength = motivationalBlock.text?.length || 0;
-        const readingTime = Math.ceil(textLength / 30);
-        duration = Math.min(10, 4 + readingTime);
+        duration = Math.min(10, 4 + Math.ceil((b.text?.length || 0) / 30));
       }
     } else if (blockType === 'code') {
-      const code = (block as { code?: string }).code || '';
-      duration = Math.min(8, Math.ceil(code.length / 100));
+      duration = Math.min(8, Math.ceil(((block as { code?: string }).code || '').length / 100));
     } else if (blockType === 'timeline') {
-      const events = (block as { events?: unknown[] }).events || [];
-      duration = 4 + Math.ceil(events.length * 0.5);
+      duration = 4 + Math.ceil(((block as { events?: unknown[] }).events || []).length * 0.5);
     } else if (blockType === 'list') {
-      const items = (block as { items?: unknown[] }).items || [];
-      duration = 3 + Math.ceil(items.length * 0.5);
+      duration = 3 + Math.ceil(((block as { items?: unknown[] }).items || []).length * 0.5);
     } else if (blockType === 'counter') {
-      // Counter duration is based on the duration field or defaults to 3 seconds
-      const counterBlock = block as { duration?: number };
-      duration = counterBlock.duration || 3;
+      duration = (block as { duration?: number }).duration || 3;
     } else if (blockType === 'progress-bar') {
-      // Progress bar animation takes about 2-4 seconds
       duration = 3;
     } else if (blockType === 'qr-code') {
-      // QR code display is typically 3-5 seconds
       duration = 4;
     } else if (blockType === 'video') {
-      // Video block - default to 5 seconds unless it's a loop
-      const videoBlock = block as { loop?: boolean };
-      duration = videoBlock.loop ? 10 : 5;
+      duration = (block as { loop?: boolean }).loop ? 10 : 5;
     } else if (blockType === 'avatar-grid') {
-      // Avatar grid depends on number of avatars
-      const avatars = (block as { avatars?: unknown[] }).avatars || [];
-      duration = 3 + Math.ceil(avatars.length * 0.2);
+      duration = 3 + Math.ceil(((block as { avatars?: unknown[] }).avatars || []).length * 0.2);
     } else if (blockType === 'social-stats') {
-      // Social stats display is typically 3-4 seconds
       duration = 4;
     } else if (blockType === 'cta') {
-      // CTA button with pulse animation - 3-5 seconds
       duration = 4;
     } else if (blockType === 'gradient-text') {
-      // Gradient text with animation
-      const gradientBlock = block as { animationSpeed?: number };
-      duration = gradientBlock.animationSpeed || 3;
+      duration = (block as { animationSpeed?: number }).animationSpeed || 3;
     } else if (blockType === 'animated-bg') {
-      // Animated background is typically a visual effect - 4-6 seconds
       duration = 5;
     } else if (blockType === 'countdown') {
-      // Countdown typically shows for 5-10 seconds
       duration = 6;
     } else if (blockType === 'tower-chart-3d') {
-      // Tower chart 3D duration based on number of items
-      // Each item: pause duration + move speed, plus intro animation
-      const towerBlock = block as { items?: unknown[]; cameraPauseDuration?: number; cameraMoveSpeed?: number };
-      const itemCount = towerBlock.items?.length || 5;
-      const pauseDuration = towerBlock.cameraPauseDuration || 0.4;
-      const moveSpeed = towerBlock.cameraMoveSpeed || 0.8;
-      // Intro (1.5s) + items * (pause + move) + outro buffer
-      duration = 1.5 + itemCount * (pauseDuration + moveSpeed) + 1;
+      const b = block as { items?: unknown[]; cameraPauseDuration?: number; cameraMoveSpeed?: number };
+      const itemCount = (b.items || []).length;
+      duration = 1.5 + itemCount * ((b.cameraPauseDuration || 0.4) + (b.cameraMoveSpeed || 0.8)) + 1;
     }
-    
+
     return {
       blockIndex: index,
       componentId: typeToComponentId[blockType] || 'text-scene',
       duration,
-      motionProfile: blockType === 'whatsapp-chat' ? 'subtle' as const 
-        : blockType === 'motivational-image' ? 'dynamic' as const
-        : 'dynamic' as const,
+      motionProfile: blockType === 'whatsapp-chat' ? 'subtle' as const : 'dynamic' as const,
       animation: {
         enter: 0.4,
-        hold: duration - 0.8,
+        hold: Math.max(0, duration - 0.8),
         exit: 0.4,
       },
     };
   });
-  
+
   return {
     decisions,
-    globalStyle: {
-      theme: videoMeta.theme,
-    },
+    globalStyle: { theme: videoMeta.theme },
   };
 }
 
@@ -925,37 +870,40 @@ async function generateVideoPlan(videoMeta: z.infer<typeof VideoMetaSchema>, con
 
 serve({
   port: PORT,
-  
+
   async fetch(req) {
     const url = new URL(req.url);
-    
-    // CORS headers
+
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     };
-    
-    // Handle preflight
+
     if (req.method === 'OPTIONS') {
       return new Response(null, { headers: corsHeaders });
     }
-    
-    // Health check
+
+    // ── Health check ──────────────────────────────────────────────────────────
     if (url.pathname === '/health') {
-      return Response.json({ 
-        status: 'ok', 
+      return Response.json({
+        status: 'ok',
         service: 'video-renderer',
+        renderMode: useLambda ? 'lambda' : 'local',
+        lambda: useLambda ? {
+          function: LAMBDA_FUNCTION_NAME,
+          site: LAMBDA_SITE_URL,
+          region: LAMBDA_REGION,
+        } : null,
         cwd: process.cwd(),
         bundlePath: BUNDLE_PATH,
         bundleExists: fs.existsSync(BUNDLE_PATH),
-        checkedPaths: BUNDLE_PATHS.map(p => ({ path: p, exists: fs.existsSync(p) })),
         gpu: GPU_INFO,
-        port: PORT 
+        port: PORT,
       }, { headers: corsHeaders });
     }
-    
-    // Debug endpoint - list files
+
+    // ── Debug ─────────────────────────────────────────────────────────────────
     if (url.pathname === '/debug' && req.method === 'GET') {
       const listDir = (dir: string) => {
         try {
@@ -968,82 +916,87 @@ serve({
           return null;
         }
       };
-      
+
       return Response.json({
         cwd: process.cwd(),
-        env: {
-          NODE_ENV: process.env.NODE_ENV,
-          HOME: process.env.HOME,
-        },
+        env: { NODE_ENV: process.env.NODE_ENV, HOME: process.env.HOME },
         directories: {
           '.': listDir(process.cwd()),
           '..': listDir(path.join(process.cwd(), '..')),
-          'bundle': fs.existsSync(path.join(process.cwd(), 'bundle')) ? listDir(path.join(process.cwd(), 'bundle'))?.slice(0, 5) : 'not found',
-        }
+          'bundle': fs.existsSync(path.join(process.cwd(), 'bundle'))
+            ? listDir(path.join(process.cwd(), 'bundle'))?.slice(0, 5)
+            : 'not found',
+        },
       }, { headers: corsHeaders });
     }
-    
-    // Render endpoint (receives pre-calculated props)
+
+    // ── /render ───────────────────────────────────────────────────────────────
     if (url.pathname === '/render' && req.method === 'POST') {
       const startTime = Date.now();
-      
+
       try {
         const body = await req.json();
         const { compositionConfig, props, quality = 'medium' } = body;
-        
-        // Validate required fields
+
         if (!compositionConfig || !props) {
           return Response.json(
             { error: 'Missing compositionConfig or props' },
             { status: 400, headers: corsHeaders }
           );
         }
-        
-        // Check bundle
+
+        const { crf } = QUALITY_SETTINGS[quality] || QUALITY_SETTINGS.medium;
+
+        // Use Lambda if configured
+        if (useLambda) {
+          try {
+            const videoBuffer = await renderWithLambda(props, compositionConfig, crf);
+            const processingTime = ((Date.now() - startTime) / 1000).toFixed(1);
+            console.log(`✅ Lambda render done in ${processingTime}s (${videoBuffer.length} bytes)`);
+            return new Response(new Uint8Array(videoBuffer), {
+              status: 200,
+              headers: {
+                ...corsHeaders,
+                'Content-Type': 'video/mp4',
+                'Content-Disposition': 'attachment; filename="video.mp4"',
+                'Content-Length': String(videoBuffer.length),
+                'X-Processing-Time': `${processingTime}s`,
+                'X-Render-Mode': 'lambda',
+              },
+            });
+          } catch (error) {
+            console.error('❌ Lambda render error:', error);
+            return Response.json(
+              { error: 'Lambda render failed', message: error instanceof Error ? error.message : 'Unknown error' },
+              { status: 500, headers: corsHeaders }
+            );
+          }
+        }
+
+        // Local render
         if (!fs.existsSync(BUNDLE_PATH)) {
           return Response.json(
-            { 
-              error: 'Remotion bundle not found',
-              bundlePath: BUNDLE_PATH,
-              setupInstruction: 'Run: bun run video:bundle'
-            },
+            { error: 'Remotion bundle not found', bundlePath: BUNDLE_PATH },
             { status: 500, headers: corsHeaders }
           );
         }
-        
-        console.log('🎥 Rendering video...');
+
+        console.log('🎥 Local render starting...');
         console.log('  Composition:', compositionConfig);
         console.log('  Quality:', quality);
         console.log('  GPU Mode:', GPU_INFO.hasGPU ? 'Enabled' : 'Disabled');
-        
-        // Create output path
+
         const tempDir = os.tmpdir();
-        const videoId = crypto.randomBytes(8).toString('hex');
-        const outputFileName = `video-${videoId}.mp4`;
-        const outputPath = path.join(tempDir, outputFileName);
-        
-        const { crf } = QUALITY_SETTINGS[quality] || QUALITY_SETTINGS.medium;
-        
-        // Get chromium options based on GPU detection
+        const outputPath = path.join(tempDir, `video-${crypto.randomBytes(8).toString('hex')}.mp4`);
         const chromiumOptions = getChromiumOptions(GPU_INFO.hasGPU);
-        console.log('  Chromium args:', chromiumOptions.args.filter(a => a.includes('gl') || a.includes('gpu')));
-        
-        // Get compositions from bundle with inputProps
-        const compositions = await getCompositions(BUNDLE_PATH, {
-          inputProps: props,
-        });
+        console.log('  GL args:', chromiumOptions.args.filter(a => a.includes('gl') || a.includes('angle') || a.includes('vulkan')));
+
+        const compositions = await getCompositions(BUNDLE_PATH, { inputProps: props });
         const composition = compositions.find(c => c.id === 'DynamicVideo');
-        
         if (!composition) {
-          return Response.json(
-            { error: 'DynamicVideo composition not found in bundle' },
-            { status: 500, headers: corsHeaders }
-          );
+          return Response.json({ error: 'DynamicVideo composition not found' }, { status: 500, headers: corsHeaders });
         }
-        
-        // Render the video with GPU-optimized settings
-        // CRITICAL: concurrency=1 to prevent flickering from multi-threading
-        // See: https://www.remotion.dev/docs/flickering
+
         await renderMedia({
           serveUrl: BUNDLE_PATH,
           composition: {
@@ -1052,7 +1005,7 @@ serve({
             fps: compositionConfig.fps,
             width: compositionConfig.width,
             height: compositionConfig.height,
-            props: props,
+            props,
           },
           codec: 'h264',
           audioCodec: 'aac',
@@ -1060,137 +1013,115 @@ serve({
           inputProps: props,
           crf,
           logLevel: 'warn',
-          // FIX: Force single-threaded rendering to prevent flickering
-          // Multi-threading causes frame timing issues with WebGL/Three.js
           concurrency: 1,
-          // GPU-specific options for deterministic frame rendering
           delayRenderTimeoutInMilliseconds: 60000,
-          chromiumOptions: {
-            args: chromiumOptions.args,
-            gl: chromiumOptions.gl,
-          },
+          chromiumOptions: { args: chromiumOptions.args, gl: chromiumOptions.gl },
         });
-        
-        // Read the video file
+
         const videoBuffer = fs.readFileSync(outputPath);
-        
-        // Clean up
         try { fs.unlinkSync(outputPath); } catch {}
-        
+
         const processingTime = ((Date.now() - startTime) / 1000).toFixed(1);
-        
-        console.log(`✅ Video rendered in ${processingTime}s (${videoBuffer.length} bytes)`);
-        
-        // Return MP4 as binary
+        console.log(`✅ Local render done in ${processingTime}s (${videoBuffer.length} bytes)`);
+
         return new Response(videoBuffer, {
           status: 200,
           headers: {
             ...corsHeaders,
             'Content-Type': 'video/mp4',
-            'Content-Disposition': `attachment; filename="video.mp4"`,
+            'Content-Disposition': 'attachment; filename="video.mp4"',
             'Content-Length': String(videoBuffer.length),
             'X-Processing-Time': `${processingTime}s`,
             'X-Video-Duration': `${(compositionConfig.durationInFrames / compositionConfig.fps).toFixed(1)}s`,
             'X-Video-Resolution': `${compositionConfig.width}x${compositionConfig.height}`,
+            'X-Render-Mode': 'local',
           },
         });
-        
+
       } catch (error) {
         console.error('❌ Render error:', error);
         return Response.json(
-          { 
-            error: 'Failed to render video',
-            message: error instanceof Error ? error.message : 'Unknown error'
-          },
+          { error: 'Failed to render video', message: error instanceof Error ? error.message : 'Unknown error' },
           { status: 500, headers: corsHeaders }
         );
       }
     }
-    
-    // Full render endpoint (handles everything from raw input)
+
+    // ── /render-full ──────────────────────────────────────────────────────────
     if (url.pathname === '/render-full' && req.method === 'POST') {
       const startTime = Date.now();
-      
+
       try {
         const body = await req.json();
-        
-        // Validate input
+
         const validationResult = VideoInputSchema.safeParse(body);
-        
         if (!validationResult.success) {
           return Response.json(
             { error: 'Validation failed', details: validationResult.error.issues },
             { status: 400, headers: corsHeaders }
           );
         }
-        
+
         const input = validationResult.data;
         const title = body.title || 'Video';
         const subtitle = body.subtitle || '';
         const quality = body.quality || 'medium';
-        
-        // Check bundle
-        if (!fs.existsSync(BUNDLE_PATH)) {
+        const { crf } = QUALITY_SETTINGS[quality] || QUALITY_SETTINGS.medium;
+
+        // Check bundle (only needed for local render)
+        if (!useLambda && !fs.existsSync(BUNDLE_PATH)) {
           return Response.json(
-            { 
-              error: 'Remotion bundle not found',
-              bundlePath: BUNDLE_PATH,
-              setupInstruction: 'Run: bun run video:bundle'
-            },
+            { error: 'Remotion bundle not found', bundlePath: BUNDLE_PATH, setupInstruction: 'Run: bun run video:bundle' },
             { status: 500, headers: corsHeaders }
           );
         }
-        
-        // Generate AI plan
+
         const plan = await generateVideoPlan(input.videoMeta, input.contentBlocks);
-        
-        // Calculate composition config
         const compositionConfig = calculateCompositionConfig(input);
-        
-        // Props for Remotion
-        const props = {
-          input,
-          plan,
-          title,
-          subtitle,
-        };
-        
+        const props = { input, plan, title, subtitle };
+
         console.log('🎥 Full render requested...');
+        console.log('  Render mode:', useLambda ? 'Lambda' : 'Local');
         console.log('  Content blocks:', input.contentBlocks.length);
         console.log('  Audio tracks:', input.videoMeta.audioTracks?.length || 0);
         console.log('  Duration:', `${(compositionConfig.durationInFrames / compositionConfig.fps).toFixed(1)}s`);
         console.log('  Resolution:', `${compositionConfig.width}x${compositionConfig.height}`);
-        console.log('  GPU Mode:', GPU_INFO.hasGPU ? 'Enabled' : 'Disabled');
-        console.log('  Props:', JSON.stringify(props, null, 2));
-        
-        // Create output path
-        const tempDir = os.tmpdir();
-        const videoId = crypto.randomBytes(8).toString('hex');
-        const outputFileName = `video-${videoId}.mp4`;
-        const outputPath = path.join(tempDir, outputFileName);
-        
-        const { crf } = QUALITY_SETTINGS[quality] || QUALITY_SETTINGS.medium;
-        
-        // Get chromium options based on GPU detection
-        const chromiumOptions = getChromiumOptions(GPU_INFO.hasGPU);
-        console.log('  Chromium args:', chromiumOptions.args.filter(a => a.includes('gl') || a.includes('gpu')));
-        
-        // Get compositions from bundle with inputProps
-        const compositions = await getCompositions(BUNDLE_PATH, {
-          inputProps: props,
-        });
-        const composition = compositions.find(c => c.id === 'DynamicVideo');
-        
-        if (!composition) {
-          return Response.json(
-            { error: 'DynamicVideo composition not found in bundle' },
-            { status: 500, headers: corsHeaders }
-          );
+
+        // ── Lambda path ──────────────────────────────────────────────────────
+        if (useLambda) {
+          const videoBuffer = await renderWithLambda(props, compositionConfig, crf);
+          const processingTime = ((Date.now() - startTime) / 1000).toFixed(1);
+          console.log(`✅ Lambda render done in ${processingTime}s (${videoBuffer.length} bytes)`);
+
+          return new Response(new Uint8Array(videoBuffer), {
+            status: 200,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'video/mp4',
+              'Content-Disposition': `attachment; filename="${title.replace(/\s+/g, '-').toLowerCase()}.mp4"`,
+              'Content-Length': String(videoBuffer.length),
+              'X-Processing-Time': `${processingTime}s`,
+              'X-Video-Duration': `${(compositionConfig.durationInFrames / compositionConfig.fps).toFixed(1)}s`,
+              'X-Video-Resolution': `${compositionConfig.width}x${compositionConfig.height}`,
+              'X-Render-Mode': 'lambda',
+            },
+          });
         }
-        
-        // Render the video with GPU-optimized settings
-        // CRITICAL: concurrency=1 to prevent flickering from multi-threading
-        // See: https://www.remotion.dev/docs/flickering
+
+        // ── Local path ───────────────────────────────────────────────────────
+        console.log('  GPU Mode:', GPU_INFO.hasGPU ? 'Enabled' : 'Disabled');
+
+        const tempDir = os.tmpdir();
+        const outputPath = path.join(tempDir, `video-${crypto.randomBytes(8).toString('hex')}.mp4`);
+        const chromiumOptions = getChromiumOptions(GPU_INFO.hasGPU);
+        console.log('  GL args:', chromiumOptions.args.filter(a => a.includes('gl') || a.includes('angle') || a.includes('vulkan')));
+
+        const compositions = await getCompositions(BUNDLE_PATH, { inputProps: props });
+        const composition = compositions.find(c => c.id === 'DynamicVideo');
+        if (!composition) {
+          return Response.json({ error: 'DynamicVideo composition not found' }, { status: 500, headers: corsHeaders });
+        }
+
         await renderMedia({
           serveUrl: BUNDLE_PATH,
           composition: {
@@ -1199,7 +1130,7 @@ serve({
             fps: compositionConfig.fps,
             width: compositionConfig.width,
             height: compositionConfig.height,
-            props: props,
+            props,
           },
           codec: 'h264',
           audioCodec: 'aac',
@@ -1207,28 +1138,17 @@ serve({
           inputProps: props,
           crf,
           logLevel: 'warn',
-          // FIX: Force single-threaded rendering to prevent flickering
-          // Multi-threading causes frame timing issues with WebGL/Three.js
           concurrency: 1,
-          // GPU-specific options for deterministic frame rendering
           delayRenderTimeoutInMilliseconds: 60000,
-          chromiumOptions: {
-            args: chromiumOptions.args,
-            gl: chromiumOptions.gl,
-          },
+          chromiumOptions: { args: chromiumOptions.args, gl: chromiumOptions.gl },
         });
-        
-        // Read the video file
+
         const videoBuffer = fs.readFileSync(outputPath);
-        
-        // Clean up
         try { fs.unlinkSync(outputPath); } catch {}
-        
+
         const processingTime = ((Date.now() - startTime) / 1000).toFixed(1);
-        
-        console.log(`✅ Video rendered in ${processingTime}s (${videoBuffer.length} bytes)`);
-        
-        // Return MP4 as binary
+        console.log(`✅ Local render done in ${processingTime}s (${videoBuffer.length} bytes)`);
+
         return new Response(videoBuffer, {
           status: 200,
           headers: {
@@ -1239,25 +1159,26 @@ serve({
             'X-Processing-Time': `${processingTime}s`,
             'X-Video-Duration': `${(compositionConfig.durationInFrames / compositionConfig.fps).toFixed(1)}s`,
             'X-Video-Resolution': `${compositionConfig.width}x${compositionConfig.height}`,
+            'X-Render-Mode': 'local',
           },
         });
-        
+
       } catch (error) {
         console.error('❌ Full render error:', error);
         return Response.json(
-          { 
+          {
             error: 'Failed to render video',
             message: error instanceof Error ? error.message : 'Unknown error',
-            stack: error instanceof Error ? error.stack : undefined
+            stack: error instanceof Error ? error.stack : undefined,
           },
           { status: 500, headers: corsHeaders }
         );
       }
     }
-    
-    // Default 404
+
+    // ── 404 ───────────────────────────────────────────────────────────────────
     return Response.json(
-      { error: 'Not found', endpoints: ['GET /health', 'POST /render', 'POST /render-full'] },
+      { error: 'Not found', endpoints: ['GET /health', 'GET /debug', 'POST /render', 'POST /render-full'] },
       { status: 404, headers: corsHeaders }
     );
   },
@@ -1266,5 +1187,6 @@ serve({
 console.log(`🚀 Video Renderer Service running on port ${PORT}`);
 console.log(`📡 Endpoints:`);
 console.log(`   GET  /health      - Health check`);
+console.log(`   GET  /debug       - Debug filesystem`);
 console.log(`   POST /render      - Render with pre-calculated props`);
 console.log(`   POST /render-full - Full render from raw input`);

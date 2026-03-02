@@ -7,9 +7,10 @@
     "start": "bun index.ts"
   },
   "dependencies": {
-    "@remotion/renderer": "4.0.424",
-    "@remotion/bundler": "4.0.424",
-    "remotion": "4.0.424",
+    "@remotion/renderer": "4.0.431",
+    "@remotion/bundler": "4.0.431",
+    "@remotion/lambda": "4.0.431",
+    "remotion": "4.0.431",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "zod": "^3.22.3"

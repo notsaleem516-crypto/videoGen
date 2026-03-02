@@ -1,12 +1,52 @@
-# Video Renderer Docker Deployment
+# Video Renderer Deployment Options
 
-## Prerequisites
+## Option 1: Remotion Lambda (Recommended)
+
+Remotion Lambda handles all GPU/Chromium infrastructure on AWS. No Docker setup needed!
+
+### Prerequisites
+- AWS account with credentials configured (`aws configure`)
+- Node.js 18+
+
+### Step 1: Install Dependencies
+```bash
+cd videoGen
+bun install
+```
+
+### Step 2: Deploy Site and Lambda
+```bash
+# Deploy your site to S3
+npx remotion lambda sites create --site-name my-video-renderer --bucket-name remotionlambda-myrenderer
+
+# Create Lambda function
+npx remotion lambda functions create --function-name video-renderer-render --region us-east-1
+```
+
+### Step 3: Configure Environment Variables
+```bash
+# Get your site URL from step 2 and set:
+export LAMBDA_FUNCTION_NAME=video-renderer-render
+export LAMBDA_SITE_URL=https://your-site.s3.amazonaws.com
+export LAMBDA_REGION=us-east-1
+```
+
+### Step 4: Run the Service
+```bash
+bun mini-services/video-renderer/index.ts
+```
+
+---
+
+## Option 2: Docker (Local/GPU)
+
+### Prerequisites
 
 1. **Docker** with GPU support
 2. **NVIDIA Docker runtime** - Required for GPU rendering
    - Install: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html
 
-## Quick Start
+### Quick Start
 
 ### 1. Build the bundle first (required)
 ```bash
