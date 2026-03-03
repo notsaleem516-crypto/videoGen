@@ -614,7 +614,7 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     showValueLabels: z.boolean().default(true),
     showRankNumbers: z.boolean().default(true),
     cameraDistance: z.number().min(10).max(50).default(20),
-    cameraPauseDuration: z.number().min(0.2).max(2).default(0.4),
+    cameraPauseDuration: z.number().min(0.2).max(3).default(0.4),
     cameraMoveSpeed: z.number().min(0.3).max(3).default(0.8),
     cameraAngle: z.number().min(0).max(90).default(30),
     animationDirection: z.enum(['top-to-bottom', 'bottom-to-top']).default('top-to-bottom'),
