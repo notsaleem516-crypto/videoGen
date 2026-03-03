@@ -56,6 +56,10 @@ RUN chown -R bun:bun /app
 # GPU environment variables
 ENV LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/nvidia/lib:$LD_LIBRARY_PATH
 
+# Optional: Force CPU mode if GPU issues occur (e.g., L40, Ada, Hopper GPUs)
+# Set FORCE_CPU=true in Cloud Run environment variables to disable GPU rendering
+ENV FORCE_CPU=false
+
 # Expose port
 EXPOSE 3031
 

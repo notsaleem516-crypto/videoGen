@@ -13,6 +13,9 @@ import { execSync } from 'child_process';
 
 const PORT = parseInt(process.env.PORT || '3031', 10);
 
+// Force CPU mode if environment variable is set
+const FORCE_CPU = process.env.FORCE_CPU === 'true' || process.env.FORCE_CPU === '1';
+
 // ============================================================================
 // GPU DETECTION - Detect GPU for hardware acceleration
 // ============================================================================
@@ -149,9 +152,14 @@ function detectGPU(): GPUInfo {
   return { hasGPU: false };
 }
 
-// Detect GPU at startup
-const GPU_INFO = detectGPU();
+// Detect GPU at startup (unless force CPU is enabled)
+const GPU_INFO = FORCE_CPU
+  ? { hasGPU: false, gpuName: 'CPU (forced)' }
+  : detectGPU();
 console.log(`[GPU] GPU Info:`, GPU_INFO);
+if (FORCE_CPU) {
+  console.log('[GPU] CPU mode forced via FORCE_CPU environment variable');
+}
 
 // ============================================================================
 // CHROMIUM OPTIONS FOR GPU RENDERING
@@ -216,6 +224,27 @@ function getChromiumOptions(useGPU: boolean) {
       gl: 'swiftshader' as const,
     };
   }
+}
+
+// ============================================================================
+// GPU FALLBACK HELPERS
+// ============================================================================
+
+// Error patterns that indicate GPU/WebGL failure - expanded for L40/Ada/Hopper
+const GPU_ERROR_PATTERNS = [
+  'WebGL', 'webgl', 'GPU', 'gpu', 'Vulkan', 'vulkan',
+  'EGL', 'egl', 'ANGLE', 'angle', 'failed to initialize',
+  'Cannot find', 'could not be initialized', 'Unable to create',
+  'glError', 'GL_INVALID', 'SwiftShader', 'software rasterizer',
+  'L40', 'Ada', 'Hopper', 'renderer', 'GPU process',
+  'GPU process isn\'t usable', 'Unable to initialize',
+];
+
+function isGPUError(error: unknown): boolean {
+  const errorStr = String(error).toLowerCase();
+  return GPU_ERROR_PATTERNS.some(pattern =>
+    errorStr.includes(pattern.toLowerCase())
+  );
 }
 
 // Try multiple bundle locations (development vs production)
@@ -1041,36 +1070,52 @@ serve({
             { status: 500, headers: corsHeaders }
           );
         }
-        
-        // Render the video with GPU-optimized settings
+
+        // Render the video with GPU-to-CPU fallback
         // CRITICAL: concurrency=1 to prevent flickering from multi-threading
-        // See: https://www.remotion.dev/docs/flickering
-        await renderMedia({
-          serveUrl: BUNDLE_PATH,
-          composition: {
-            id: composition.id,
-            durationInFrames: compositionConfig.durationInFrames,
-            fps: compositionConfig.fps,
-            width: compositionConfig.width,
-            height: compositionConfig.height,
-            props: props,
-          },
-          codec: 'h264',
-          audioCodec: 'aac',
-          outputLocation: outputPath,
-          inputProps: props,
-          crf,
-          logLevel: 'warn',
-          // FIX: Force single-threaded rendering to prevent flickering
-          // Multi-threading causes frame timing issues with WebGL/Three.js
-          concurrency: 1,
-          // GPU-specific options for deterministic frame rendering
-          delayRenderTimeoutInMilliseconds: 60000,
-          chromiumOptions: {
-            args: chromiumOptions.args,
-            gl: chromiumOptions.gl,
-          },
-        });
+        let useGPU = GPU_INFO.hasGPU;
+
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          const opts = getChromiumOptions(useGPU);
+          const mode = useGPU ? 'GPU (Vulkan)' : 'CPU (SwiftShader)';
+          console.log(`[Render Attempt ${attempt}] Using ${mode}...`);
+
+          try {
+            await renderMedia({
+              serveUrl: BUNDLE_PATH,
+              composition: {
+                id: composition.id,
+                durationInFrames: compositionConfig.durationInFrames,
+                fps: compositionConfig.fps,
+                width: compositionConfig.width,
+                height: compositionConfig.height,
+                props: props,
+              },
+              codec: 'h264',
+              audioCodec: 'aac',
+              outputLocation: outputPath,
+              inputProps: props,
+              crf,
+              logLevel: 'warn',
+              concurrency: 1,
+              delayRenderTimeoutInMilliseconds: 60000,
+              chromiumOptions: {
+                args: opts.args,
+                gl: opts.gl,
+              },
+            });
+            console.log(`[Render Success] Video rendered with ${mode}`);
+            break;
+          } catch (error) {
+            const errMsg = String(error);
+            if (useGPU && attempt === 1 && isGPUError(error)) {
+              console.log(`[GPU Fallback] GPU failed (${errMsg.slice(0, 80)}...), trying CPU...`);
+              useGPU = false;
+            } else {
+              throw error;
+            }
+          }
+        }
         
         // Read the video file
         const videoBuffer = fs.readFileSync(outputPath);
@@ -1188,36 +1233,52 @@ serve({
             { status: 500, headers: corsHeaders }
           );
         }
-        
-        // Render the video with GPU-optimized settings
+
+        // Render the video with GPU-to-CPU fallback
         // CRITICAL: concurrency=1 to prevent flickering from multi-threading
-        // See: https://www.remotion.dev/docs/flickering
-        await renderMedia({
-          serveUrl: BUNDLE_PATH,
-          composition: {
-            id: composition.id,
-            durationInFrames: compositionConfig.durationInFrames,
-            fps: compositionConfig.fps,
-            width: compositionConfig.width,
-            height: compositionConfig.height,
-            props: props,
-          },
-          codec: 'h264',
-          audioCodec: 'aac',
-          outputLocation: outputPath,
-          inputProps: props,
-          crf,
-          logLevel: 'warn',
-          // FIX: Force single-threaded rendering to prevent flickering
-          // Multi-threading causes frame timing issues with WebGL/Three.js
-          concurrency: 1,
-          // GPU-specific options for deterministic frame rendering
-          delayRenderTimeoutInMilliseconds: 60000,
-          chromiumOptions: {
-            args: chromiumOptions.args,
-            gl: chromiumOptions.gl,
-          },
-        });
+        let useGPU = GPU_INFO.hasGPU;
+
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          const opts = getChromiumOptions(useGPU);
+          const mode = useGPU ? 'GPU (Vulkan)' : 'CPU (SwiftShader)';
+          console.log(`[Render Attempt ${attempt}] Using ${mode}...`);
+
+          try {
+            await renderMedia({
+              serveUrl: BUNDLE_PATH,
+              composition: {
+                id: composition.id,
+                durationInFrames: compositionConfig.durationInFrames,
+                fps: compositionConfig.fps,
+                width: compositionConfig.width,
+                height: compositionConfig.height,
+                props: props,
+              },
+              codec: 'h264',
+              audioCodec: 'aac',
+              outputLocation: outputPath,
+              inputProps: props,
+              crf,
+              logLevel: 'warn',
+              concurrency: 1,
+              delayRenderTimeoutInMilliseconds: 60000,
+              chromiumOptions: {
+                args: opts.args,
+                gl: opts.gl,
+              },
+            });
+            console.log(`[Render Success] Video rendered with ${mode}`);
+            break;
+          } catch (error) {
+            const errMsg = String(error);
+            if (useGPU && attempt === 1 && isGPUError(error)) {
+              console.log(`[GPU Fallback] GPU failed (${errMsg.slice(0, 80)}...), trying CPU...`);
+              useGPU = false;
+            } else {
+              throw error;
+            }
+          }
+        }
         
         // Read the video file
         const videoBuffer = fs.readFileSync(outputPath);
