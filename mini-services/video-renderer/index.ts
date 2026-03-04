@@ -635,6 +635,83 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     customModelScale: z.number().min(0.1).max(10).default(2),
     customModelRotation: z.number().min(0).max(360).default(0),
   }).merge(BlockCustomizationSchema),
+  // Parallax Story Block - Cinematic multi-layer storytelling
+  z.object({
+    type: z.literal('parallax-story'),
+    title: z.string().max(100).optional(),
+    subtitle: z.string().max(200).optional(),
+    layers: z.array(z.object({
+      id: z.string().optional(),
+      name: z.string().max(50),
+      image: z.string().min(1),
+      depth: z.number().min(0).max(100).default(50),
+      parallaxFactor: z.number().min(0).max(5).default(1),
+      scale: z.number().min(0.5).max(3).default(1),
+      opacity: z.number().min(0).max(1).default(1),
+      positionX: z.number().min(-100).max(100).default(0),
+      positionY: z.number().min(-100).max(100).default(0),
+      rotation: z.number().min(-45).max(45).default(0),
+      blur: z.number().min(0).max(20).default(0),
+      blendMode: z.enum(['normal', 'multiply', 'screen', 'overlay', 'lighten', 'darken']).default('normal'),
+      motionEnabled: z.boolean().default(true),
+      motionDirection: z.enum([
+        'none', 'left', 'right', 'up', 'down',
+        'diagonal-tl-br', 'diagonal-tr-bl', 'diagonal-bl-tr', 'diagonal-br-tl',
+        'zoom-in', 'zoom-out', 'rotate-cw', 'rotate-ccw', 'float', 'pulse'
+      ]).default('right'),
+      motionSpeed: z.number().min(0).max(5).default(1),
+      motionIntensity: z.number().min(0).max(3).default(1),
+      motionOscillate: z.boolean().default(false),
+      motionOscillateSpeed: z.number().min(0.5).max(5).default(1),
+      animationIn: z.enum(['none', 'fade', 'slide-left', 'slide-right', 'slide-up', 'slide-down', 'zoom-in', 'zoom-out', 'rotate-in', 'flip-x', 'flip-y', 'bounce', 'blur-in']).default('fade'),
+      animationOut: z.enum(['none', 'fade', 'slide-left', 'slide-right', 'slide-up', 'slide-down', 'zoom-in', 'zoom-out', 'rotate-out', 'flip-x', 'flip-y', 'bounce']).default('fade'),
+      animationDelay: z.number().min(0).max(5).default(0),
+      animationDuration: z.number().min(0.1).max(5).default(1),
+      animationEasing: z.enum(['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out', 'bounce', 'elastic']).default('ease-out'),
+    })).min(1).max(10),
+    cameraMovement: z.enum(['none', 'pan-left', 'pan-right', 'pan-up', 'pan-down', 'zoom-in', 'zoom-out', 'diagonal-tl-br', 'diagonal-tr-bl', 'orbit', 'breathing']).default('pan-right'),
+    cameraSpeed: z.number().min(0.1).max(5).default(1),
+    cameraIntensity: z.number().min(0).max(2).default(1),
+    effects: z.array(z.enum(['none', 'particles', 'light-rays', 'fog', 'rain', 'snow', 'bokeh', 'vignette', 'film-grain', 'chromatic', 'glow'])).default([]),
+    effectIntensity: z.number().min(0).max(1).default(0.5),
+    textOverlays: z.array(z.object({
+      text: z.string().max(500),
+      position: z.enum(['top', 'center', 'bottom', 'custom']).default('center'),
+      customX: z.number().min(0).max(100).default(50),
+      customY: z.number().min(0).max(100).default(50),
+      fontSize: z.enum(['small', 'medium', 'large', 'xlarge', 'xxlarge']).default('large'),
+      fontWeight: z.enum(['normal', 'bold', 'black']).default('bold'),
+      color: z.string().default('#FFFFFF'),
+      shadow: z.boolean().default(true),
+      shadowColor: z.string().default('rgba(0,0,0,0.8)'),
+      textAlign: z.enum(['left', 'center', 'right']).default('center'),
+      animation: z.enum(['none', 'fade', 'slide-up', 'slide-down', 'typewriter', 'glow', 'pulse']).default('fade'),
+      animationDelay: z.number().min(0).max(10).default(0.5),
+      duration: z.number().min(0.5).max(30).default(3),
+      startTime: z.number().min(0).max(60).default(0),
+    })).optional(),
+    colorGrade: z.enum(['none', 'cinematic', 'vintage', 'cold', 'warm', 'noir', 'sepia', 'neon']).default('none'),
+    colorIntensity: z.number().min(0).max(1).default(0.5),
+    backgroundColor: z.string().default('#000000'),
+    fitMode: z.enum(['cover', 'contain', 'stretch']).default('cover'),
+    introDuration: z.number().min(0.5).max(3).default(1),
+    outroDuration: z.number().min(0.5).max(3).default(1),
+    loopAnimation: z.boolean().default(false),
+    dofEnabled: z.boolean().default(false),
+    dofFocusDepth: z.number().min(0).max(100).default(50),
+    dofBlurAmount: z.number().min(0).max(10).default(2),
+    perspective: z.number().min(500).max(3000).default(1000),
+    perspectiveOriginX: z.number().min(0).max(100).default(50),
+    perspectiveOriginY: z.number().min(0).max(100).default(50),
+    // Audio support
+    audioSrc: z.string().optional(),
+    audioVolume: z.number().min(0).max(1).default(0.7),
+    audioFadeIn: z.number().min(0).max(5).default(0.5),
+    audioFadeOut: z.number().min(0).max(5).default(0.5),
+    audioLoop: z.boolean().default(true),
+    audioStartTime: z.number().min(0).default(0),
+    duration: z.number().min(1).max(120).optional(),
+  }).merge(BlockCustomizationSchema),
 ]);
 
 const VideoInputSchema = z.object({
@@ -749,6 +826,21 @@ function calculateCompositionConfig(input: z.infer<typeof VideoInputSchema>) {
       const pauseDuration = towerBlock.cameraPauseDuration || 0.4;
       const moveSpeed = towerBlock.cameraMoveSpeed || 0.8;
       contentDuration += 1.5 + itemCount * (pauseDuration + moveSpeed) + 1;
+    } else if (blockType === 'parallax-story') {
+      // Parallax story duration logic:
+      // 1. If duration is provided → use it directly
+      // 2. If audioSrc provided but no duration → default 15 seconds for audio
+      // 3. Otherwise → default 10 seconds for visual storytelling
+      const parallaxBlock = block as { duration?: number; audioSrc?: string };
+      if (parallaxBlock.duration) {
+        contentDuration += parallaxBlock.duration;
+      } else if (parallaxBlock.audioSrc) {
+        // Audio provided, give more time for the story
+        contentDuration += 15;
+      } else {
+        // Default visual storytelling duration
+        contentDuration += 10;
+      }
     } else {
       contentDuration += 3; // default 3 seconds per block
     }
@@ -802,6 +894,7 @@ async function generateVideoPlan(videoMeta: z.infer<typeof VideoMetaSchema>, con
     'animated-bg': 'animated-bg-scene',
     'countdown': 'countdown-scene',
     'tower-chart-3d': 'tower-chart-3d-scene',
+    'parallax-story': 'parallax-story-scene',
   };
   
   // Create decisions for each block
@@ -895,6 +988,21 @@ async function generateVideoPlan(videoMeta: z.infer<typeof VideoMetaSchema>, con
       const moveSpeed = towerBlock.cameraMoveSpeed || 0.8;
       // Intro (1.5s) + items * (pause + move) + outro buffer
       duration = 1.5 + itemCount * (pauseDuration + moveSpeed) + 1;
+    } else if (blockType === 'parallax-story') {
+      // Parallax story duration logic:
+      // 1. If duration is provided → use it directly
+      // 2. If audioSrc provided but no duration → default 15 seconds for audio
+      // 3. Otherwise → default 10 seconds for visual storytelling
+      const parallaxBlock = block as { duration?: number; audioSrc?: string };
+      if (parallaxBlock.duration) {
+        duration = parallaxBlock.duration;
+      } else if (parallaxBlock.audioSrc) {
+        // Audio provided, give more time for the story
+        duration = 15;
+      } else {
+        // Default visual storytelling duration
+        duration = 10;
+      }
     }
     
     return {
