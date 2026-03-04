@@ -963,12 +963,15 @@ export function ParallaxStoryScene({ data }: ParallaxStorySceneProps): React.Rea
         >
           {/* Parallax Layers */}
           {sortedLayers.map((layer) => {
-            // Calculate global camera offset (applies to all layers)
+            // Calculate global camera offset with per-layer camera intensity
+            // layer.cameraIntensity: 0 = static, 1 = normal, 2 = double movement
+            const layerCameraIntensity = (layer.cameraIntensity ?? 1) * cameraIntensity;
+            
             const cameraOffset = calculateParallaxOffset(
               cameraMovement,
               movementProgress,
               layer.depth,
-              cameraIntensity,
+              layerCameraIntensity,
               cameraSpeed
             );
 

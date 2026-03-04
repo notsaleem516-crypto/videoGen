@@ -2154,6 +2154,7 @@ function ParallaxStoryEditor({ block, index }: EditorProps) {
     image: string;
     depth: number;
     parallaxFactor: number;
+    cameraIntensity?: number;
     scale: number;
     opacity: number;
     positionX: number;
@@ -2189,6 +2190,7 @@ function ParallaxStoryEditor({ block, index }: EditorProps) {
       image: '',
       depth: 50,
       parallaxFactor: 1,
+      cameraIntensity: 1,
       scale: 1,
       opacity: 1,
       positionX: 0,
@@ -2428,6 +2430,28 @@ function ParallaxStoryEditor({ block, index }: EditorProps) {
                     <div>
                       <Label className="text-[10px] text-gray-500">Offset Y (%)</Label>
                       <Input type="number" value={layer.positionY} onChange={(e) => updateLayer(i, 'positionY', parseFloat(e.target.value) || 0)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                    </div>
+                  </div>
+                  
+                  {/* Camera Response Section */}
+                  <div className="pt-2 border-t border-gray-700/30">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-300">Camera Response</span>
+                      <span className="text-[10px] text-gray-500">{((layer.cameraIntensity ?? 1) * 100).toFixed(0)}%</span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="0" 
+                      max="2" 
+                      step="0.1" 
+                      value={layer.cameraIntensity ?? 1} 
+                      onChange={(e) => updateLayer(i, 'cameraIntensity', parseFloat(e.target.value))} 
+                      className="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-pink-500"
+                    />
+                    <div className="flex justify-between text-[9px] text-gray-500 mt-1">
+                      <span>Static</span>
+                      <span>Normal</span>
+                      <span>Double</span>
                     </div>
                   </div>
                   

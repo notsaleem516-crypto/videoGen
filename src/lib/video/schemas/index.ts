@@ -851,6 +851,7 @@ export const ParallaxLayerSchema = z.object({
   image: z.string().min(1), // Image URL for this layer
   depth: z.number().min(0).max(100).default(50), // 0 = closest (moves most), 100 = farthest (moves least)
   parallaxFactor: z.number().min(0).max(5).default(1), // Multiplier for parallax effect
+  cameraIntensity: z.number().min(0).max(2).default(1), // How much camera movement affects this layer (0 = static, 1 = normal, 2 = double)
   scale: z.number().min(0.5).max(3).default(1), // Initial scale of the layer
   opacity: z.number().min(0).max(1).default(1), // Layer opacity
   positionX: z.number().min(-100).max(100).default(0), // Horizontal offset (%)

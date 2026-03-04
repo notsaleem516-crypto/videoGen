@@ -646,6 +646,7 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
       image: z.string().min(1),
       depth: z.number().min(0).max(100).default(50),
       parallaxFactor: z.number().min(0).max(5).default(1),
+      cameraIntensity: z.number().min(0).max(2).default(1), // Per-layer camera response (0=static, 1=normal, 2=double)
       scale: z.number().min(0.5).max(3).default(1),
       opacity: z.number().min(0).max(1).default(1),
       positionX: z.number().min(-100).max(100).default(0),
