@@ -368,17 +368,19 @@ function ParallaxLayerComponent({
     layer.animationEasing || 'ease-out'
   );
 
-  // Calculate individual layer motion
-  const layerMotion = calculateLayerMotion(
-    layer.motionDirection || 'none',
-    frame / totalFrames,
-    layer.motionIntensity || 1,
-    layer.motionSpeed || 1,
-    layer.motionOscillate || false,
-    layer.motionOscillateSpeed || 1,
-    frame,
-    fps
-  );
+  // Calculate individual layer motion - only if motion is enabled
+  const layerMotion = layer.motionEnabled !== false
+    ? calculateLayerMotion(
+        layer.motionDirection || 'none',
+        frame / totalFrames,
+        layer.motionIntensity || 1,
+        layer.motionSpeed || 1,
+        layer.motionOscillate || false,
+        layer.motionOscillateSpeed || 1,
+        frame,
+        fps
+      )
+    : { x: 0, y: 0, scale: 1, rotation: 0 }; // No motion when disabled
 
   if (!loaded) return null;
 
