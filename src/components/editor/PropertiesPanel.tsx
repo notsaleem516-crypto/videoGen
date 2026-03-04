@@ -2393,6 +2393,38 @@ function ParallaxStoryEditor({ block, index }: EditorProps) {
                     {layer.image && <img src={layer.image} alt="preview" className="mt-1 w-full h-16 object-cover rounded" />}
                   </div>
                   
+                  {/* Image Fit Options */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-[10px] text-gray-500">Image Fit</Label>
+                      <Select value={(layer as Record<string, unknown>).imageFit as string || 'cover'} onValueChange={(v) => updateLayer(i, 'imageFit', v)}>
+                        <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-800 border-gray-700">
+                          <SelectItem value="cover" className="text-white text-xs">Cover (Crop)</SelectItem>
+                          <SelectItem value="contain" className="text-white text-xs">Contain (No Crop)</SelectItem>
+                          <SelectItem value="fill" className="text-white text-xs">Fill (Stretch)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-gray-500">Position</Label>
+                      <Select value={(layer as Record<string, unknown>).imagePosition as string || 'center'} onValueChange={(v) => updateLayer(i, 'imagePosition', v)}>
+                        <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-800 border-gray-700">
+                          <SelectItem value="center" className="text-white text-xs">Center</SelectItem>
+                          <SelectItem value="top" className="text-white text-xs">Top</SelectItem>
+                          <SelectItem value="bottom" className="text-white text-xs">Bottom</SelectItem>
+                          <SelectItem value="left" className="text-white text-xs">Left</SelectItem>
+                          <SelectItem value="right" className="text-white text-xs">Right</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
                   {/* Basic Settings Row */}
                   <div className="grid grid-cols-2 gap-2">
                     <div>
@@ -2617,31 +2649,166 @@ function ParallaxStoryEditor({ block, index }: EditorProps) {
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Text Overlays" icon={Type} defaultOpen={false}>
-        <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
-          {textOverlays.map((text, i) => (
-            <div key={i} className="bg-gray-800/50 rounded-lg p-3 space-y-2 border border-gray-700/30">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400">Text {i + 1}</span>
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-red-400" onClick={() => removeTextOverlay(i)}><Trash2 className="w-3 h-3" /></Button>
+      <CollapsibleSection title="Text" icon={Type} defaultOpen={false}>
+        <div className="space-y-3">
+          {/* Text Mode Selector */}
+          <div>
+            <Label className="text-xs text-gray-400">Text Mode</Label>
+            <Select value={(block.textMode as string) || 'none'} onValueChange={(v) => updateBlock(index, { textMode: v })}>
+              <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-9 text-xs mt-1">
+                <SelectValue placeholder="Select text mode" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectItem value="none" className="text-white text-xs">None</SelectItem>
+                <SelectItem value="overlays" className="text-white text-xs">Text Overlays (Timed)</SelectItem>
+                <SelectItem value="overall" className="text-white text-xs">Overall Text (Styled)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Overall Text Settings */}
+          {(block.textMode as string) === 'overall' && (
+            <div className="space-y-3 pt-2 border-t border-gray-700/30">
+              <div>
+                <Label className="text-xs text-gray-400">Text Content</Label>
+                <textarea
+                  value={(block.text as string) || ''}
+                  onChange={(e) => updateBlock(index, { text: e.target.value })}
+                  className="w-full bg-gray-800/50 border-gray-700/50 text-white text-xs p-2 rounded-md min-h-[60px]"
+                  placeholder="Enter your text..."
+                />
               </div>
-              <Input value={text.text} onChange={(e) => updateTextOverlay(i, 'text', e.target.value)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" placeholder="Text content" />
+              
+              <div>
+                <Label className="text-xs text-gray-400">Text Style</Label>
+                <Select value={(block.textStyle as string) || 'default'} onValueChange={(v) => updateBlock(index, { textStyle: v })}>
+                  <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-9 text-xs mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700">
+                    <SelectItem value="default" className="text-white text-xs">Default (Fade)</SelectItem>
+                    <SelectItem value="typing" className="text-white text-xs">Typewriter</SelectItem>
+                    <SelectItem value="words" className="text-white text-xs">Word by Word</SelectItem>
+                    <SelectItem value="quote" className="text-white text-xs">Quote (Italic)</SelectItem>
+                    <SelectItem value="glow" className="text-white text-xs">Glow</SelectItem>
+                    <SelectItem value="outline" className="text-white text-xs">Outline</SelectItem>
+                    <SelectItem value="bold-glow" className="text-white text-xs">Bold Glow</SelectItem>
+                    <SelectItem value="shadow" className="text-white text-xs">Shadow</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <Label className="text-[10px] text-gray-500">Start (s)</Label>
-                  <Input type="number" step="0.5" value={text.startTime || 0} onChange={(e) => updateTextOverlay(i, 'startTime', parseFloat(e.target.value) || 1)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                  <Label className="text-[10px] text-gray-500">Font Size</Label>
+                  <Select value={(block.textFontSize as string) || 'xlarge'} onValueChange={(v) => updateBlock(index, { textFontSize: v })}>
+                    <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700">
+                      <SelectItem value="small" className="text-white text-xs">Small</SelectItem>
+                      <SelectItem value="medium" className="text-white text-xs">Medium</SelectItem>
+                      <SelectItem value="large" className="text-white text-xs">Large</SelectItem>
+                      <SelectItem value="xlarge" className="text-white text-xs">X-Large</SelectItem>
+                      <SelectItem value="xxlarge" className="text-white text-xs">XX-Large</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
-                  <Label className="text-[10px] text-gray-500">Duration (s)</Label>
-                  <Input type="number" step="0.5" value={text.duration || 3} onChange={(e) => updateTextOverlay(i, 'duration', parseFloat(e.target.value) || 3)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                  <Label className="text-[10px] text-gray-500">Weight</Label>
+                  <Select value={(block.textFontWeight as string) || 'bold'} onValueChange={(v) => updateBlock(index, { textFontWeight: v })}>
+                    <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700">
+                      <SelectItem value="normal" className="text-white text-xs">Normal</SelectItem>
+                      <SelectItem value="bold" className="text-white text-xs">Bold</SelectItem>
+                      <SelectItem value="black" className="text-white text-xs">Black</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-[10px] text-gray-500">Align</Label>
+                  <Select value={(block.textAlign as string) || 'center'} onValueChange={(v) => updateBlock(index, { textAlign: v })}>
+                    <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700">
+                      <SelectItem value="left" className="text-white text-xs">Left</SelectItem>
+                      <SelectItem value="center" className="text-white text-xs">Center</SelectItem>
+                      <SelectItem value="right" className="text-white text-xs">Right</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-[10px] text-gray-500">Position</Label>
+                  <Select value={(block.textPosition as string) || 'center'} onValueChange={(v) => updateBlock(index, { textPosition: v })}>
+                    <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700">
+                      <SelectItem value="top" className="text-white text-xs">Top</SelectItem>
+                      <SelectItem value="center" className="text-white text-xs">Center</SelectItem>
+                      <SelectItem value="bottom" className="text-white text-xs">Bottom</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <ColorPicker 
+                value={(block.textColor as string) || '#FFFFFF'} 
+                onChange={(v) => updateBlock(index, { textColor: v })} 
+                label="Text Color" 
+              />
+
+              <div>
+                <Label className="text-[10px] text-gray-500">Animation Delay (s)</Label>
+                <Input 
+                  type="number" 
+                  step="0.1" 
+                  min="0" 
+                  max="5" 
+                  value={(block.textAnimationDelay as number) || 0.3} 
+                  onChange={(e) => updateBlock(index, { textAnimationDelay: parseFloat(e.target.value) || 0 })} 
+                  className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" 
+                />
+              </div>
             </div>
-          ))}
+          )}
+
+          {/* Text Overlays (when mode is 'overlays') */}
+          {(block.textMode as string) === 'overlays' && (
+            <>
+              <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
+                {textOverlays.map((text, i) => (
+                  <div key={i} className="bg-gray-800/50 rounded-lg p-3 space-y-2 border border-gray-700/30">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-400">Text {i + 1}</span>
+                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-red-400" onClick={() => removeTextOverlay(i)}><Trash2 className="w-3 h-3" /></Button>
+                    </div>
+                    <Input value={text.text} onChange={(e) => updateTextOverlay(i, 'text', e.target.value)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" placeholder="Text content" />
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-[10px] text-gray-500">Start (s)</Label>
+                        <Input type="number" step="0.5" value={text.startTime || 0} onChange={(e) => updateTextOverlay(i, 'startTime', parseFloat(e.target.value) || 1)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] text-gray-500">Duration (s)</Label>
+                        <Input type="number" step="0.5" value={text.duration || 3} onChange={(e) => updateTextOverlay(i, 'duration', parseFloat(e.target.value) || 3)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Button variant="outline" size="sm" className="w-full h-8 text-xs bg-gray-800 border-gray-700" onClick={addTextOverlay}>
+                <Plus className="w-3 h-3 mr-1" /> Add Text
+              </Button>
+            </>
+          )}
         </div>
-        <Button variant="outline" size="sm" className="w-full h-8 text-xs mt-3 bg-gray-800 border-gray-700" onClick={addTextOverlay}>
-          <Plus className="w-3 h-3 mr-1" /> Add Text
-        </Button>
       </CollapsibleSection>
 
       <CollapsibleSection title="Scene" icon={Layers} defaultOpen={false}>

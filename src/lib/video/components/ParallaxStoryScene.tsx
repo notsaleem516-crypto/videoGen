@@ -394,12 +394,21 @@ function ParallaxLayerComponent({
   const combinedScale = cameraOffset.scale * layerMotion.scale * (layer.scale || 1);
   const combinedRotation = (layer.rotation || 0) + layerMotion.rotation;
 
+  // Image position mapping for contain mode
+  const imagePositionMap: Record<string, string> = {
+    center: 'center',
+    top: 'top center',
+    bottom: 'bottom center',
+    left: 'center left',
+    right: 'center right',
+  };
+
   const layerStyle: React.CSSProperties = {
     position: 'absolute',
     inset: 0,
     backgroundImage: `url(${layer.image})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
+    backgroundSize: layer.imageFit || 'cover',
+    backgroundPosition: imagePositionMap[layer.imagePosition || 'center'],
     backgroundRepeat: 'no-repeat',
     transform: `
       translateX(calc(${combinedX}%))
@@ -858,6 +867,210 @@ function TextOverlayComponent({
 }
 
 // ============================================================================
+// OVERALL TEXT COMPONENT - Styled text with different animation modes
+// ============================================================================
+
+const FONT_SIZES: Record<string, number> = {
+  small: 32,
+  medium: 48,
+  large: 64,
+  xlarge: 80,
+  xxlarge: 100,
+};
+
+interface OverallTextComponentProps {
+  text: string;
+  textStyle: string;
+  fontSize: string;
+  fontWeight: string;
+  textColor: string;
+  textAlign: string;
+  textPosition: string;
+  animationDelay: number;
+  frame: number;
+  fps: number;
+}
+
+function OverallTextComponent({
+  text,
+  textStyle,
+  fontSize,
+  fontWeight,
+  textColor,
+  textAlign,
+  textPosition,
+  animationDelay,
+  frame,
+  fps,
+}: OverallTextComponentProps) {
+  const delayedFrame = Math.max(0, frame - animationDelay * fps);
+  const animationDuration = 1 * fps;
+  const progress = Math.min(1, delayedFrame / animationDuration);
+
+  // Position styles
+  const positionStyles: React.CSSProperties = {
+    position: 'absolute',
+    inset: 0,
+    display: 'flex',
+    justifyContent: textAlign === 'left' ? 'flex-start' 
+      : textAlign === 'right' ? 'flex-end' 
+      : 'center',
+    alignItems: textPosition === 'top' ? 'flex-start' 
+      : textPosition === 'bottom' ? 'flex-end' 
+      : 'center',
+    padding: '40px',
+    zIndex: 250,
+    pointerEvents: 'none',
+  };
+
+  // Get style-specific properties
+  const getStyleSpecifics = (style: string, color: string): React.CSSProperties => {
+    switch (style) {
+      case 'quote':
+        return {
+          fontStyle: 'italic',
+          textShadow: `0 4px 20px rgba(0,0,0,0.8), 0 0 60px rgba(0,0,0,0.5)`,
+          borderLeft: `4px solid ${color}`,
+          paddingLeft: '30px',
+        };
+      case 'glow':
+        return {
+          textShadow: `0 0 10px ${color}, 0 0 20px ${color}, 0 0 40px ${color}, 0 0 80px ${color}`,
+        };
+      case 'outline':
+        return {
+          color: 'transparent',
+          WebkitTextStroke: `2px ${color}`,
+          textShadow: 'none',
+        };
+      case 'bold-glow':
+        return {
+          fontWeight: 900,
+          textShadow: `0 0 10px ${color}, 0 4px 20px rgba(0,0,0,0.9)`,
+        };
+      case 'shadow':
+        return {
+          textShadow: `3px 3px 0 rgba(0,0,0,0.8), 6px 6px 0 rgba(0,0,0,0.5)`,
+        };
+      default:
+        return {
+          textShadow: `0 4px 20px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.5)`,
+        };
+    }
+  };
+
+  // Get animation based on style
+  const getAnimation = (style: string, prog: number, fr: number, f: number): { opacity: number; transform: string } => {
+    switch (style) {
+      case 'typing':
+      case 'words':
+        return { opacity: 1, transform: 'none' };
+      case 'quote':
+        return {
+          opacity: interpolate(prog, [0, 0.5, 1], [0, 0.8, 1]),
+          transform: `translateX(${interpolate(prog, [0, 1], [-30, 0])}px)`,
+        };
+      case 'glow':
+        const pulse = 0.8 + 0.2 * Math.sin(fr / f * Math.PI * 2);
+        return {
+          opacity: interpolate(prog, [0, 1], [0, 1]) * pulse,
+          transform: 'none',
+        };
+      case 'outline':
+        return {
+          opacity: interpolate(prog, [0, 1], [0, 1]),
+          transform: `scale(${interpolate(prog, [0, 1], [0.9, 1])})`,
+        };
+      case 'bold-glow':
+        return {
+          opacity: interpolate(prog, [0, 1], [0, 1]),
+          transform: `scale(${spring({ frame: fr, fps: f, config: { damping: 12, stiffness: 100 } })})`,
+        };
+      case 'shadow':
+        return {
+          opacity: interpolate(prog, [0, 1], [0, 1]),
+          transform: `translateY(${interpolate(prog, [0, 1], [30, 0])}px)`,
+        };
+      default:
+        return {
+          opacity: interpolate(prog, [0, 1], [0, 1]),
+          transform: 'none',
+        };
+    }
+  };
+
+  const animationStyles = getAnimation(textStyle, progress, delayedFrame, fps);
+  const styleSpecifics = getStyleSpecifics(textStyle, textColor);
+  const fontSizePx = FONT_SIZES[fontSize] || FONT_SIZES.xlarge;
+
+  const baseStyles: React.CSSProperties = {
+    fontSize: fontSizePx,
+    fontWeight: fontWeight as React.CSSProperties['fontWeight'],
+    color: textColor,
+    textAlign: textAlign as React.CSSProperties['textAlign'],
+    fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    letterSpacing: '-0.02em',
+    lineHeight: 1.2,
+    maxWidth: '95%',
+    opacity: animationStyles.opacity,
+    transform: animationStyles.transform,
+    ...styleSpecifics,
+  };
+
+  // Typewriter effect
+  if (textStyle === 'typing') {
+    const charsPerSecond = 20;
+    const totalChars = text.length;
+    const duration = totalChars / charsPerSecond;
+    const typewriterProgress = Math.min(1, (delayedFrame / fps) / duration);
+    const visibleChars = Math.floor(typewriterProgress * totalChars);
+    const visibleText = text.slice(0, visibleChars);
+
+    return (
+      <div style={positionStyles}>
+        <div style={baseStyles}>
+          {visibleText}
+          {typewriterProgress < 1 && <span style={{ opacity: 0.8 }}>|</span>}
+        </div>
+      </div>
+    );
+  }
+
+  // Word by word effect
+  if (textStyle === 'words') {
+    const words = text.split(' ');
+    const wordsPerSecond = 2;
+    const duration = words.length / wordsPerSecond;
+    const wordsProgress = Math.min(1, (delayedFrame / fps) / duration);
+    const visibleWords = Math.floor(wordsProgress * words.length);
+
+    return (
+      <div style={positionStyles}>
+        <div style={baseStyles}>
+          {words.map((word, i) => (
+            <span
+              key={i}
+              style={{
+                opacity: i < visibleWords ? 1 : 0,
+                marginRight: '0.3em',
+              }}
+            >
+              {word}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={positionStyles}>
+      <div style={baseStyles}>{text}</div>
+    </div>
+  );
+}
+
+// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
@@ -882,6 +1095,16 @@ export function ParallaxStoryScene({ data }: ParallaxStorySceneProps): React.Rea
     effects = [],
     effectIntensity = 0.5,
     textOverlays = [],
+    // Overall text settings
+    textMode = 'none',
+    text,
+    textStyle = 'default',
+    textFontSize = 'xlarge',
+    textFontWeight = 'bold',
+    textColor = '#FFFFFF',
+    textAlign = 'center',
+    textPosition = 'center',
+    textAnimationDelay = 0.3,
     colorGrade = 'none',
     colorIntensity = 0.5,
     backgroundColor = '#000000',
@@ -1042,15 +1265,31 @@ export function ParallaxStoryScene({ data }: ParallaxStorySceneProps): React.Rea
         </div>
       )}
 
-      {/* Text Overlays */}
-      {textOverlays.map((text, index) => (
+      {/* Text Overlays - only show if textMode is 'overlays' */}
+      {textMode === 'overlays' && textOverlays.map((txt, index) => (
         <TextOverlayComponent
           key={index}
-          text={text}
+          text={txt}
           frame={frame}
           fps={fps}
         />
       ))}
+
+      {/* Overall Text - show if textMode is 'overall' */}
+      {textMode === 'overall' && text && (
+        <OverallTextComponent
+          text={text}
+          textStyle={textStyle}
+          fontSize={textFontSize}
+          fontWeight={textFontWeight}
+          textColor={textColor}
+          textAlign={textAlign}
+          textPosition={textPosition}
+          animationDelay={textAnimationDelay}
+          frame={frame}
+          fps={fps}
+        />
+      )}
 
       {/* Audio */}
       {audioSrc && (

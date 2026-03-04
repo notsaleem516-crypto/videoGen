@@ -876,6 +876,9 @@ export const ParallaxLayerSchema = z.object({
   animationDelay: z.number().min(0).max(5).default(0), // Delay before animation starts
   animationDuration: z.number().min(0.1).max(5).default(1), // Duration of entrance animation
   animationEasing: z.enum(['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out', 'bounce', 'elastic']).default('ease-out'),
+  // Image fit option - control whether image is cropped or not
+  imageFit: z.enum(['cover', 'contain', 'fill']).default('cover'), // How image fits the layer
+  imagePosition: z.enum(['center', 'top', 'bottom', 'left', 'right']).default('center'), // Image position when using contain
 });
 
 export type ParallaxLayer = z.infer<typeof ParallaxLayerSchema>;
@@ -965,6 +968,17 @@ export const ParallaxStoryBlockSchema = z.object({
   
   // Story text overlays (multiple text elements with timing)
   textOverlays: z.array(StoryTextSchema).optional(),
+  
+  // Overall text - single text with advanced styles (like motivational image)
+  textMode: z.enum(['none', 'overlays', 'overall']).default('none'), // Which text mode to use
+  text: z.string().max(500).optional(), // Main text for "overall" mode
+  textStyle: z.enum(['default', 'quote', 'typing', 'words', 'glow', 'outline', 'bold-glow', 'shadow']).default('default'),
+  textFontSize: z.enum(['small', 'medium', 'large', 'xlarge', 'xxlarge']).default('xlarge'),
+  textFontWeight: z.enum(['normal', 'bold', 'black']).default('bold'),
+  textColor: z.string().default('#FFFFFF'),
+  textAlign: z.enum(['left', 'center', 'right']).default('center'),
+  textPosition: z.enum(['top', 'center', 'bottom']).default('center'),
+  textAnimationDelay: z.number().min(0).max(5).default(0.3),
   
   // Color grading
   colorGrade: z.enum(['none', 'cinematic', 'vintage', 'cold', 'warm', 'noir', 'sepia', 'neon']).default('none'),
