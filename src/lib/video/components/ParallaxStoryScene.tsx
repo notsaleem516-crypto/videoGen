@@ -155,10 +155,13 @@ function calculateParallaxOffset(
       y = -progress * 15 * parallaxMultiplier;
       break;
     case 'zoom-in':
-      scale = 1 + (progress * 0.3 * depthFactor);
+      // Apply intensity to zoom - when intensity is 0, scale stays at 1
+      scale = 1 + (progress * 0.3 * depthFactor * intensity);
       break;
     case 'zoom-out':
-      scale = 1.3 - (progress * 0.3 * depthFactor);
+      // Apply intensity to zoom - when intensity is 0, scale stays at 1
+      // Scale starts higher and decreases toward 1 as progress increases
+      scale = 1 + ((1 - progress) * 0.3 * depthFactor * intensity);
       break;
     case 'diagonal-tl-br':
       x = -progress * 15 * parallaxMultiplier;
@@ -175,7 +178,8 @@ function calculateParallaxOffset(
       break;
     case 'breathing':
       const breatheProgress = Math.sin(progress * Math.PI * 2) * 0.5 + 0.5;
-      scale = 1 + (breatheProgress * 0.1 * depthFactor);
+      // Apply intensity to scale - when intensity is 0, scale stays at 1
+      scale = 1 + (breatheProgress * 0.1 * depthFactor * intensity);
       x = breatheProgress * 3 * parallaxMultiplier;
       break;
     case 'none':
