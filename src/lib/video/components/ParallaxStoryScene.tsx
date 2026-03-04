@@ -3,7 +3,7 @@
 // ============================================================================
 
 import React, { useMemo, useEffect, useState, useRef } from 'react';
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring, delayRender, continueRender, cancelRender, Easing } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring, delayRender, continueRender, cancelRender, Easing, Audio } from 'remotion';
 import type { ParallaxStoryBlock, ParallaxLayer, StoryText, CameraMovement, ParallaxEffect } from '../schemas';
 import type { MotionProfileType } from '../utils/animations';
 
@@ -887,6 +887,13 @@ export function ParallaxStoryScene({ data }: ParallaxStorySceneProps): React.Rea
     perspective = 1000,
     perspectiveOriginX = 50,
     perspectiveOriginY = 50,
+    // Audio settings
+    audioSrc,
+    audioVolume = 0.7,
+    audioFadeIn = 0.5,
+    audioFadeOut = 0.5,
+    audioLoop = true,
+    audioStartTime = 0,
   } = data;
 
   // Calculate camera movement progress
@@ -896,6 +903,42 @@ export function ParallaxStoryScene({ data }: ParallaxStorySceneProps): React.Rea
   const sortedLayers = useMemo(() => {
     return [...layers].sort((a, b) => b.depth - a.depth);
   }, [layers]);
+
+  // Calculate audio volume with fade in/out
+  const audioCurrentTime = frame / fps;
+  const audioStartFrame = audioStartTime * fps;
+  const audioEndFrame = durationInFrames - (audioFadeOut * fps);
+  const fadeInFrames = audioFadeIn * fps;
+  const fadeOutFrames = audioFadeOut * fps;
+  
+  const audioVolumeModulated = useMemo(() => {
+    if (!audioSrc) return 0;
+    
+    // Before start time
+    if (frame < audioStartFrame) return 0;
+    
+    // Fade in
+    if (frame < audioStartFrame + fadeInFrames) {
+      return audioVolume * interpolate(
+        frame,
+        [audioStartFrame, audioStartFrame + fadeInFrames],
+        [0, 1],
+        { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+      );
+    }
+    
+    // Fade out
+    if (frame > audioEndFrame - fadeOutFrames) {
+      return audioVolume * interpolate(
+        frame,
+        [audioEndFrame - fadeOutFrames, audioEndFrame],
+        [1, 0],
+        { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+      );
+    }
+    
+    return audioVolume;
+  }, [frame, audioSrc, audioVolume, audioStartFrame, fadeInFrames, audioEndFrame, fadeOutFrames]);
 
   return (
     <AbsoluteFill style={{ backgroundColor, overflow: 'hidden' }}>
@@ -999,6 +1042,16 @@ export function ParallaxStoryScene({ data }: ParallaxStorySceneProps): React.Rea
           fps={fps}
         />
       ))}
+
+      {/* Audio */}
+      {audioSrc && (
+        <Audio
+          src={audioSrc}
+          volume={audioVolumeModulated}
+          startFrom={audioStartTime * fps}
+          loop={audioLoop}
+        />
+      )}
     </AbsoluteFill>
   );
 }

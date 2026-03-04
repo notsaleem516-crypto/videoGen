@@ -990,6 +990,14 @@ export const ParallaxStoryBlockSchema = z.object({
   perspectiveOriginX: z.number().min(0).max(100).default(50), // %
   perspectiveOriginY: z.number().min(0).max(100).default(50), // %
   
+  // Audio support
+  audioSrc: z.string().optional(), // URL to audio file (mp3, wav, etc.)
+  audioVolume: z.number().min(0).max(1).default(0.7), // Volume level 0-1
+  audioFadeIn: z.number().min(0).max(5).default(0.5), // Fade in duration in seconds
+  audioFadeOut: z.number().min(0).max(5).default(0.5), // Fade out duration in seconds
+  audioLoop: z.boolean().default(true), // Whether to loop audio
+  audioStartTime: z.number().min(0).default(0), // When audio starts (seconds from video start)
+  
 }).merge(BlockCustomizationSchema);
 
 export type ParallaxStoryBlock = z.infer<typeof ParallaxStoryBlockSchema>;

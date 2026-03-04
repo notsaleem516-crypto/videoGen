@@ -21,7 +21,7 @@ import {
   BarChart3, Type, Image, Quote, List, Clock, AlertCircle,
   Grid3X3, LineChart, PieChart, Code, MessageSquare, Heart, MessageCircle,
   Timer, QrCode, Video, Users, Share2, MousePointer, Palette, Waves, Hourglass,
-  Layers, Box, Move, Zap, TrendingUp, CloudSun, Activity
+  Layers, Box, Move, Zap, TrendingUp, CloudSun, Activity, Music, Volume2
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -2630,6 +2630,94 @@ function ParallaxStoryEditor({ block, index }: EditorProps) {
               <SliderInput label="Blur Amount" value={(block.dofBlurAmount as number) || 2} onChange={(v) => updateBlock(index, { dofBlurAmount: v })} min={0} max={10} step={0.5} unit="" />
             </>
           )}
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Audio" icon={Music} defaultOpen={false}>
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs text-gray-400">Audio URL</Label>
+            <Input 
+              value={(block.audioSrc as string) || ''} 
+              onChange={(e) => updateBlock(index, { audioSrc: e.target.value })} 
+              className="bg-gray-800/50 border-gray-700/50 text-white h-9 text-xs mt-1" 
+              placeholder="https://...mp3 or /audio/file.mp3"
+            />
+            {(block.audioSrc as string) && (
+              <div className="mt-2 p-2 bg-gray-800/50 rounded-lg border border-gray-700/30">
+                <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <Volume2 className="w-3 h-3" />
+                  <span className="truncate">{(block.audioSrc as string).split('/').pop()}</span>
+                </div>
+                <audio 
+                  src={block.audioSrc as string} 
+                  controls 
+                  className="w-full h-6 mt-2 opacity-75"
+                  style={{ filter: 'invert(1) hue-rotate(180deg)' }}
+                />
+              </div>
+            )}
+          </div>
+          
+          <SliderInput 
+            label="Volume" 
+            value={(block.audioVolume as number) ?? 0.7} 
+            onChange={(v) => updateBlock(index, { audioVolume: v })} 
+            min={0} 
+            max={1} 
+            step={0.1} 
+            unit="%" 
+          />
+          
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label className="text-[10px] text-gray-500">Fade In (s)</Label>
+              <Input 
+                type="number" 
+                step="0.1" 
+                min="0" 
+                max="5" 
+                value={(block.audioFadeIn as number) ?? 0.5} 
+                onChange={(e) => updateBlock(index, { audioFadeIn: parseFloat(e.target.value) || 0 })} 
+                className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" 
+              />
+            </div>
+            <div>
+              <Label className="text-[10px] text-gray-500">Fade Out (s)</Label>
+              <Input 
+                type="number" 
+                step="0.1" 
+                min="0" 
+                max="5" 
+                value={(block.audioFadeOut as number) ?? 0.5} 
+                onChange={(e) => updateBlock(index, { audioFadeOut: parseFloat(e.target.value) || 0 })} 
+                className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" 
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label className="text-[10px] text-gray-500">Start Time (s)</Label>
+              <Input 
+                type="number" 
+                step="0.5" 
+                min="0" 
+                value={(block.audioStartTime as number) ?? 0} 
+                onChange={(e) => updateBlock(index, { audioStartTime: parseFloat(e.target.value) || 0 })} 
+                className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" 
+              />
+            </div>
+            <div className="flex items-end pb-1">
+              <div className="flex items-center gap-2">
+                <Switch 
+                  checked={(block.audioLoop as boolean) ?? true} 
+                  onCheckedChange={(v) => updateBlock(index, { audioLoop: v })} 
+                />
+                <Label className="text-[10px] text-gray-500">Loop</Label>
+              </div>
+            </div>
+          </div>
         </div>
       </CollapsibleSection>
     </>
