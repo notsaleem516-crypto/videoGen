@@ -605,7 +605,7 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
       subtitle: z.string().max(100).optional(),
     })).min(1).max(50),
     towerStyle: z.enum(['boxes', 'cylinders', 'hexagons']).default('boxes'),
-    towerSpacing: z.number().min(2).max(10).default(5),
+    towerSpacing: z.number().min(2).max(20).default(10),
     baseHeight: z.number().min(1).max(5).default(2),
     maxHeight: z.number().min(10).max(50).default(25),
     gradientStart: z.string().default('#3B82F6'),

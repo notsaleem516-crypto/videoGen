@@ -297,9 +297,9 @@ function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, ran
       <Box args={[width, height, depth]} position={[0, height / 2, 0]} castShadow receiveShadow>
         <meshStandardMaterial
           color={color}
-          metalness={0.6}
-          roughness={0.2}
-          envMapIntensity={1.5}
+          metalness={0.7}
+          roughness={0.15}
+          envMapIntensity={2}
           transparent={opacity < 1}
           opacity={opacity}
           emissive={color}
@@ -307,12 +307,12 @@ function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, ran
         />
       </Box>
 
-      {/* Glowing top cap */}
-      <Box args={[width + 0.3, 0.4, depth + 0.3]} position={[0, height + 0.2, 0]}>
+      {/* Clean glowing top cap */}
+      <Box args={[width + 0.15, 0.25, depth + 0.15]} position={[0, height + 0.12, 0]}>
         <meshStandardMaterial
           color="#ffffff"
-          metalness={0.95}
-          roughness={0.05}
+          metalness={0.9}
+          roughness={0.1}
           emissive={color}
           emissiveIntensity={glowIntensity}
           transparent={opacity < 1}
@@ -331,36 +331,50 @@ function Tower({ position, height, color, width = 3, depth = 3, opacity = 1, ran
       </Box>
 
 {image && texture && (
-  <Billboard position={[0, height + 5, 0]} follow={true}>
-    {/* Real 3D box for depth/thickness */}
-    <mesh position={[0, 0, -0.3]} renderOrder={996}>
-      <boxGeometry args={[3.0, 3.0, 0.6]} />
-      <meshStandardMaterial color={color} metalness={0.7} roughness={0.2} emissive={color} emissiveIntensity={0.3} />
+  <Billboard position={[0, height + 10, 0]} follow={true}>
+    {/* Clean frame border */}
+    <mesh position={[0, 0, -0.05]} renderOrder={995}>
+      <planeGeometry args={[3.4, 3.4]} />
+      <meshBasicMaterial color="#1a1a2e" />
     </mesh>
-    {/* White border face */}
-    <mesh position={[0, 0, 0.01]} renderOrder={997}>
+    {/* 3D backing for depth */}
+    <mesh position={[0, 0, -0.15]} renderOrder={996}>
+      <boxGeometry args={[3.2, 3.2, 0.2]} />
+      <meshStandardMaterial color={color} metalness={0.8} roughness={0.15} emissive={color} emissiveIntensity={0.2} />
+    </mesh>
+    {/* White border */}
+    <mesh position={[0, 0, 0.001]} renderOrder={997}>
+      <planeGeometry args={[3.15, 3.15]} />
+      <meshBasicMaterial color="#ffffff" />
+    </mesh>
+    {/* Inner dark border */}
+    <mesh position={[0, 0, 0.002]} renderOrder={998}>
       <planeGeometry args={[3.0, 3.0]} />
-      <meshBasicMaterial color="#ffffff" depthTest={false} depthWrite={false} />
+      <meshBasicMaterial color="#0f0f1a" />
     </mesh>
-    {/* Main image */}
-    <mesh position={[0, 0, 0.02]} renderOrder={999}>
-      <planeGeometry args={[2.8, 2.8]} />
-      <meshBasicMaterial map={texture} transparent opacity={opacity} side={THREE.DoubleSide} depthTest={false} depthWrite={false} />
+    {/* Main image - centered and crisp */}
+    <mesh position={[0, 0, 0.01]} renderOrder={999}>
+      <planeGeometry args={[2.85, 2.85]} />
+      <meshBasicMaterial map={texture} transparent opacity={opacity} depthTest={false} depthWrite={false} />
     </mesh>
-    {/* Shine */}
-    <mesh position={[-0.4, 0.4, 0.03]} renderOrder={1000}>
-      <planeGeometry args={[1.2, 1.2]} />
-      <meshBasicMaterial color="#ffffff" transparent opacity={0.15 * opacity} depthTest={false} depthWrite={false} />
+    {/* Subtle highlight */}
+    <mesh position={[-0.5, 0.5, 0.02]} renderOrder={1000}>
+      <planeGeometry args={[1.0, 1.0]} />
+      <meshBasicMaterial color="#ffffff" transparent opacity={0.08 * opacity} depthTest={false} depthWrite={false} />
     </mesh>
   </Billboard>
 )}
       
      {showLabel && (
-  <Billboard position={[0, height + (image && texture ? 2 : 3), 0]} follow={true}>
-  <Text position={[-1.8, 0.5, 0]} fontSize={0.75} color="#FFD700" anchorX="right" anchorY="middle" fontWeight="bold" outlineWidth={0.06} outlineColor="#000000">#{rank}</Text>
-<Text position={[-1.4, 0.5, 0]} fontSize={0.65} color="#FFFFFF" anchorX="left" anchorY="middle" fontWeight="bold" outlineWidth={0.05} outlineColor="#000000" maxWidth={20} whiteSpace="nowrap">{name}</Text>
-  <Text position={[0, -0.5, 0]} fontSize={0.65} color="#4ADE80" anchorX="center" anchorY="middle" outlineWidth={0.04} outlineColor="#000000">{value}</Text>
-  {subtitle && <Text position={[0, -1.2, 0]} fontSize={0.45} color="#9CA3AF" anchorX="center" anchorY="middle">{subtitle}</Text>}
+  <Billboard position={[0, height + (image && texture ? 4.5 : 4), 0]} follow={true}>
+  <group position={[-0.5, 1.2, 0]}>
+    <Text position={[-1.8, 0, 0]} fontSize={0.75} color="#FFD700" anchorX="right" anchorY="middle" fontWeight="bold" outlineWidth={0.06} outlineColor="#000000">#{rank}</Text>
+    <Text position={[-1.2, 0, 0]} fontSize={0.7} color="#FFFFFF" anchorX="left" anchorY="middle" fontWeight="bold" outlineWidth={0.06} outlineColor="#000000" maxWidth={20} textAlign="left">{name}</Text>
+  </group>
+  <Text position={[0, -0.2, 0]} fontSize={0.7} color="#4ADE80" anchorX="center" anchorY="middle" fontWeight="bold" outlineWidth={0.05} outlineColor="#000000">{value}</Text>
+  {subtitle && (
+    <Text position={[0, -1.0, 0]} fontSize={0.4} color="#94A3B8" anchorX="center" anchorY="middle" outlineWidth={0.05} outlineColor="#000000" maxWidth={16}>{subtitle}</Text>
+  )}
 </Billboard>
       )}
     </group>
@@ -2361,7 +2375,7 @@ export function TowerChart3DScene({ data }: TowerChart3DSceneProps): React.React
     showGround = true,
     ambientIntensity = 0.5,
     itemRevealDelay = 0.06,
-    towerSpacing = 7,
+    towerSpacing = 10,
     baseHeight = 4,
     maxHeight = 30,
     backgroundPreset = 'cyber-grid',
