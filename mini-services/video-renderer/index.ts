@@ -669,6 +669,9 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
       animationDelay: z.number().min(0).max(5).default(0),
       animationDuration: z.number().min(0.1).max(5).default(1),
       animationEasing: z.enum(['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out', 'bounce', 'elastic']).default('ease-out'),
+      // Image fit options
+      imageFit: z.enum(['cover', 'contain', 'fill']).default('cover'),
+      imagePosition: z.enum(['center', 'top', 'bottom', 'left', 'right']).default('center'),
     })).min(1).max(10),
     cameraMovement: z.enum(['none', 'pan-left', 'pan-right', 'pan-up', 'pan-down', 'zoom-in', 'zoom-out', 'diagonal-tl-br', 'diagonal-tr-bl', 'orbit', 'breathing']).default('pan-right'),
     cameraSpeed: z.number().min(0.1).max(5).default(1),
@@ -712,6 +715,16 @@ const ContentBlockSchema = z.discriminatedUnion('type', [
     audioLoop: z.boolean().default(true),
     audioStartTime: z.number().min(0).default(0),
     duration: z.number().min(1).max(120).optional(),
+    // Overall text settings
+    textMode: z.enum(['none', 'overlays', 'overall']).default('none'),
+    text: z.string().max(500).optional(),
+    textStyle: z.enum(['default', 'quote', 'typing', 'words', 'glow', 'outline', 'bold-glow', 'shadow']).default('default'),
+    textFontSize: z.enum(['small', 'medium', 'large', 'xlarge', 'xxlarge']).default('xlarge'),
+    textFontWeight: z.enum(['normal', 'bold', 'black']).default('bold'),
+    textColor: z.string().default('#FFFFFF'),
+    textAlign: z.enum(['left', 'center', 'right']).default('center'),
+    textPosition: z.enum(['top', 'center', 'bottom']).default('center'),
+    textAnimationDelay: z.number().min(0).max(5).default(0.3),
   }).merge(BlockCustomizationSchema),
 ]);
 
