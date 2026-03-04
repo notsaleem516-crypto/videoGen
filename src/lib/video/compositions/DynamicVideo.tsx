@@ -36,6 +36,8 @@ import { AnimatedBgScene } from '../components/AnimatedBgScene';
 import { CountdownScene } from '../components/CountdownScene';
 import { WeatherScene } from '../components/WeatherScene';
 import { TowerChart3DScene } from '../components/TowerChart3DScene';
+import { BarRace3DScene } from '../components/BarRace3DScene';
+import { ParallaxStoryScene } from '../components/ParallaxStoryScene';
 import {
   type VideoInput,
   type AIDecision,
@@ -68,6 +70,8 @@ import {
   type CountdownBlock,
   type WeatherBlock,
   type TowerChart3DBlock,
+  type BarRace3DBlock,
+  type ParallaxStoryBlock,
   COMPONENT_IDS,
 } from '../schemas';
 import { getTheme } from '../utils/theme';
@@ -462,6 +466,25 @@ function SceneRenderer({
         />
       );
       
+    case COMPONENT_IDS.BAR_RACE_3D:
+      return (
+        <BarRace3DScene
+          data={block as BarRace3DBlock}
+          theme={theme}
+          motionProfile={motionProfile}
+          animation={animation}
+        />
+      );
+      
+    case COMPONENT_IDS.PARALLAX_STORY:
+      return (
+        <ParallaxStoryScene
+          data={block as ParallaxStoryBlock}
+          theme={theme}
+          motionProfile={motionProfile}
+        />
+      );
+      
     default:
       // Fallback: render based on block type directly
       return renderByBlockType(block, theme, motionProfile, animation);
@@ -531,6 +554,10 @@ function renderByBlockType(
       return <WeatherScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
     case 'tower-chart-3d':
       return <TowerChart3DScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
+    case 'bar-race-3d':
+      return <BarRace3DScene data={block} theme={theme} motionProfile={motionProfile} animation={animation} />;
+    case 'parallax-story':
+      return <ParallaxStoryScene data={block} theme={theme} motionProfile={motionProfile} />;
     default:
       return (
         <TextScene

@@ -29,6 +29,9 @@ export type { WeatherSceneProps } from './WeatherScene';
 export { TowerChart3DScene } from './TowerChart3DScene';
 export type { TowerChart3DSceneProps } from './TowerChart3DScene';
 
+export { BarRace3DScene } from './BarRace3DScene';
+export type { BarRace3DSceneProps } from './BarRace3DScene';
+
 // Note: TowerChart3DEditor is NOT exported here because it imports UI components
 // that cannot be bundled by Remotion. Import it directly from './TowerChart3DEditor'
 // in the main app only, not in video compositions.

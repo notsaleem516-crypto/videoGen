@@ -757,6 +757,243 @@ export const TowerChart3DBlockSchema = z.object({
 
 export type TowerChart3DBlock = z.infer<typeof TowerChart3DBlockSchema>;
 
+// ============================================================================
+// 3D BAR RACE CHART BLOCK SCHEMA - Dynamic horizontal bar race
+// ============================================================================
+
+/**
+ * Bar Race item schema for time-series data
+ */
+export const BarRaceItemSchema = z.object({
+  name: z.string().max(100),
+  value: z.number().min(0),
+  valueFormatted: z.string().max(50).optional(), // e.g., "155M", "$2.5B"
+  color: z.string().optional(),
+  image: z.string().optional(), // Optional image/flag URL
+  data: z.array(z.number()).optional(), // Time-series data for animation (optional)
+});
+
+export type BarRaceItem = z.infer<typeof BarRaceItemSchema>;
+
+/**
+ * 3D Bar Race Chart Block Schema - Dynamic ranking visualization
+ */
+export const BarRace3DBlockSchema = z.object({
+  type: z.literal('bar-race-3d'),
+  
+  // Title and description
+  title: z.string().max(100).default('Bar Race'),
+  subtitle: z.string().max(200).optional(),
+  
+  // Data - array of items with optional time-series
+  items: z.array(BarRaceItemSchema).min(2).max(20),
+  
+  // Race settings
+  raceDuration: z.number().min(1).max(30).default(10), // Total duration of the race animation
+  barHeight: z.number().min(0.5).max(3).default(1.5), // Height of each bar
+  barMaxWidth: z.number().min(10).max(50).default(30), // Maximum bar width (value)
+  barSpacing: z.number().min(0.5).max(2).default(0.8), // Vertical spacing between bars
+  barDepth: z.number().min(0.5).max(3).default(1.5), // Depth of each bar
+  
+  // Colors
+  gradientStart: z.string().default('#3B82F6'),
+  gradientEnd: z.string().default('#8B5CF6'),
+  useGradientByValue: z.boolean().default(true), // Color by value magnitude
+  
+  // Labels
+  showValueLabels: z.boolean().default(true),
+  showNameLabels: z.boolean().default(true),
+  showRankNumbers: z.boolean().default(true),
+  
+  // Animation
+  animationDirection: z.enum(['top-to-bottom', 'bottom-to-top', 'winner-focus']).default('top-to-bottom'),
+  positionTransitionSpeed: z.number().min(0.1).max(1).default(0.3), // Speed of position changes
+  valueGrowSpeed: z.number().min(0.5).max(3).default(1), // Speed of value bar growing
+  
+  // Camera
+  cameraDistance: z.number().min(10).max(50).default(25),
+  cameraAngle: z.number().min(0).max(90).default(45),
+  cameraFollowTop: z.number().min(1).max(10).default(5), // How many top items to keep in view
+  
+  // Scene
+  backgroundColor: z.string().default('#0a0a1a'),
+  groundColor: z.string().default('#151525'),
+  showGround: z.boolean().default(true),
+  ambientIntensity: z.number().min(0.3).max(2).default(0.6),
+  
+  // Background Preset
+  backgroundPreset: z.enum([
+    'none',
+    'cyber-grid',
+    'neon-tokyo',
+    'tron-grid',
+    'galaxy-nebula',
+    'matrix-rain',
+  ]).default('cyber-grid'),
+  
+  // Winner celebration
+  showWinnerEffect: z.boolean().default(true),
+  winnerDuration: z.number().min(0.5).max(3).default(1.5), // Duration of winner celebration
+}).merge(BlockCustomizationSchema);
+
+export type BarRace3DBlock = z.infer<typeof BarRace3DBlockSchema>;
+
+// ============================================================================
+// PARALLAX STORY BLOCK SCHEMA - Cinematic Multi-layer Parallax Storytelling
+// ============================================================================
+
+/**
+ * Parallax layer schema - Each layer has its own depth and movement
+ */
+export const ParallaxLayerSchema = z.object({
+  id: z.string().optional(), // Unique identifier
+  name: z.string().max(50), // Layer name (e.g., "Foreground", "Trees", "Sky")
+  image: z.string().min(1), // Image URL for this layer
+  depth: z.number().min(0).max(100).default(50), // 0 = closest (moves most), 100 = farthest (moves least)
+  parallaxFactor: z.number().min(0).max(5).default(1), // Multiplier for parallax effect
+  scale: z.number().min(0.5).max(3).default(1), // Initial scale of the layer
+  opacity: z.number().min(0).max(1).default(1), // Layer opacity
+  positionX: z.number().min(-100).max(100).default(0), // Horizontal offset (%)
+  positionY: z.number().min(-100).max(100).default(0), // Vertical offset (%)
+  rotation: z.number().min(-45).max(45).default(0), // Rotation in degrees
+  blur: z.number().min(0).max(20).default(0), // Blur amount
+  blendMode: z.enum(['normal', 'multiply', 'screen', 'overlay', 'lighten', 'darken']).default('normal'),
+  // Individual layer motion controls
+  motionEnabled: z.boolean().default(true), // Whether this layer has its own motion
+  motionDirection: z.enum([
+    'none', 'left', 'right', 'up', 'down', 
+    'diagonal-tl-br', 'diagonal-tr-bl', 'diagonal-bl-tr', 'diagonal-br-tl',
+    'zoom-in', 'zoom-out', 'rotate-cw', 'rotate-ccw', 'float', 'pulse'
+  ]).default('right'),
+  motionSpeed: z.number().min(0).max(5).default(1), // Speed of individual layer motion
+  motionIntensity: z.number().min(0).max(3).default(1), // How much the layer moves
+  motionOscillate: z.boolean().default(false), // Whether motion should oscillate back and forth
+  motionOscillateSpeed: z.number().min(0.5).max(5).default(1), // Oscillation frequency
+  // Animation settings per layer
+  animationIn: z.enum(['none', 'fade', 'slide-left', 'slide-right', 'slide-up', 'slide-down', 'zoom-in', 'zoom-out', 'rotate-in', 'flip-x', 'flip-y', 'bounce', 'blur-in']).default('fade'),
+  animationOut: z.enum(['none', 'fade', 'slide-left', 'slide-right', 'slide-up', 'slide-down', 'zoom-in', 'zoom-out', 'rotate-out', 'flip-x', 'flip-y', 'bounce']).default('fade'),
+  animationDelay: z.number().min(0).max(5).default(0), // Delay before animation starts
+  animationDuration: z.number().min(0.1).max(5).default(1), // Duration of entrance animation
+  animationEasing: z.enum(['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out', 'bounce', 'elastic']).default('ease-out'),
+});
+
+export type ParallaxLayer = z.infer<typeof ParallaxLayerSchema>;
+
+/**
+ * Camera movement types for parallax effect
+ */
+export const CameraMovementSchema = z.enum([
+  'none',           // Static camera
+  'pan-left',       // Camera pans left (layers move right at different speeds)
+  'pan-right',      // Camera pans right (layers move left at different speeds)
+  'pan-up',         // Camera pans up
+  'pan-down',       // Camera pans down
+  'zoom-in',        // Camera zooms in
+  'zoom-out',       // Camera zooms out
+  'diagonal-tl-br', // Diagonal pan top-left to bottom-right
+  'diagonal-tr-bl', // Diagonal pan top-right to bottom-left
+  'orbit',          // Circular/orbital camera movement
+  'breathing',      // Subtle in-out breathing motion
+  'custom',         // Custom keyframe-based movement
+]);
+
+export type CameraMovement = z.infer<typeof CameraMovementSchema>;
+
+/**
+ * Visual effects for parallax scenes
+ */
+export const ParallaxEffectSchema = z.enum([
+  'none',
+  'particles',      // Floating particles (dust, snow, leaves)
+  'light-rays',     // God rays / volumetric light
+  'fog',            // Atmospheric fog/mist
+  'rain',           // Rain overlay
+  'snow',           // Snowfall
+  'bokeh',          // Bokeh light spots
+  'film-grain',     // Vintage film grain
+  'vignette',       // Darkened edges
+  'chromatic',      // Chromatic aberration
+  'glow',           // Glow/bloom effect
+]);
+
+export type ParallaxEffect = z.infer<typeof ParallaxEffectSchema>;
+
+/**
+ * Text overlay for storytelling
+ */
+export const StoryTextSchema = z.object({
+  text: z.string().max(500),
+  position: z.enum(['top', 'center', 'bottom', 'custom']).default('center'),
+  customX: z.number().min(0).max(100).default(50), // Percentage
+  customY: z.number().min(0).max(100).default(50), // Percentage
+  fontSize: z.enum(['small', 'medium', 'large', 'xlarge', 'xxlarge']).default('large'),
+  fontWeight: z.enum(['normal', 'bold', 'black']).default('bold'),
+  color: z.string().default('#FFFFFF'),
+  shadow: z.boolean().default(true),
+  shadowColor: z.string().default('rgba(0,0,0,0.8)'),
+  textAlign: z.enum(['left', 'center', 'right']).default('center'),
+  animation: z.enum(['none', 'fade', 'slide-up', 'slide-down', 'typewriter', 'glow', 'pulse']).default('fade'),
+  animationDelay: z.number().min(0).max(10).default(0.5),
+  duration: z.number().min(0.5).max(30).default(3), // How long text stays visible
+  startTime: z.number().min(0).max(60).default(0), // When text appears (seconds)
+});
+
+export type StoryText = z.infer<typeof StoryTextSchema>;
+
+/**
+ * Parallax Story Block Schema - Cinematic multi-layer storytelling
+ */
+export const ParallaxStoryBlockSchema = z.object({
+  type: z.literal('parallax-story'),
+  
+  // Story title and metadata
+  title: z.string().max(100).optional(),
+  subtitle: z.string().max(200).optional(),
+  
+  // Parallax layers (ordered back to front)
+  layers: z.array(ParallaxLayerSchema).min(1).max(10),
+  
+  // Camera settings
+  cameraMovement: CameraMovementSchema.default('pan-right'),
+  cameraSpeed: z.number().min(0.1).max(5).default(1), // Speed multiplier
+  cameraIntensity: z.number().min(0).max(2).default(1), // How intense the movement is
+  
+  // Visual effects
+  effects: z.array(ParallaxEffectSchema).default([]),
+  effectIntensity: z.number().min(0).max(1).default(0.5),
+  
+  // Story text overlays (multiple text elements with timing)
+  textOverlays: z.array(StoryTextSchema).optional(),
+  
+  // Color grading
+  colorGrade: z.enum(['none', 'cinematic', 'vintage', 'cold', 'warm', 'noir', 'sepia', 'neon']).default('none'),
+  colorIntensity: z.number().min(0).max(1).default(0.5),
+  
+  // Background color (for letterboxing or blending)
+  backgroundColor: z.string().default('#000000'),
+  
+  // Aspect ratio handling
+  fitMode: z.enum(['cover', 'contain', 'stretch']).default('cover'),
+  
+  // Animation settings
+  introDuration: z.number().min(0.5).max(3).default(1), // Fade in duration
+  outroDuration: z.number().min(0.5).max(3).default(1), // Fade out duration
+  loopAnimation: z.boolean().default(false), // Whether to loop camera movement
+  
+  // Depth of field simulation
+  dofEnabled: z.boolean().default(false),
+  dofFocusDepth: z.number().min(0).max(100).default(50), // Which depth level is in focus
+  dofBlurAmount: z.number().min(0).max(10).default(2), // Blur intensity
+  
+  // 3D perspective settings
+  perspective: z.number().min(500).max(3000).default(1000), // CSS perspective value
+  perspectiveOriginX: z.number().min(0).max(100).default(50), // %
+  perspectiveOriginY: z.number().min(0).max(100).default(50), // %
+  
+}).merge(BlockCustomizationSchema);
+
+export type ParallaxStoryBlock = z.infer<typeof ParallaxStoryBlockSchema>;
+
 /**
  * Union type for all content blocks
  */
@@ -789,6 +1026,8 @@ export const ContentBlockSchema = z.discriminatedUnion('type', [
   CountdownBlockSchema,
   WeatherBlockSchema,
   TowerChart3DBlockSchema,
+  BarRace3DBlockSchema,
+  ParallaxStoryBlockSchema,
 ]);
 
 export type ContentBlock = z.infer<typeof ContentBlockSchema>;
@@ -899,6 +1138,8 @@ export const COMPONENT_IDS = {
   COUNTDOWN: 'countdown-scene',
   WEATHER: 'weather-scene',
   TOWER_CHART_3D: 'tower-chart-3d-scene',
+  BAR_RACE_3D: 'bar-race-3d-scene',
+  PARALLAX_STORY: 'parallax-story-scene',
 } as const;
 
 export type ComponentId = typeof COMPONENT_IDS[keyof typeof COMPONENT_IDS];
@@ -935,5 +1176,7 @@ export const TYPE_TO_COMPONENT_MAP: Record<string, ComponentId[]> = {
   countdown: [COMPONENT_IDS.COUNTDOWN],
   'weather-block': [COMPONENT_IDS.WEATHER],
   'tower-chart-3d': [COMPONENT_IDS.TOWER_CHART_3D],
+  'bar-race-3d': [COMPONENT_IDS.BAR_RACE_3D],
+  'parallax-story': [COMPONENT_IDS.PARALLAX_STORY],
 };
 

@@ -7,7 +7,9 @@ const nextConfig: NextConfig = {
   },
   reactStrictMode: false,
   // Acknowledge Turbopack is being used (required in Next.js 16)
-  turbopack: {},
+  turbopack: {
+    root: __dirname,
+  },
 };
 
 export default nextConfig;

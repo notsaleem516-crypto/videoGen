@@ -1,7 +1,18 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-02-28T10:48:26.777Z",
+  "generatedAt": "2026-03-04T06:07:51.010Z",
   "plugins": [
+    {
+      "id": "counter-block",
+      "name": "Animated Counter",
+      "path": "./plugins/core/counter-block",
+      "category": "data",
+      "icon": "timer",
+      "color": "#3B82F6",
+      "description": "Animated number counter with customizable styles and animations",
+      "version": "1.0.0",
+      "status": "stable"
+    },
     {
       "id": "stat-block",
       "name": "Statistics",
@@ -25,17 +36,6 @@
       "status": "stable"
     },
     {
-      "id": "counter-block",
-      "name": "Animated Counter",
-      "path": "./plugins/core/counter-block",
-      "category": "data",
-      "icon": "timer",
-      "color": "#3B82F6",
-      "description": "Animated number counter with customizable styles and animations",
-      "version": "1.0.0",
-      "status": "stable"
-    },
-    {
       "id": "text-block",
       "name": "Text Block",
       "path": "./plugins/core/text-block",
@@ -52,8 +52,8 @@
       "text-block"
     ],
     "data": [
-      "stat-block",
-      "counter-block"
+      "counter-block",
+      "stat-block"
     ],
     "visual": [],
     "interactive": [

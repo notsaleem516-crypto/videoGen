@@ -39,6 +39,8 @@ function generatePlanFromBlocks(videoInput: { contentBlocks: Array<{ type: strin
     'countdown': COMPONENT_IDS.COUNTDOWN,
     'weather-block': COMPONENT_IDS.WEATHER,
     'tower-chart-3d': COMPONENT_IDS.TOWER_CHART_3D,
+    'bar-race-3d': COMPONENT_IDS.BAR_RACE_3D,
+    'parallax-story': COMPONENT_IDS.PARALLAX_STORY,
   };
 
   const decisions: AIDecision[] = videoInput.contentBlocks.map((block) => {
@@ -66,7 +68,7 @@ function getDefaultDuration(type: string): number {
     // New blocks
     'counter': 4, 'progress-bar': 3, 'qr-code': 4, 'video': 5,
     'avatar-grid': 5, 'social-stats': 4, 'cta': 3, 'gradient-text': 4,
-    'animated-bg': 5, 'countdown': 4, 'weather-block': 4, 'tower-chart-3d': 20,
+    'animated-bg': 5, 'countdown': 4, 'weather-block': 4, 'tower-chart-3d': 20, 'bar-race-3d': 15, 'parallax-story': 10,
   };
   return durations[type] || 4;
 }

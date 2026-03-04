@@ -4,12 +4,12 @@ import { useEditorStore, BLOCK_TEMPLATES } from '@/store/editor-store';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion } from 'framer-motion';
-import { 
-  BarChart3, Type, Image, Quote, List, Clock, AlertCircle, 
+import {
+  BarChart3, Type, Image, Quote, List, Clock, AlertCircle,
   Grid3X3, LineChart, PieChart, Code, MessageSquare, Heart,
   MessageCircle, Sparkles, Zap, PlusCircle, Timer, QrCode,
   Video, Users, Share2, MousePointer, Palette, Waves, ChevronDown,
-  Hourglass, CloudSun, Box
+  Hourglass, CloudSun, Box, TrendingUp, Layers
 } from 'lucide-react';
 
 const BLOCK_CATEGORIES = [
@@ -36,6 +36,8 @@ const BLOCK_CATEGORIES = [
       { type: 'counter', label: 'Counter', icon: Timer, gradient: 'from-cyan-500 to-blue-500', description: 'Animated counter' },
       { type: 'progress-bar', label: 'Progress', icon: BarChart3, gradient: 'from-green-500 to-emerald-500', description: 'Progress bar' },
       { type: 'tower-chart-3d', label: '3D Tower', icon: Box, gradient: 'from-violet-600 to-indigo-500', description: '3D ranking tower' },
+      { type: 'bar-race-3d', label: '3D Bar Race', icon: TrendingUp, gradient: 'from-emerald-600 to-teal-500', description: '3D racing bars' },
+      { type: 'parallax-story', label: 'Parallax', icon: Layers, gradient: 'from-pink-500 to-rose-500', description: 'Cinematic parallax' },
     ],
   },
   {

@@ -16,12 +16,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   Trash2, Copy, Settings, Plus, X, Sparkles, ChevronDown, ChevronUp,
-  BarChart3, Type, Image, Quote, List, Clock, AlertCircle, 
+  BarChart3, Type, Image, Quote, List, Clock, AlertCircle,
   Grid3X3, LineChart, PieChart, Code, MessageSquare, Heart, MessageCircle,
   Timer, QrCode, Video, Users, Share2, MousePointer, Palette, Waves, Hourglass,
-  Layers, Box, Move, Zap, TrendingUp, CloudSun
+  Layers, Box, Move, Zap, TrendingUp, CloudSun, Activity
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -36,6 +36,8 @@ const BLOCK_ICONS: Record<string, React.ComponentType<{ className?: string }>> =
   'gradient-text': Palette, 'animated-bg': Waves, countdown: Hourglass,
   'weather-block': CloudSun,
   'tower-chart-3d': Box,
+  'bar-race-3d': Activity,
+  'parallax-story': Layers,
 };
 
 const BLOCK_GRADIENTS: Record<string, string> = {
@@ -55,6 +57,8 @@ const BLOCK_GRADIENTS: Record<string, string> = {
   'animated-bg': 'from-indigo-500 to-purple-500', countdown: 'from-rose-500 to-orange-500',
   'weather-block': 'from-sky-400 to-cyan-500',
   'tower-chart-3d': 'from-violet-600 to-indigo-500',
+  'bar-race-3d': 'from-emerald-600 to-teal-500',
+  'parallax-story': 'from-pink-500 to-rose-500',
 };
 
 // Color Picker Component
@@ -489,6 +493,8 @@ export function PropertiesPanel() {
           {blockType === 'countdown' && <CountdownEditor block={selectedBlock} index={selectedBlockIndex} />}
           {blockType === 'weather-block' && <WeatherEditor block={selectedBlock} index={selectedBlockIndex} />}
           {blockType === 'tower-chart-3d' && <TowerChart3DEditor block={selectedBlock} index={selectedBlockIndex} />}
+          {blockType === 'bar-race-3d' && <BarRace3DEditor block={selectedBlock} index={selectedBlockIndex} />}
+          {blockType === 'parallax-story' && <ParallaxStoryEditor block={selectedBlock} index={selectedBlockIndex} />}
           
           {/* Common Settings for all blocks */}
           <CommonSettings block={selectedBlock} index={selectedBlockIndex} />
@@ -2008,12 +2014,622 @@ function TowerChart3DEditor({ block, index }: EditorProps) {
             min={0.5} max={10} step={0.5} unit="" 
           />
           
-          <SliderInput 
-            label="Model Rotation" 
-            value={(block.customModelRotation as number) || 0} 
-            onChange={(v) => updateBlock(index, { customModelRotation: v })} 
-            min={0} max={360} step={15} unit="°" 
+          <SliderInput
+            label="Model Rotation"
+            value={(block.customModelRotation as number) || 0}
+            onChange={(v) => updateBlock(index, { customModelRotation: v })}
+            min={0} max={360} step={15} unit="°"
           />
+        </div>
+      </CollapsibleSection>
+    </>
+  );
+}
+
+function BarRace3DEditor({ block, index }: EditorProps) {
+  const { updateBlock } = useEditorStore();
+  const items = (block.items as Array<{ rank: number; name: string; value: number; valueFormatted?: string; subtitle?: string; color?: string }>) || [];
+
+  const updateItem = (itemIndex: number, field: string, value: unknown) => {
+    const newItems = [...items];
+    newItems[itemIndex] = { ...newItems[itemIndex], [field]: value };
+    updateBlock(index, { items: newItems });
+  };
+
+  const addItem = () => {
+    const newRank = items.length + 1;
+    updateBlock(index, { items: [...items, { rank: newRank, name: `Item ${newRank}`, value: 100 * newRank, valueFormatted: `${newRank * 100}`, subtitle: 'Category' }] });
+  };
+
+  const removeItem = (itemIndex: number) => {
+    const newItems = items.filter((_, i) => i !== itemIndex).map((item, i) => ({ ...item, rank: i + 1 }));
+    updateBlock(index, { items: newItems });
+  };
+
+  const moveItem = (itemIndex: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? itemIndex - 1 : itemIndex + 1;
+    if (newIndex < 0 || newIndex >= items.length) return;
+    const newItems = [...items];
+    [newItems[itemIndex], newItems[newIndex]] = [newItems[newIndex], newItems[itemIndex]];
+    const reordered = newItems.map((item, i) => ({ ...item, rank: i + 1 }));
+    updateBlock(index, { items: reordered });
+  };
+
+  return (
+    <>
+      <CollapsibleSection title="Title" icon={Type} defaultOpen={true}>
+        <div className="space-y-3">
+          <div><Label className="text-xs text-gray-400">Title</Label><Input value={(block.title as string) || ''} onChange={(e) => updateBlock(index, { title: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" placeholder="Market Share Battle" /></div>
+          <div><Label className="text-xs text-gray-400">Subtitle</Label><Input value={(block.subtitle as string) || ''} onChange={(e) => updateBlock(index, { subtitle: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" placeholder="Optional description" /></div>
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title={`Items (${items.length})`} icon={BarChart3} defaultOpen={true}>
+        <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1">
+          {items.map((item, i) => (
+            <div key={i} className="bg-gray-800/50 rounded-lg p-3 space-y-2 border border-gray-700/30">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-gray-400">#{item.rank}</span>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => moveItem(i, 'up')} disabled={i === 0}><ChevronUp className="w-3 h-3" /></Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => moveItem(i, 'down')} disabled={i === items.length - 1}><ChevronDown className="w-3 h-3" /></Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-red-400" onClick={() => removeItem(i)}><Trash2 className="w-3 h-3" /></Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Input value={item.name} onChange={(e) => updateItem(i, 'name', e.target.value)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" placeholder="Name" />
+                <Input value={item.value.toString()} onChange={(e) => updateItem(i, 'value', parseFloat(e.target.value) || 0)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" type="number" placeholder="Value" />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Input value={item.valueFormatted || ''} onChange={(e) => updateItem(i, 'valueFormatted', e.target.value)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" placeholder="$1.5M" />
+                <Input value={item.subtitle || ''} onChange={(e) => updateItem(i, 'subtitle', e.target.value)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" placeholder="Category" />
+              </div>
+              <div className="flex gap-1">
+                <input type="color" value={item.color || '#10B981'} onChange={(e) => updateItem(i, 'color', e.target.value)} className="w-8 h-8 rounded p-0.5 bg-transparent border-0" />
+                <Input value={item.color || ''} onChange={(e) => updateItem(i, 'color', e.target.value || undefined)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs flex-1" placeholder="Color" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <Button variant="outline" size="sm" className="w-full h-8 text-xs mt-3 bg-gray-800 border-gray-700" onClick={addItem}>
+          <Plus className="w-3 h-3 mr-1" /> Add Item
+        </Button>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Colors" icon={Palette} defaultOpen={false}>
+        <div className="space-y-3">
+          <ColorPicker value={(block.backgroundColor as string) || '#0a0a1a'} onChange={(v) => updateBlock(index, { backgroundColor: v })} label="Background" />
+          <ColorPicker value={(block.groundColor as string) || '#151525'} onChange={(v) => updateBlock(index, { groundColor: v })} label="Ground" />
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Camera" icon={Move} defaultOpen={false}>
+        <div className="space-y-3">
+          <SliderInput label="Camera Distance" value={(block.cameraDistance as number) || 35} onChange={(v) => updateBlock(index, { cameraDistance: v })} min={20} max={60} step={5} unit="" />
+          <SliderInput label="Camera Angle" value={(block.cameraAngle as number) || 30} onChange={(v) => updateBlock(index, { cameraAngle: v })} min={0} max={60} step={5} unit="°" />
+          <SliderInput label="Animation Speed" value={(block.animationSpeed as number) || 1} onChange={(v) => updateBlock(index, { animationSpeed: v })} min={0.5} max={3} step={0.1} unit="x" />
+          <SliderInput label="Rank Change Speed" value={(block.rankChangeSpeed as number) || 0.8} onChange={(v) => updateBlock(index, { rankChangeSpeed: v })} min={0.3} max={2} step={0.1} unit="s" />
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Bars" icon={BarChart3} defaultOpen={false}>
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs text-gray-400">Bar Style</Label>
+            <Select value={(block.barStyle as string) || 'rounded'} onValueChange={(v) => updateBlock(index, { barStyle: v })}>
+              <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-9 text-xs mt-1">
+                <SelectValue placeholder="Select style" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectItem value="rounded" className="text-white text-xs">Rounded</SelectItem>
+                <SelectItem value="square" className="text-white text-xs">Square</SelectItem>
+                <SelectItem value="cylindrical" className="text-white text-xs">Cylindrical</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <SliderInput label="Bar Spacing" value={(block.barSpacing as number) || 3.5} onChange={(v) => updateBlock(index, { barSpacing: v })} min={2} max={6} step={0.5} unit="" />
+          <SliderInput label="Bar Height" value={(block.barHeight as number) || 2.5} onChange={(v) => updateBlock(index, { barHeight: v })} min={1} max={5} step={0.5} unit="" />
+          <SliderInput label="Bar Depth" value={(block.barDepth as number) || 2} onChange={(v) => updateBlock(index, { barDepth: v })} min={1} max={4} step={0.5} unit="" />
+          <SliderInput label="Max Bar Width" value={(block.maxBarWidth as number) || 30} onChange={(v) => updateBlock(index, { maxBarWidth: v })} min={15} max={50} step={5} unit="" />
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Scene" icon={Layers} defaultOpen={false}>
+        <div className="space-y-3">
+          <div className="flex items-center gap-2"><Switch checked={(block.showGround as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { showGround: v })} /><Label className="text-xs text-gray-400">Show Ground</Label></div>
+          <div className="flex items-center gap-2"><Switch checked={(block.showLabels3D as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { showLabels3D: v })} /><Label className="text-xs text-gray-400">Show Labels</Label></div>
+          <div className="flex items-center gap-2"><Switch checked={(block.showValueLabels as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { showValueLabels: v })} /><Label className="text-xs text-gray-400">Show Values</Label></div>
+          <div className="flex items-center gap-2"><Switch checked={(block.showRankNumbers as boolean) ?? true} onCheckedChange={(v) => updateBlock(index, { showRankNumbers: v })} /><Label className="text-xs text-gray-400">Show Ranks</Label></div>
+        </div>
+      </CollapsibleSection>
+    </>
+  );
+}
+
+function ParallaxStoryEditor({ block, index }: EditorProps) {
+  const { updateBlock } = useEditorStore();
+  const layers = (block.layers as Array<{
+    id?: string;
+    name: string;
+    image: string;
+    depth: number;
+    parallaxFactor: number;
+    scale: number;
+    opacity: number;
+    positionX: number;
+    positionY: number;
+    rotation: number;
+    blur: number;
+    blendMode: string;
+    motionEnabled?: boolean;
+    motionDirection?: string;
+    motionSpeed?: number;
+    motionIntensity?: number;
+    motionOscillate?: boolean;
+    motionOscillateSpeed?: number;
+    animationIn?: string;
+    animationOut?: string;
+    animationDelay?: number;
+    animationDuration?: number;
+    animationEasing?: string;
+  }>) || [];
+
+  const [expandedLayer, setExpandedLayer] = useState<number | null>(0);
+
+  const updateLayer = (layerIndex: number, field: string, value: unknown) => {
+    const newLayers = [...layers];
+    newLayers[layerIndex] = { ...newLayers[layerIndex], [field]: value };
+    updateBlock(index, { layers: newLayers });
+  };
+
+  const addLayer = () => {
+    const newLayer = {
+      id: `layer-${Date.now()}`,
+      name: `Layer ${layers.length + 1}`,
+      image: '',
+      depth: 50,
+      parallaxFactor: 1,
+      scale: 1,
+      opacity: 1,
+      positionX: 0,
+      positionY: 0,
+      rotation: 0,
+      blur: 0,
+      blendMode: 'normal',
+      motionEnabled: true,
+      motionDirection: 'right',
+      motionSpeed: 1,
+      motionIntensity: 1,
+      motionOscillate: false,
+      motionOscillateSpeed: 1,
+      animationIn: 'fade',
+      animationOut: 'fade',
+      animationDelay: 0,
+      animationDuration: 1,
+      animationEasing: 'ease-out',
+    };
+    updateBlock(index, { layers: [...layers, newLayer] });
+  };
+
+  const removeLayer = (layerIndex: number) => {
+    const newLayers = layers.filter((_, i) => i !== layerIndex);
+    updateBlock(index, { layers: newLayers });
+  };
+
+  const duplicateLayer = (layerIndex: number) => {
+    const newLayer = { ...layers[layerIndex], id: `layer-${Date.now()}`, name: `${layers[layerIndex].name} (copy)` };
+    updateBlock(index, { layers: [...layers, newLayer] });
+  };
+
+  const textOverlays = (block.textOverlays as Array<{
+    text: string;
+    position: string;
+    customX?: number;
+    customY?: number;
+    fontSize?: string;
+    fontWeight?: string;
+    color?: string;
+    startTime?: number;
+    duration?: number;
+  }>) || [];
+
+  const addTextOverlay = () => {
+    const newText = {
+      text: 'New Text',
+      position: 'center',
+      customX: 50,
+      customY: 50,
+      fontSize: 'large',
+      fontWeight: 'bold',
+      color: '#FFFFFF',
+      startTime: 0,
+      duration: 3,
+    };
+    updateBlock(index, { textOverlays: [...textOverlays, newText] });
+  };
+
+  const updateTextOverlay = (textIndex: number, field: string, value: unknown) => {
+    const newTexts = [...textOverlays];
+    newTexts[textIndex] = { ...newTexts[textIndex], [field]: value };
+    updateBlock(index, { textOverlays: newTexts });
+  };
+
+  const removeTextOverlay = (textIndex: number) => {
+    const newTexts = textOverlays.filter((_, i) => i !== textIndex);
+    updateBlock(index, { textOverlays: newTexts });
+  };
+
+  const motionDirections = [
+    { value: 'none', label: 'None' },
+    { value: 'left', label: '← Left' },
+    { value: 'right', label: '→ Right' },
+    { value: 'up', label: '↑ Up' },
+    { value: 'down', label: '↓ Down' },
+    { value: 'diagonal-tl-br', label: '↘ TL→BR' },
+    { value: 'diagonal-tr-bl', label: '↙ TR→BL' },
+    { value: 'diagonal-bl-tr', label: '↗ BL→TR' },
+    { value: 'diagonal-br-tl', label: '↖ BR→TL' },
+    { value: 'zoom-in', label: '🔍 Zoom In' },
+    { value: 'zoom-out', label: '🔎 Zoom Out' },
+    { value: 'rotate-cw', label: '↻ Rotate CW' },
+    { value: 'rotate-ccw', label: '↺ Rotate CCW' },
+    { value: 'float', label: '🎈 Float' },
+    { value: 'pulse', label: '💓 Pulse' },
+  ];
+
+  const animationInOptions = [
+    { value: 'none', label: 'None' },
+    { value: 'fade', label: 'Fade' },
+    { value: 'slide-left', label: '← Slide Left' },
+    { value: 'slide-right', label: '→ Slide Right' },
+    { value: 'slide-up', label: '↑ Slide Up' },
+    { value: 'slide-down', label: '↓ Slide Down' },
+    { value: 'zoom-in', label: '🔍 Zoom In' },
+    { value: 'zoom-out', label: '🔎 Zoom Out' },
+    { value: 'rotate-in', label: '↻ Rotate In' },
+    { value: 'flip-x', label: '↕ Flip X' },
+    { value: 'flip-y', label: '↔ Flip Y' },
+    { value: 'bounce', label: '⬆ Bounce' },
+    { value: 'blur-in', label: '🌫 Blur In' },
+  ];
+
+  const easingOptions = [
+    { value: 'linear', label: 'Linear' },
+    { value: 'ease', label: 'Ease' },
+    { value: 'ease-in', label: 'Ease In' },
+    { value: 'ease-out', label: 'Ease Out' },
+    { value: 'ease-in-out', label: 'Ease In Out' },
+    { value: 'bounce', label: 'Bounce' },
+    { value: 'elastic', label: 'Elastic' },
+  ];
+
+  const cameraMovements = [
+    { value: 'none', label: 'None' },
+    { value: 'pan-left', label: 'Pan Left' },
+    { value: 'pan-right', label: 'Pan Right' },
+    { value: 'pan-up', label: 'Pan Up' },
+    { value: 'pan-down', label: 'Pan Down' },
+    { value: 'zoom-in', label: 'Zoom In' },
+    { value: 'zoom-out', label: 'Zoom Out' },
+    { value: 'diagonal-tl-br', label: 'Diagonal TL→BR' },
+    { value: 'diagonal-tr-bl', label: 'Diagonal TR→BL' },
+    { value: 'orbit', label: 'Orbit' },
+    { value: 'breathing', label: 'Breathing' },
+  ];
+
+  const effects = [
+    { value: 'none', label: 'None' },
+    { value: 'particles', label: 'Particles' },
+    { value: 'light-rays', label: 'Light Rays' },
+    { value: 'fog', label: 'Fog' },
+    { value: 'rain', label: 'Rain' },
+    { value: 'snow', label: 'Snow' },
+    { value: 'bokeh', label: 'Bokeh' },
+    { value: 'vignette', label: 'Vignette' },
+    { value: 'film-grain', label: 'Film Grain' },
+    { value: 'chromatic', label: 'Chromatic' },
+    { value: 'glow', label: 'Glow' },
+  ];
+
+  const colorGrades = [
+    { value: 'none', label: 'None' },
+    { value: 'cinematic', label: 'Cinematic' },
+    { value: 'vintage', label: 'Vintage' },
+    { value: 'cold', label: 'Cold' },
+    { value: 'warm', label: 'Warm' },
+    { value: 'noir', label: 'Noir' },
+    { value: 'sepia', label: 'Sepia' },
+    { value: 'neon', label: 'Neon' },
+  ];
+
+  const selectedEffects = (block.effects as string[]) || [];
+
+  const toggleEffect = (effect: string) => {
+    if (selectedEffects.includes(effect)) {
+      updateBlock(index, { effects: selectedEffects.filter(e => e !== effect) });
+    } else {
+      updateBlock(index, { effects: [...selectedEffects, effect] });
+    }
+  };
+
+  return (
+    <>
+      <CollapsibleSection title="Title" icon={Type} defaultOpen={true}>
+        <div className="space-y-3">
+          <div><Label className="text-xs text-gray-400">Title</Label><Input value={(block.title as string) || ''} onChange={(e) => updateBlock(index, { title: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" placeholder="Story title" /></div>
+          <div><Label className="text-xs text-gray-400">Subtitle</Label><Input value={(block.subtitle as string) || ''} onChange={(e) => updateBlock(index, { subtitle: e.target.value })} className="bg-gray-800/50 border-gray-700/50 text-white h-10" placeholder="Optional description" /></div>
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title={`Layers (${layers.length})`} icon={Layers} defaultOpen={true}>
+        <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
+          {layers.map((layer, i) => (
+            <div key={layer.id || i} className="bg-gray-800/50 rounded-lg border border-gray-700/30 overflow-hidden">
+              {/* Layer Header - Clickable */}
+              <button
+                className="w-full flex items-center justify-between p-3 hover:bg-gray-700/30 transition-colors"
+                onClick={() => setExpandedLayer(expandedLayer === i ? null : i)}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-gray-300">{layer.name || `Layer ${i + 1}`}</span>
+                  <span className="text-[10px] text-gray-500">Depth: {layer.depth}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-gray-400 hover:text-white" onClick={(e) => { e.stopPropagation(); duplicateLayer(i); }}><Copy className="w-3 h-3" /></Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-red-400" onClick={(e) => { e.stopPropagation(); removeLayer(i); }}><Trash2 className="w-3 h-3" /></Button>
+                  <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${expandedLayer === i ? 'rotate-180' : ''}`} />
+                </div>
+              </button>
+              
+              {/* Expanded Content */}
+              {expandedLayer === i && (
+                <div className="p-3 pt-0 space-y-3 border-t border-gray-700/30">
+                  {/* Image URL */}
+                  <div>
+                    <Label className="text-[10px] text-gray-500">Image URL</Label>
+                    <Input value={layer.image} onChange={(e) => updateLayer(i, 'image', e.target.value)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" placeholder="https://..." />
+                    {layer.image && <img src={layer.image} alt="preview" className="mt-1 w-full h-16 object-cover rounded" />}
+                  </div>
+                  
+                  {/* Basic Settings Row */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-[10px] text-gray-500">Layer Name</Label>
+                      <Input value={layer.name} onChange={(e) => updateLayer(i, 'name', e.target.value)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-gray-500">Depth (0-100)</Label>
+                      <Input type="number" value={layer.depth} onChange={(e) => updateLayer(i, 'depth', parseFloat(e.target.value) || 0)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                    </div>
+                  </div>
+                  
+                  {/* Transform Row */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <Label className="text-[10px] text-gray-500">Scale</Label>
+                      <Input type="number" step="0.1" value={layer.scale} onChange={(e) => updateLayer(i, 'scale', parseFloat(e.target.value) || 1)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-gray-500">Opacity</Label>
+                      <Input type="number" step="0.1" min="0" max="1" value={layer.opacity} onChange={(e) => updateLayer(i, 'opacity', parseFloat(e.target.value) || 1)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-gray-500">Blur</Label>
+                      <Input type="number" value={layer.blur} onChange={(e) => updateLayer(i, 'blur', parseFloat(e.target.value) || 0)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                    </div>
+                  </div>
+                  
+                  {/* Position Row */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-[10px] text-gray-500">Offset X (%)</Label>
+                      <Input type="number" value={layer.positionX} onChange={(e) => updateLayer(i, 'positionX', parseFloat(e.target.value) || 0)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-gray-500">Offset Y (%)</Label>
+                      <Input type="number" value={layer.positionY} onChange={(e) => updateLayer(i, 'positionY', parseFloat(e.target.value) || 0)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                    </div>
+                  </div>
+                  
+                  {/* Motion Section */}
+                  <div className="pt-2 border-t border-gray-700/30">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-medium text-gray-300">Motion</span>
+                      <Switch checked={layer.motionEnabled ?? true} onCheckedChange={(v) => updateLayer(i, 'motionEnabled', v)} />
+                    </div>
+                    
+                    {layer.motionEnabled !== false && (
+                      <div className="space-y-2">
+                        <div>
+                          <Label className="text-[10px] text-gray-500">Direction</Label>
+                          <Select value={layer.motionDirection || 'right'} onValueChange={(v) => updateLayer(i, 'motionDirection', v)}>
+                            <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-gray-800 border-gray-700 max-h-48 overflow-y-auto">
+                              {motionDirections.map(m => (
+                                <SelectItem key={m.value} value={m.value} className="text-white text-xs">{m.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label className="text-[10px] text-gray-500">Speed</Label>
+                            <Input type="number" step="0.1" min="0" max="5" value={layer.motionSpeed || 1} onChange={(e) => updateLayer(i, 'motionSpeed', parseFloat(e.target.value) || 1)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-gray-500">Intensity</Label>
+                            <Input type="number" step="0.1" min="0" max="3" value={layer.motionIntensity || 1} onChange={(e) => updateLayer(i, 'motionIntensity', parseFloat(e.target.value) || 1)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <Switch checked={layer.motionOscillate || false} onCheckedChange={(v) => updateLayer(i, 'motionOscillate', v)} />
+                          <Label className="text-[10px] text-gray-500">Oscillate (back & forth)</Label>
+                        </div>
+                        
+                        {layer.motionOscillate && (
+                          <div>
+                            <Label className="text-[10px] text-gray-500">Oscillate Speed</Label>
+                            <Input type="number" step="0.1" min="0.5" max="5" value={layer.motionOscillateSpeed || 1} onChange={(e) => updateLayer(i, 'motionOscillateSpeed', parseFloat(e.target.value) || 1)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Animation Section */}
+                  <div className="pt-2 border-t border-gray-700/30">
+                    <span className="text-xs font-medium text-gray-300">Entrance Animation</span>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <div>
+                        <Label className="text-[10px] text-gray-500">Type</Label>
+                        <Select value={layer.animationIn || 'fade'} onValueChange={(v) => updateLayer(i, 'animationIn', v)}>
+                          <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-gray-800 border-gray-700 max-h-48 overflow-y-auto">
+                            {animationInOptions.map(a => (
+                              <SelectItem key={a.value} value={a.value} className="text-white text-xs">{a.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-[10px] text-gray-500">Easing</Label>
+                        <Select value={layer.animationEasing || 'ease-out'} onValueChange={(v) => updateLayer(i, 'animationEasing', v)}>
+                          <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-gray-800 border-gray-700">
+                            {easingOptions.map(e => (
+                              <SelectItem key={e.value} value={e.value} className="text-white text-xs">{e.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <div>
+                        <Label className="text-[10px] text-gray-500">Delay (s)</Label>
+                        <Input type="number" step="0.1" min="0" max="5" value={layer.animationDelay || 0} onChange={(e) => updateLayer(i, 'animationDelay', parseFloat(e.target.value) || 0)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] text-gray-500">Duration (s)</Label>
+                        <Input type="number" step="0.1" min="0.1" max="5" value={layer.animationDuration || 1} onChange={(e) => updateLayer(i, 'animationDuration', parseFloat(e.target.value) || 1)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        <Button variant="outline" size="sm" className="w-full h-8 text-xs mt-3 bg-gray-800 border-gray-700" onClick={addLayer}>
+          <Plus className="w-3 h-3 mr-1" /> Add Layer
+        </Button>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Camera" icon={Move} defaultOpen={false}>
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs text-gray-400">Movement</Label>
+            <Select value={(block.cameraMovement as string) || 'pan-right'} onValueChange={(v) => updateBlock(index, { cameraMovement: v })}>
+              <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-9 text-xs mt-1">
+                <SelectValue placeholder="Select movement" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-700 max-h-48 overflow-y-auto">
+                {cameraMovements.map(m => (
+                  <SelectItem key={m.value} value={m.value} className="text-white text-xs">{m.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <SliderInput label="Speed" value={(block.cameraSpeed as number) || 1} onChange={(v) => updateBlock(index, { cameraSpeed: v })} min={0.1} max={5} step={0.1} unit="x" />
+          <SliderInput label="Intensity" value={(block.cameraIntensity as number) || 1} onChange={(v) => updateBlock(index, { cameraIntensity: v })} min={0.1} max={2} step={0.1} unit="" />
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Effects" icon={Sparkles} defaultOpen={false}>
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-1">
+            {effects.filter(e => e.value !== 'none').map(e => (
+              <button
+                key={e.value}
+                onClick={() => toggleEffect(e.value)}
+                className={`px-2 py-1 rounded text-xs transition-all ${
+                  selectedEffects.includes(e.value)
+                    ? 'bg-pink-500/30 text-pink-300 border border-pink-500/50'
+                    : 'bg-gray-800/50 text-gray-400 border border-gray-700/30'
+                }`}
+              >
+                {e.label}
+              </button>
+            ))}
+          </div>
+          <SliderInput label="Effect Intensity" value={(block.effectIntensity as number) || 0} onChange={(v) => updateBlock(index, { effectIntensity: v })} min={0} max={1} step={0.1} unit="" />
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Color Grade" icon={Palette} defaultOpen={false}>
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs text-gray-400">Preset</Label>
+            <Select value={(block.colorGrade as string) || 'none'} onValueChange={(v) => updateBlock(index, { colorGrade: v })}>
+              <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white h-9 text-xs mt-1">
+                <SelectValue placeholder="Select grade" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-700 max-h-48 overflow-y-auto">
+                {colorGrades.map(g => (
+                  <SelectItem key={g.value} value={g.value} className="text-white text-xs">{g.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <SliderInput label="Color Intensity" value={(block.colorIntensity as number) || 1} onChange={(v) => updateBlock(index, { colorIntensity: v })} min={0} max={1} step={0.1} unit="" />
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Text Overlays" icon={Type} defaultOpen={false}>
+        <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
+          {textOverlays.map((text, i) => (
+            <div key={i} className="bg-gray-800/50 rounded-lg p-3 space-y-2 border border-gray-700/30">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-400">Text {i + 1}</span>
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-red-400" onClick={() => removeTextOverlay(i)}><Trash2 className="w-3 h-3" /></Button>
+              </div>
+              <Input value={text.text} onChange={(e) => updateTextOverlay(i, 'text', e.target.value)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" placeholder="Text content" />
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-[10px] text-gray-500">Start (s)</Label>
+                  <Input type="number" step="0.5" value={text.startTime || 0} onChange={(e) => updateTextOverlay(i, 'startTime', parseFloat(e.target.value) || 1)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                </div>
+                <div>
+                  <Label className="text-[10px] text-gray-500">Duration (s)</Label>
+                  <Input type="number" step="0.5" value={text.duration || 3} onChange={(e) => updateTextOverlay(i, 'duration', parseFloat(e.target.value) || 3)} className="bg-gray-700/50 border-gray-600 text-white h-8 text-xs" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <Button variant="outline" size="sm" className="w-full h-8 text-xs mt-3 bg-gray-800 border-gray-700" onClick={addTextOverlay}>
+          <Plus className="w-3 h-3 mr-1" /> Add Text
+        </Button>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Scene" icon={Layers} defaultOpen={false}>
+        <div className="space-y-3">
+          <ColorPicker value={(block.backgroundColor as string) || '#000000'} onChange={(v) => updateBlock(index, { backgroundColor: v })} label="Background" />
+          <div className="flex items-center gap-2"><Switch checked={(block.dofEnabled as boolean) ?? false} onCheckedChange={(v) => updateBlock(index, { dofEnabled: v })} /><Label className="text-xs text-gray-400">Depth of Field</Label></div>
+          {block.dofEnabled && (
+            <>
+              <SliderInput label="Focus Depth" value={(block.dofFocusDepth as number) || 50} onChange={(v) => updateBlock(index, { dofFocusDepth: v })} min={0} max={100} step={5} unit="" />
+              <SliderInput label="Blur Amount" value={(block.dofBlurAmount as number) || 2} onChange={(v) => updateBlock(index, { dofBlurAmount: v })} min={0} max={10} step={0.5} unit="" />
+            </>
+          )}
         </div>
       </CollapsibleSection>
     </>
